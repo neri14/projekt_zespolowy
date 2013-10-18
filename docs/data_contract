@@ -1,0 +1,32 @@
+User
+{
+	user_id : int       //unique
+	login : string     //unique
+	password : string
+	status : EStatus
+	description : string
+}
+
+enum EStatus
+{
+}
+
+
+
+~/Service/Login                    Client -> Server : {login : string, password : string}
+                                   Server <- Client : {logged_in : int}                          //int as bool 0,1
+
+~/Service/GetContactList           Client -> Server : {}
+                                   Server -> Client : { [{user_id, login, nickname : string, status, description}] }
+
+~/Service/GetStatusUpdate          Client -> Server : {}
+                                   Server -> Client : { [{user_id, status, description}] }     //long polling on change of status/desc from friendlist
+
+~/Service/SetStatus                Client -> Server : {status, description}
+                                   Server -> Client : 200/500   return new HttpStatusCodeResult(HttpStatusCode.OK);
+
+~/Service/SendMessage              Client -> Server : { users : [{ user_id }], message : string }                  //users is sorted
+                                   Server -> Client : 200/500
+
+~/Service/GetMessage               Client -> Server : {}
+                                   Server -> Client : { [ { users : [{ user_id }], timestamp : datetime, message : string } ] }   //datetime milliseconds from epoch  1.1.1970
