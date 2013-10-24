@@ -1,0 +1,13 @@
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\bin\Debug\duta_deskopt.exe.config
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\bin\Debug\duta_deskopt.exe
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\bin\Debug\duta_deskopt.pdb
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\obj\Debug\duta_deskopt.csprojResolveAssemblyReference.cache
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\obj\Debug\duta_deskopt.Form1.resources
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\obj\Debug\duta_deskopt.MessangerForm.resources
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\obj\Debug\duta_deskopt.Properties.Resources.resources
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\obj\Debug\duta_deskopt.csproj.GenerateResource.Cache
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\obj\Debug\duta_deskopt.exe
+c:\users\daniel\documents\visual studio 2012\Projects\duta_deskopt\duta_deskopt\obj\Debug\duta_deskopt.pdb
+C:\Users\Daniel\Documents\uczelnia\projekt_zespolowy\desktop\duta_deskopt\bin\Debug\duta_deskopt.exe.config
+C:\Users\Daniel\Documents\uczelnia\projekt_zespolowy\desktop\duta_deskopt\obj\Debug\duta_deskopt.exe
+C:\Users\Daniel\Documents\uczelnia\projekt_zespolowy\desktop\duta_deskopt\obj\Debug\duta_deskopt.pdb
