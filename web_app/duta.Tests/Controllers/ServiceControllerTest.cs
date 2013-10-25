@@ -75,8 +75,9 @@ namespace duta.Controllers
             ServiceController controller = new ServiceController();
 
             List<int> users = new List<int>{ 1, 2, 3 };
-            HttpStatusCodeResult result = controller.SendMessage(users, "msg");
-            Assert.AreEqual(200, result.StatusCode);
+            JsonResult result = controller.SendMessage(users, "msg") as JsonResult;
+
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]

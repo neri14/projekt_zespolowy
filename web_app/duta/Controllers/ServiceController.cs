@@ -92,9 +92,12 @@ namespace duta.Controllers
 //                                   Server -> Client : 200/500
         [HttpPost]
         [AllowAnonymous]
-        public HttpStatusCodeResult SendMessage(List<int> users, string message)
+        public JsonResult SendMessage(List<int> users, string message)
         {
-            return new HttpStatusCodeResult(HttpStatusCode.OK);
+            //return 500 if fail - no user from users in storage e.g.
+
+            TimeSpan t = DateTime.Now-new DateTime(1970, 1,1);
+            return Json(new SendMessageResponse((long)t.TotalMilliseconds));
         }
 
 //~/Service/GetMessage               Client -> Server : {}
