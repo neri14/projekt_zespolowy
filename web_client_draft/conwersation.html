@@ -1,0 +1,29 @@
+<div class="tab-pane active conversation" id="{{conversationId}}">
+	<div class="tabMenu">
+		<div class="btn-group">
+			<button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown">
+				Menu <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu" role="menu">
+				<li><a href="#">Zapros</a></li>
+				<li><a href="#">Poprzednie rozmowy</a></li>
+				<li><a href="#">Something else here</a></li>
+				<li class="divider"></li>
+				<li><a href="#">Zakoñcz</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="tabMessages">
+						
+	</div>
+	<div class="tabMyMessage">
+		<textarea rows="4" cols="72">
+			At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies.
+		</textarea>
+	</div>
+	<div class="tabBottomMenu">
+		<button type="button" class="btn btn-sm" onClick="controller.sendBtn('{{conversationId}}')">
+			Wyœlij
+		</button>
+	</div>
+</div>

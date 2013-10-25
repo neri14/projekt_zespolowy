@@ -1,0 +1,143 @@
+#dutaContainer{
+
+	margin-left:auto;
+	margin-right:auto;
+	width:70%;
+	
+}
+
+#application{
+	display:inline-block;
+	width:250px;
+	border: 2px solid #DDDDDD;
+	vertical-align: top;
+}
+
+#applicationMenu{
+	border-top: 2px solid #DDDDDD;
+	border-bottom: 2px solid #DDDDDD;
+}
+
+#applicationMenu .btn{
+	margin:2px 0px 2px 2px;
+}
+
+#messagesPanel{
+	width:500px;
+	text-align:middle;
+	display:inline-block;
+	margin-left:10px;
+	vertical-align: top;
+	
+}
+
+#messagesPanel .tab-content{
+	border-left: 1px solid #DDDDDD;
+	border-right: 1px solid #DDDDDD;
+	border-bottom: 1px solid #DDDDDD;
+	
+}
+
+
+#contacts{
+	margin:0px 2px 2px 2px;
+	border-top: 1px solid #DDDDDD;
+	border-left: 1px solid #DDDDDD;
+	border-right: 1px solid #DDDDDD;
+	border-bottom: 1px solid #DDDDDD;
+}
+
+#userInfo{
+	
+	border-top: 1px solid #DDDDDD;
+	border-left: 1px solid #DDDDDD;
+	border-right: 1px solid #DDDDDD;
+	
+}
+
+#userDesription{
+	margin:5px;
+	width: 97%;
+	color: #757575;
+}
+
+.conversation{
+	margin:0px 4px 4px 4px;
+}
+.tabMenu{
+	text-align:right;
+}
+
+.tabMenu .btn{
+	margin:2px 2px 2px 2px;
+}
+
+.tabBottomMenu{
+	text-align:right;
+}
+
+.tabMessages{
+	border-top: 1px solid #DDDDDD;
+	border-left: 1px solid #DDDDDD;
+	border-right: 1px solid #DDDDDD;
+	border-bottom: 1px solid #DDDDDD;
+	margin:2px 0px 2px 0px;
+}
+
+.tabMyMessage{
+	margin:4px 0px 2px 0px;
+}
+
+.blueColor{
+	background: #BFF2FF;
+}
+.yellowColor{
+	background: #FCF5C7;
+}
+
+.contact{
+	margin:5px;
+	border: 1px solid #DDDDDD;
+	cursor:pointer;
+}
+
+.name{
+	display:inline-block;
+	float:left;
+}
+
+.author{
+	display:inline-block;
+	float:left;
+}
+
+.dateTime{
+	display:inline-block;
+	float:right;
+}
+
+.status{
+	display:inline-block;
+	float:left;
+	width:20px;
+}
+
+.status.available{
+	color:#25E009;
+}
+
+.status.inaccessible{
+	color:#DDDDDD;
+}
+
+.status.brb{
+	color:#09A3E0;
+}
+
+
+.description{
+	margin-left:20px;
+	color: #757575;
+}
+
+
