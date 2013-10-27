@@ -14,6 +14,23 @@ namespace duta.Storage
         public InternalDataStorage()
         {
             users = new List<User>();
+
+            //test data
+            CreateUser("user_a", "pass");
+            CreateUser("user_b", "pass");
+
+            User user_a = GetUser("user_a");
+            User user_b = GetUser("user_b");
+
+            user_a.contact_list.Add("nick_b", user_b);
+        }
+
+        public override User GetUser(int user_id)
+        {
+            lock (users)
+            {
+                return users.FirstOrDefault(u => u.user_id == user_id);
+            }
         }
 
         public override User GetUser(string login)
@@ -21,6 +38,18 @@ namespace duta.Storage
             lock (users)
             {
                 return users.FirstOrDefault(u => u.login == login);
+            }
+        }
+
+        public override List<string> GetUsersWithLoginInContactList(string login)
+        {
+            lock (users)
+            {
+                List<string> logins = users.Where(u1 =>
+                    null != u1.contact_list.Values.FirstOrDefault(u2 => u2.login == login)).
+                    Select(u3 => u3.login).ToList();
+
+                return logins;
             }
         }
 

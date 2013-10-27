@@ -8,7 +8,9 @@ namespace duta.Storage
 {
     public abstract class DataStorage
     {
+        public abstract User GetUser(int user_id);
         public abstract User GetUser(string login);
+        public abstract List<string> GetUsersWithLoginInContactList(string login);
         public abstract int CreateUser(string login, string password);
     }
 
@@ -16,18 +18,22 @@ namespace duta.Storage
     {
         private static DataStorage instance;
 
-        public static DataStorage create<T>() where T : DataStorage, new()
+        public static DataStorage Create<T>() where T : DataStorage, new()
         {
             instance = new T();
             return instance;
         }
 
-        public static DataStorage get()
+        public static DataStorage Get()
         {
+            if (instance == null)
+            {
+                return Create<InternalDataStorage>();
+            }
             return instance;
         }
 
-        public static void clear()
+        public static void Clear()
         {
             instance = null;
         }

@@ -7,91 +7,94 @@ using duta.Interface;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Net;
+using duta.Storage;
+using duta.Managers;
+using System.Web.Security;
+using duta.Storage.Entities;
 
 namespace duta.Controllers
 {
     [Authorize]
     public class ServiceController : Controller
     {
-        //
-        // GET: /Service/
-
-        public ActionResult Index()
-        {
-            return View();
-        }
-
-//~/Service/Login                    Client -> Server : {login : string, password : string}
-//                                   Server <- Client : {logged_in : int}                          //int as bool 0,1
+/********************** DONE ****************************/
         [HttpPost]
         [AllowAnonymous]
         public JsonResult Login(string login, string password)
         {
-            bool resp = login == "user_a" && password == "qwerty";
-
+            //bool resp = login == "user_a" && password == "qwerty";
+            bool resp = UserManager.Login(login, password);
+            Session["last_sent_status_update"] = new DateTime(1970, 1, 1);
             return Json(new LoginResponse(resp));
         }
 
-//~/Service/GetContactList           Client -> Server : {}
-//                                   Server -> Client : { [{user_id, login, nickname : string, status, description}] }
         [HttpPost]
-        [AllowAnonymous]
+        public HttpStatusCodeResult Logout()
+        {
+            UserManager.Logout();
+            return new HttpStatusCodeResult(HttpStatusCode.OK);
+        }
+
+        [HttpPost]
         public JsonResult GetContactList()
         {
             SortedSet<GetContactListResponse_User> list = new SortedSet<GetContactListResponse_User>();
-            list.Add(new GetContactListResponse_User
+            User user = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
+
+            foreach(KeyValuePair<string, User> u in user.contact_list)
             {
-                user_id = 1,
-                login = "user_a",
-                nickname = "nick_a",
-                status = 1,
-                description = "desc_a"
-            });
-            return Json(list);
+                list.Add(new GetContactListResponse_User
+                {
+                    user_id = u.Value.user_id,
+                    login = u.Value.login,
+                    nickname = u.Key,
+                    status = (int)u.Value.status,
+                    description = u.Value.descripton
+                });
+            }
+            return Json(list.OrderBy(u => u.user_id));
         }
 
-//~/Service/GetStatusUpdate          Client -> Server : {}
-//                                   Server -> Client : { [{user_id, status, description}] }     //long polling on change of status/desc from friendlist
         [HttpPost]
         [AllowAnonymous]
         public async Task<JsonResult> GetStatusUpdate()
         {
-            SortedSet<GetStatusUpdateResponse_User> list = new SortedSet<GetStatusUpdateResponse_User>();
-            list.Add(new GetStatusUpdateResponse_User
+            List<User> updates = await UserManager.GetStatusUpdate(System.Web.HttpContext.Current.User.Identity.Name, (DateTime)Session["last_sent_status_update"]);
+            Session["last_sent_status_update"] = DateTime.Now;
+
+            List<GetStatusUpdateResponse_User> list = new List<GetStatusUpdateResponse_User>();
+            foreach (User u in updates)
             {
-                user_id = 1,
-                status = 1,
-                description = "desc_a"
-            });
-            list.Add(new GetStatusUpdateResponse_User
-            {
-                user_id = 2,
-                status = 0,
-                description = "desc_b"
-            });
-            return Json(list);
+                list.Add(new GetStatusUpdateResponse_User
+                {
+                    user_id = u.user_id,
+                    status = (int)u.status,
+                    description = u.descripton
+                });
+            }
+            return Json(list.OrderBy(u => u.user_id));
         }
 
-//~/Service/SetStatus                Client -> Server : {status, description}
-//                                   Server -> Client : 200/500   return new HttpStatusCodeResult(HttpStatusCode.OK);
         [HttpPost]
-        [AllowAnonymous]
         public HttpStatusCodeResult SetStatus(int status, string description)
         {
-            if (status > 4) //check if enum is in range
+            EUserStatus eStatus;
+            try
+            {
+                eStatus = (EUserStatus)status;
+            }
+            catch (Exception)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
-            else
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.OK);
-            }
+
+            UserManager.SetStatus(System.Web.HttpContext.Current.User.Identity.Name,
+                eStatus, description);
+            return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
 
-//~/Service/SendMessage              Client -> Server : { users : [{ user_id }], message : string }                  //users is sorted
-//                                   Server -> Client : 200/500
+/********************** TODO ****************************/
         [HttpPost]
-        [AllowAnonymous]
         public JsonResult SendMessage(List<int> users, string message)
         {
             //return 500 if fail - no user from users in storage e.g.
@@ -100,10 +103,7 @@ namespace duta.Controllers
             return Json(new SendMessageResponse((long)t.TotalMilliseconds));
         }
 
-//~/Service/GetMessage               Client -> Server : {}
-//                                   Server -> Client : { [ { users : [{ user_id }], timestamp : datetime, message : string } ] }   //datetime milliseconds from epoch  1.1.1970
         [HttpPost]
-        [AllowAnonymous]
         public async Task<JsonResult> GetMessage()
         {
             List<GetMessageResponse_Message> msgs = new List<GetMessageResponse_Message>();
