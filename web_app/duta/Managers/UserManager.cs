@@ -85,9 +85,15 @@ namespace duta.Managers
             u.descripton = description;
             u.last_status_update = DateTime.Now;
 
-            foreach (string notify in data.GetUsersWithLoginInContactList(login))
+            lock (awaitingStatusUpdates)
             {
-                awaitingStatusUpdates.FirstOrDefault(p => p.Key == notify).Value.SetResult(true);
+                foreach (string notify in data.GetUsersWithLoginInContactList(login))
+                {
+                    if (awaitingStatusUpdates.ContainsKey(notify))
+                    {
+                        awaitingStatusUpdates.FirstOrDefault(p => p.Key == notify).Value.SetResult(true);
+                    }
+                }
             }
         }
 

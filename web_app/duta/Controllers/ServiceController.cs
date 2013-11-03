@@ -17,14 +17,14 @@ namespace duta.Controllers
     [Authorize]
     public class ServiceController : Controller
     {
-/********************** DONE ****************************/
         [HttpPost]
         [AllowAnonymous]
         public JsonResult Login(string login, string password)
         {
             //bool resp = login == "user_a" && password == "qwerty";
             bool resp = UserManager.Login(login, password);
-            Session["last_sent_status_update"] = new DateTime(1970, 1, 1);
+            Session["last_sent_status_update"] = new DateTime(1970, 1, 1); //TODO change to saved in db
+            Session["last_sent_message_update"] = new DateTime(1970, 1, 1); //TODO change to saved in db
             return Json(new LoginResponse(resp));
         }
 
@@ -93,32 +93,45 @@ namespace duta.Controllers
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
 
-/********************** TODO ****************************/
         [HttpPost]
-        public JsonResult SendMessage(List<int> users, string message)
+        public ActionResult SendMessage(List<int> users, string message)
         {
-            //return 500 if fail - no user from users in storage e.g.
-
-            TimeSpan t = DateTime.Now-new DateTime(1970, 1,1);
-            return Json(new SendMessageResponse((long)t.TotalMilliseconds));
+            try
+            {
+                User user = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
+                DateTime sentTime = MessageManager.SendMessage(user.user_id, users, message);
+                TimeSpan t = sentTime - new DateTime(1970, 1, 1);
+                return Json(new SendMessageResponse((long)t.TotalMilliseconds));
+            }
+            catch (Exception)
+            {
+                //return new HttpStatusCodeResult(HttpStatusCode.OK);
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
+            }
         }
 
         [HttpPost]
         public async Task<JsonResult> GetMessage()
         {
-            List<GetMessageResponse_Message> msgs = new List<GetMessageResponse_Message>();
+            User user = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
+            List<Message> messages = await MessageManager.GetMessageUpdate(user.user_id, (DateTime)Session["last_sent_message_update"]);
+            Session["last_sent_message_update"] = DateTime.Now;
 
-            TimeSpan t = new DateTime(2013, 10, 1, 12, 12, 32) - new DateTime(1970, 1, 1);
-            long secondsSinceEpoch = (long)t.TotalMilliseconds;
+            List<GetMessageResponse_Message> response = new List<GetMessageResponse_Message>();
 
-            msgs.Add(new GetMessageResponse_Message
+            foreach (Message msg in messages)
             {
-                users = new SortedSet<int> { 1,2,3 },
-                timestamp = (long)t.TotalMilliseconds,
-                message = "msg"
-            });
+                TimeSpan t = msg.time - new DateTime(1970, 1, 1);
 
-            return Json(msgs.OrderBy(m => m.timestamp));
+                response.Add(new GetMessageResponse_Message
+                {
+                    users = msg.users.OrderBy(u => u).ToList(),
+                    timestamp = (long)t.TotalMilliseconds,
+                    message = msg.message
+                });
+            }
+
+            return Json(response.OrderBy(m => m.timestamp));
         }
     }
 }

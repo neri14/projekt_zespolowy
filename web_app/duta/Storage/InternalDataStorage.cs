@@ -9,11 +9,14 @@ namespace duta.Storage
     public class InternalDataStorage : DataStorage
     {
         private int last_user_id = 0;
+        private long last_message_id = 0;
         private List<User> users;
+        private List<Message> messages;
 
         public InternalDataStorage()
         {
             users = new List<User>();
+            messages = new List<Message>();
 
             //test data
             CreateUser("user_a", "pass");
@@ -65,6 +68,30 @@ namespace duta.Storage
                 }
 
                 throw new UserAlreadyExistsException();
+            }
+        }
+
+        public override List<Message> GetMessagesSince(int user, DateTime time)
+        {
+            lock (messages)
+            {
+                return messages.Where(m => m.users.Contains(user) && m.time >= time).ToList();
+            }
+        }
+
+        public override void AddMessage(DateTime time, List<int> msg_users, string message)
+        {
+            lock (messages)
+            {
+                foreach (int id in msg_users)
+                {
+                    if (users.FirstOrDefault(u => u.user_id == id) == null)
+                    {
+                        throw new UserNotExistingException();
+                    }
+                }
+
+                messages.Add(new Message(++last_message_id, time, msg_users, message));
             }
         }
     }

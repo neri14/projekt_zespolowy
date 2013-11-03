@@ -7,7 +7,7 @@ namespace duta.Interface
 {
     public class GetMessageResponse_Message
     {
-        public SortedSet<int> users { get; set; }
+        public List<int> users { get; set; }
         public long timestamp { get; set; }
         public string message { get; set; }
     }

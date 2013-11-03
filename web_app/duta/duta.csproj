@@ -173,10 +173,12 @@
     <Compile Include="Interface\GetStatusUpdateResponse.cs" />
     <Compile Include="Interface\LoginResponse.cs" />
     <Compile Include="Interface\SendMessageResponse.cs" />
+    <Compile Include="Managers\MessageManager.cs" />
     <Compile Include="Managers\UserManager.cs" />
     <Compile Include="Storage\DataStorage.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Storage\Entities\Message.cs" />
     <Compile Include="Storage\Entities\User.cs" />
     <Compile Include="Storage\InternalDataStorage.cs" />
   </ItemGroup>

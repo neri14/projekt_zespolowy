@@ -12,6 +12,9 @@ namespace duta.Storage
         public abstract User GetUser(string login);
         public abstract List<string> GetUsersWithLoginInContactList(string login);
         public abstract int CreateUser(string login, string password);
+
+        public abstract List<Message> GetMessagesSince(int user, DateTime time);
+        public abstract void AddMessage(DateTime time, List<int> users, string message);
     }
 
     public static class DataStorageCreator
@@ -40,6 +43,8 @@ namespace duta.Storage
     }
 
     public class UserAlreadyExistsException : System.Exception
-    {
-    }
+    {}
+
+    public class UserNotExistingException : System.Exception
+    {}
 }
