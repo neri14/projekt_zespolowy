@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarActivity;
 
 import com.dutamobile.R;
 import com.dutamobile.model.Status;
+import com.google.gson.Gson;
 
 /**
  * Created by Bartosz on 12.10.13.
@@ -19,6 +20,7 @@ public class Helper
 {
     public static String CURRENT_FRAGMENT;
     private static ActionBar actionBar = null;
+    private static Gson gson = null;
     private static int [] statusIcons = new int[]
             {
                     R.drawable.status_available,
@@ -26,6 +28,7 @@ public class Helper
                     R.drawable.status_busy,
                     R.drawable.status_offline
             };
+
 
 
     public static void fragmentReplacement(FragmentManager fragmentManager, Fragment fragment, boolean addToBackStack, String tag)
@@ -54,6 +57,14 @@ public class Helper
     {
         return context.getResources().getDrawable(statusIcons[status.ordinal()]);
     }
+
+    public synchronized static Gson getGsonInstance()
+    {
+        if(gson == null)
+            gson = new Gson();
+        return gson;
+    }
+
 
 
 }

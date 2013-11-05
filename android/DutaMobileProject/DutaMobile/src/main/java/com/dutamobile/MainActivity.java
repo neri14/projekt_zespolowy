@@ -29,6 +29,7 @@ public class MainActivity extends ActionBarActivity
     private Status myStatus;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
+    private ListView mActiveChatList;
     private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
@@ -129,6 +130,7 @@ public class MainActivity extends ActionBarActivity
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        mActiveChatList = (ListView) findViewById(R.id.right_drawer);
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
