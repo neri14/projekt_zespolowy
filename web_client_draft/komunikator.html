@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Duta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="dist/css/bootstrap.css" rel="stylesheet" media="screen">
+	<script src="colorPicker/js/jquery.js" type="text/javascript"></script>
+	
+	<link rel="stylesheet" media="screen" type="text/css" href="colorPicker/css/colorpicker.css" />
+	<script type="text/javascript" src="colorPicker/js/colorpicker.js"></script>
+	<script type="text/javascript" src="handlebars.js"></script>
+	
+	<script src="comunikator.js" type="text/javascript"></script>
+	<link href="komunikatorCSS.css" rel="stylesheet">
+
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="dist/js/bootstrap.js" type="text/javascript"></script>
+	
+  </head>
+  <body>
+    <h1>Duta!</h1>
+	<div id="dutaContainer">
+		<div id="application">
+			<div class="btn-group">
+				<button type="button" class="btn btn-sm" data-toggle="dropdown">
+					<span id="userStatus" class="glyphicon glyphicon-certificate status available"></span>
+					<span id="userName">Zubek34</span>
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu" role="menu">
+					<li><a href="#"><span class="glyphicon glyphicon-certificate status available"></span><span>Dostêpny</span></a></li>
+					<li><a href="#"><span class="glyphicon glyphicon-certificate status brb"></span><span>Zaraz wracam</span></a></li>
+					<li><a href="#"><span class="glyphicon glyphicon-certificate status inaccessible"></span><span>Niedostêpny</span></a></li>
+				</ul>
+			</div>
+			<div id="applicationMenu">
+				<button type="button" class="btn btn-xs">Menu1</button>
+				<button type="button" class="btn btn-xs">Menu2</button>
+				<button type="button" class="btn btn-xs">Menu3</button>
+			</div>
+			<div id="userInfo">
+				<input id="userDesription" type="text"></input>
+			</div>
+			<div id="contacts">
+				<div id="" class="contact odd">
+					<span class="glyphicon glyphicon-certificate status available"></span><div class="name">Tomek</div></br>
+					<div class="description">opis sdv eew gdggd sagdgdzfg</div>	
+				</div>
+				<div id="" class="contact even">
+					<span class="glyphicon glyphicon-certificate status brb"></span><div class="name">Mateusz</div></br>
+					<div class="description">opis sdv eew gdggd sagdgdzfg</div>	
+				</div>
+				<div id="" class="contact odd">
+					<span class="glyphicon glyphicon-certificate status brb"></span><div class="name">Adrian</div></br>
+					<div class="description">opis sdv eew gdggd sagdgdzfg</div>	
+				</div>
+				<div id="" class="contact even">
+					<span class="glyphicon glyphicon-certificate status inaccessible"></span><div class="name">Kasia</div></br>
+					<div class="description">opis sdv eew gdggd sagdgdzfg</div>	
+				</div>
+			</div>
+		
+		</div>
+	
+	
+		<div id="messagesPanel">
+			<ul class="nav nav-tabs">
+				<li><a href="#conversation1" data-toggle="tab">Tomek</a></li>
+				<li><a href="#conversation2" data-toggle="tab">Mateusz</a></li>
+				<li><a href="#conversation3" data-toggle="tab">Adrian</a></li>
+				<li><a href="#conversation4" data-toggle="tab">Kasia</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active conversation" id="conversation1">
+					<div class="tabMenu">
+						<div class="btn-group">
+							<button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown">
+								Menu <span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#">Zapros</a></li>
+								<li><a href="#">Poprzednie rozmowy</a></li>
+								<li><a href="#">Something else here</a></li>
+								<li class="divider"></li>
+								<li><a href="#">Zakoñcz</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="tabMessages">
+						<div class="message odd">
+							<div class="author">Ja</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+						<div class="message even">
+						<span class="glyphicon glyphicon-certificate status available"></span>
+							<div class="author">Tomek</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+						<div class="message odd">
+							<div class="author">Ja</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+					</div>
+					<div class="tabMyMessage">
+							<textarea rows="4" cols="72">
+								At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies.
+							</textarea> 
+					</div>
+					<div class="tabBottomMenu">
+						<button type="button" class="btn btn-sm" onclick="duta.renderMessage()">
+							Wyœlij
+						</button>
+					</div>
+				</div>
+				<div class="tab-pane" id="conversation2">
+					<div class="tabMenu">
+						<div class="btn-group">
+							<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+								Menu <span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#">Zapros</a></li>
+								<li><a href="#">Poprzednie rozmowy</a></li>
+								<li><a href="#">Something else here</a></li>
+								<li class="divider"></li>
+								<li><a href="#">Zakoñcz</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="tabMessages">
+						<div class="message odd">
+							<div class="author">Ja</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+						<div class="message even">
+						<span class="glyphicon glyphicon-certificate status brb"></span>
+							<div class="author">Mateusz</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+						<div class="message odd">
+							<div class="author">Ja</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane" id="conversation3">
+					<div class="tabMenu">
+						<div class="btn-group">
+							<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+								Menu <span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#">Zapros</a></li>
+								<li><a href="#">Poprzednie rozmowy</a></li>
+								<li><a href="#">Something else here</a></li>
+								<li class="divider"></li>
+								<li><a href="#">Zakoñcz</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="tabMessages">
+						<div class="message odd">
+							<div class="author">Ja</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+						<div class="message even">
+						<span class="glyphicon glyphicon-certificate status brb"></span>
+							<div class="author">Adrian</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+						<div class="message odd">
+							<div class="author">Ja</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane" id="conversation4">
+					<div class="tabMenu">
+						<div class="btn-group">
+							<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+								Menu <span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#">Zapros</a></li>
+								<li><a href="#">Poprzednie rozmowy</a></li>
+								<li><a href="#">Something else here</a></li>
+								<li class="divider"></li>
+								<li><a href="#">Zakoñcz</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="tabMessages">
+						<div class="message odd">
+							<div class="author">Ja</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+						<div class="message even">
+						<span class="glyphicon glyphicon-certificate status inaccessible"></span>
+							<div class="author">Kasia</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+						<div class="message odd">
+							<div class="author">Ja</div></br>
+							<div class="messageContent">sdf sdfa sd faf af dsf af dg fg dfhgdfghsdf ghsdgh sdf h  sdhgdfhdf s hhsh gsf hghfs</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="kolory">
+		<p id="colorpickerHolder">
+		</p>
+		<input type="radio" name="kolor" value="1">messages odd<br>
+		<input type="radio" name="kolor" value="2">messages even<br>
+		<input type="radio" name="kolor" value="3">komunikator odd<br>
+		<input type="radio" name="kolor" value="4">komunikator even<br>
+		<input type="radio" name="kolor" value="5">messages window<br>
+		<input type="radio" name="kolor" value="6">messages menu<br>
+		<input type="radio" name="kolor" value="7">messages buttons<br>
+		<input type="radio" name="kolor" value="8">komunikator window<br>
+		<input type="radio" name="kolor" value="9">komunikator menu<br>
+		<input type="radio" name="kolor" value="10">komunikator buttons<br>
+		<input type="radio" name="kolor" value="11">dostêpny<br>
+		<input type="radio" name="kolor" value="12">brb<br>
+		<input type="radio" name="kolor" value="13">niedostepny<br>
+	</div>
+
+    
+  </body>
+</html>
