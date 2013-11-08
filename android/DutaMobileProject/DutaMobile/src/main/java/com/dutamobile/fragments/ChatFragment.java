@@ -24,8 +24,8 @@ import java.util.Random;
  */
 public class ChatFragment extends ListFragment
 {
-    ImageView send_btn;
-    EditText message_box;
+    private ImageView send_btn;
+    private EditText message_box;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -62,6 +62,8 @@ public class ChatFragment extends ListFragment
         getListView().setSelection(getListAdapter().getCount() - 1);
     }
 
+
+
     private List<Message> setData()
     {
         Random r = new Random();
@@ -81,7 +83,7 @@ public class ChatFragment extends ListFragment
         for(int i = 0 ; i < 4 ; i++)
         {
             m = new Message();
-            m.setIncoming( i % 2 == 0 ? true : false);
+            m.setIncoming(i % 2 == 0);
             m.setMessageText(mgs[r.nextInt(4)]);
             data.add(m);
         }

@@ -6,12 +6,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.dutamobile.MainActivity;
 import com.dutamobile.R;
 import com.dutamobile.RESTClient;
 import com.dutamobile.adapter.ContactListAdapter;
@@ -41,6 +43,8 @@ public class ContactListFragment extends ListFragment
         if(getListAdapter() == null)
             setListAdapter(new ContactListAdapter(getActivity(), getContacts()));
 
+        Helper.getSupportActionBar(getActivity()).setTitle(getString(R.string.app_name));
+
         return v;
     }
 
@@ -49,6 +53,7 @@ public class ContactListFragment extends ListFragment
     {
         super.onListItemClick(l, v, position, id);
 
+        /*
         new AsyncTask<Void,Void,Void>()
         {
 
@@ -57,42 +62,14 @@ public class ContactListFragment extends ListFragment
             {
                 Object o = RESTClient.getInstance().getContacts();
 
-                /*
-                final String SOAP_ACTION = "http://tempuri.org/IService1/IsWorking";
-                final String METHOD_NAME = "IsWorking";
-                final String NAMESPACE = "http://tempuri.org/IService1";
-                final String URL = "http://192.168.1.6:8733/Design_Time_Addresses/SimpleWebService/SWS/?wsdl";
-                SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-
-                SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-                envelope.dotNet = true;
-
-                envelope.setOutputSoapObject(request);
-
-                HttpTransportSE ht = new HttpTransportSE(URL, 1000);
-                try {
-
-                    ht.call(SOAP_ACTION, envelope);
-                    SoapPrimitive response = (SoapPrimitive)envelope.getResponse();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-*/
-
                 return null;
             }
-        };
-        //Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), new ChatFragment(), true, "Chat");
+        };*/
 
-        FragmentManager fg = getActivity().getSupportFragmentManager();
-        FragmentTransaction ft = fg.beginTransaction();
-
-        Fragment f = new ChatFragment();
-        ft.add(R.id.content_frame, f, "Chat_Marysia");
-        ft.hide(fg.findFragmentByTag("ContactList"));
-        ft.attach(f);
-        ft.commit();
+        Contact c = (Contact)getListAdapter().getItem(position);
+        Helper.getSupportActionBar(getActivity()).setTitle(c.getName());
+        Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + c.getName());
+        ((MainActivity)getActivity()).rightAdapter.addItem(c);
     }
 
     private List<Contact> getContacts()
@@ -101,18 +78,21 @@ public class ContactListFragment extends ListFragment
         Contact c = new Contact();
         c.setId(0);
         c.setName("John");
+        c.setDescription("Cool men!");
         c.setStatus(Status.AWAY);
         data.add(c);
 
         c = new Contact();
-        c.setId(0);
+        c.setId(1);
         c.setName("Marie");
+        c.setDescription("I just bought new shoes!");
         c.setStatus(Status.AVAILABLE);
         data.add(c);
 
         c = new Contact();
-        c.setId(0);
+        c.setId(2);
         c.setName("Alice");
+        c.setDescription("Fucking rabbit!");
         c.setStatus(Status.BUSY);
         data.add(c);
 

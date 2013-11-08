@@ -28,10 +28,10 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
     }
 
     private List<Message> data;
-    private LayoutInflater inflater;
+    private final LayoutInflater inflater;
     private int height;
     private int width;
-    private Context ctx;
+    private final Context ctx;
 
     public ChatAdapter(Context context, List<Message> messages)
     {

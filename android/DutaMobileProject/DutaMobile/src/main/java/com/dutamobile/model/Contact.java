@@ -35,7 +35,18 @@ public class Contact
         this.name = name;
     }
 
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
     private int id;
     private String name;
     private Status status;
+    private String description;
 }

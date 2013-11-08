@@ -33,5 +33,9 @@
             </group>
         </menu>
     </item>
-
+    <item
+        android:id="@+id/action_chats"
+        android:icon="@drawable/ic_drawer"
+        android:showAsAction="always"
+        duta:showAsAction="always"/>
 </menu>

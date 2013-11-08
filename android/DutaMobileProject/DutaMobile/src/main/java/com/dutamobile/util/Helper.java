@@ -21,7 +21,7 @@ public class Helper
     public static String CURRENT_FRAGMENT;
     private static ActionBar actionBar = null;
     private static Gson gson = null;
-    private static int [] statusIcons = new int[]
+    private static final int [] statusIcons = new int[]
             {
                     R.drawable.status_available,
                     R.drawable.status_away,
@@ -31,8 +31,25 @@ public class Helper
 
 
 
-    public static void fragmentReplacement(FragmentManager fragmentManager, Fragment fragment, boolean addToBackStack, String tag)
+    public static void fragmentReplacement(FragmentManager fragmentManager, Class fragmentClass, boolean addToBackStack, String tag)
     {
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+
+        try
+        {
+            if(fragment == null)
+            {
+                android.util.Log.i("Fragment Replacement", "Creating new instance of fragment...");
+                fragment = (Fragment) fragmentClass.newInstance();
+                android.util.Log.i("Fragment Replacement", "Fragment created.");
+            }
+        }
+        catch(Exception e)
+        {
+            android.util.Log.e("Fragment Replacement", "Creating new instance of fragment failed. " + e.getMessage());
+        }
+
+
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         transaction.replace(R.id.content_frame, fragment, tag);
@@ -45,11 +62,11 @@ public class Helper
         transaction.commit();
     }
 
-    public synchronized static ActionBar getSupportActionBar(Activity activity)
+    public synchronized static ActionBar getSupportActionBar(Activity actionBarActivity)
     {
         if(actionBar == null)
-            if(activity instanceof ActionBarActivity)
-                actionBar = ((ActionBarActivity)activity).getSupportActionBar();
+            if(actionBarActivity instanceof ActionBarActivity)
+                actionBar = ((ActionBarActivity)actionBarActivity).getSupportActionBar();
         return actionBar;
     }
 

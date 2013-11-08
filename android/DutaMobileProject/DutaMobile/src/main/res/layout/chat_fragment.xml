@@ -37,6 +37,7 @@
             android:textColor="#000"
             android:maxLines="3"
             android:minLines="1"
+            android:hint="Tu wpisz wiadomość..."
             />
 
         <ImageView

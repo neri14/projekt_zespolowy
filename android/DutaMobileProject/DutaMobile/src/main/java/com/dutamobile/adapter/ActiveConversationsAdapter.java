@@ -1,35 +1,40 @@
 package com.dutamobile.adapter;
 
+/**
+ * Created by Bartosz on 07.11.13.
+ */
+
 import android.content.Context;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dutamobile.R;
 import com.dutamobile.model.Contact;
-import com.dutamobile.util.Helper;
 
 import java.util.List;
-
 /**
- * Created by Bartosz on 12.10.13.
+ * Created by Bartosz on 07.11.13.
  */
-public class ContactListAdapter extends BaseAdapter
+public class ActiveConversationsAdapter extends BaseAdapter
 {
-    private final LayoutInflater inflater;
-    private List<Contact> data;
-    private Context context;
-
-    public ContactListAdapter(Context context, List<Contact> data)
+    static class ViewHolder
     {
-        this.inflater = LayoutInflater.from(context);
-        this.context = context;
-        this.data = data;
+        TextView text;
+        Fragment fragment;
     }
 
+    private final LayoutInflater inflater;
+    private List<Contact> data;
+
+    public ActiveConversationsAdapter(Context context, List<Contact> activeConversations)
+    {
+        this.inflater = LayoutInflater.from(context);
+        this.data = activeConversations;
+    }
 
     @Override
     public int getCount()
@@ -37,6 +42,14 @@ public class ContactListAdapter extends BaseAdapter
         return data.size();
     }
 
+    public void addItem(Contact contact)
+    {
+        if(!data.contains(contact))
+        {
+            data.add(contact);
+            notifyDataSetChanged();
+        }
+    }
     @Override
     public Object getItem(int position)
     {
@@ -56,11 +69,9 @@ public class ContactListAdapter extends BaseAdapter
 
         if(convertView == null)
         {
-            convertView = inflater.inflate(R.layout.contact_list_item, null); //FIXME
             holder = new ViewHolder();
-            holder.name = (TextView) convertView.findViewById(R.id.text_1);
-            holder.status = (ImageView) convertView.findViewById(R.id.image_1);
-            holder.desc = (TextView) convertView.findViewById(R.id.text_2);
+            convertView = inflater.inflate(R.layout.active_chat_list_item, null);
+            holder.text = (TextView) convertView.findViewById(R.id.text);
             convertView.setTag(holder);
         }
         else
@@ -68,24 +79,9 @@ public class ContactListAdapter extends BaseAdapter
             holder = (ViewHolder) convertView.getTag();
         }
 
-        Contact c = data.get(position);
-
-        if(c != null)
-        {
-            holder.name.setText(c.getName());
-            holder.status.setImageDrawable(Helper.getStatusIndicator(context, c.getStatus()));
-            holder.desc.setText(c.getDescription());
-        }
+        holder.text.setText(data.get(position).getName());
 
 
         return convertView;
     }
-
-    static class ViewHolder
-    {
-        TextView name;
-        TextView desc;
-        ImageView status;
-    }
-
 }

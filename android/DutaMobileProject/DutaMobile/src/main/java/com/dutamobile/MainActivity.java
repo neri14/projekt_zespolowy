@@ -2,14 +2,12 @@ package com.dutamobile;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,13 +16,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.dutamobile.adapter.ActiveConversationsAdapter;
+import com.dutamobile.fragments.ChatFragment;
 import com.dutamobile.fragments.ContactListFragment;
+import com.dutamobile.model.Contact;
 import com.dutamobile.model.Status;
 import com.dutamobile.util.Helper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends ActionBarActivity
 {
-    public static String PREFS_MAIN = "main-prefs";
+    public static final String PREFS_MAIN = "main-prefs";
     private MenuItem status_item;
     private Status myStatus;
     private DrawerLayout mDrawerLayout;
@@ -32,27 +36,26 @@ public class MainActivity extends ActionBarActivity
     private ListView mActiveChatList;
     private ActionBarDrawerToggle mDrawerToggle;
 
+    private List<Contact> activeConversations;
+    public ActiveConversationsAdapter rightAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Fragment fragment = null;
+        setup();
 
         if (savedInstanceState != null)
         {
-            fragment = getSupportFragmentManager().getFragment(savedInstanceState, Helper.CURRENT_FRAGMENT);
-            Helper.fragmentReplacement(getSupportFragmentManager(), fragment, false, fragment.getTag());
+            Fragment fragment = getSupportFragmentManager().getFragment(savedInstanceState, Helper.CURRENT_FRAGMENT);
+            Helper.fragmentReplacement(getSupportFragmentManager(), ((Object)fragment).getClass(), false, fragment.getTag());
+
+            return;
         }
 
-        if (fragment == null)
-        {
-            fragment = new ContactListFragment();
-            Helper.fragmentReplacement(getSupportFragmentManager(), fragment, false, "ContactList");
-        }
-
-        setup();
+        Helper.fragmentReplacement(getSupportFragmentManager(), ContactListFragment.class, false, "ContactList");
     }
 
     @Override
@@ -61,6 +64,20 @@ public class MainActivity extends ActionBarActivity
         getMenuInflater().inflate(R.menu.main, menu);
         status_item = menu.findItem(R.id.action_status_indicator);
         status_item.setIcon(Helper.getStatusIndicator(this, myStatus));
+        MenuItem chatItem = menu.findItem(R.id.action_chats);
+        chatItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener()
+        {
+            @Override
+            public boolean onMenuItemClick(MenuItem item)
+            {
+                if(mDrawerLayout.isDrawerOpen(mActiveChatList))
+                    mDrawerLayout.closeDrawer(mActiveChatList);
+                else
+                    mDrawerLayout.openDrawer(mActiveChatList);
+
+                return false;
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -94,10 +111,10 @@ public class MainActivity extends ActionBarActivity
             editor.commit();
         }
 
-        if(mDrawerToggle.onOptionsItemSelected(item))
-            return true;
+        //if(mDrawerToggle.onOptionsItemSelected(item))
+        //    return true;
 
-        return super.onOptionsItemSelected(item);
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -124,6 +141,9 @@ public class MainActivity extends ActionBarActivity
 
     private void setup()
     {
+
+        activeConversations = new ArrayList<Contact>();
+
         myStatus = Status.valueOf(getSharedPreferences(PREFS_MAIN, MODE_PRIVATE).getString("status", "OFFLINE"));
 
         String[] drawerItemsStrings = getResources().getStringArray(R.array.drawer_items);
@@ -138,6 +158,10 @@ public class MainActivity extends ActionBarActivity
         // set up the drawer's list view with items and click listener
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, drawerItemsStrings));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        rightAdapter = new ActiveConversationsAdapter(this, activeConversations);
+        mActiveChatList.setAdapter(rightAdapter);
+        mActiveChatList.setOnItemClickListener(new DrawerItemClickListener());
 
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                   /* host Activity */
@@ -161,6 +185,7 @@ public class MainActivity extends ActionBarActivity
         };
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mActiveChatList);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -173,14 +198,23 @@ public class MainActivity extends ActionBarActivity
         public void onItemClick(AdapterView<?> parent, View view, int position, long id)
         {
             //TODO
-            switch (position)
+            if(parent.getId() == mDrawerList.getId())
             {
-                default:
-                    //finish();
-                    break;
+                switch (position)
+                {
+                    default:
+                        //finish();
+                        break;
+                }
+            }
+            else
+            {
+                //FIXME powrót bezpośrednio do listy kontaków
+                getSupportActionBar().setTitle(activeConversations.get(position).getName());
+                Helper.fragmentReplacement(getSupportFragmentManager(), ChatFragment.class, false, "Chat-" + activeConversations.get(position).getName());
             }
 
-            mDrawerLayout.closeDrawer(mDrawerList);
+            mDrawerLayout.closeDrawer(parent);
 
         }
 

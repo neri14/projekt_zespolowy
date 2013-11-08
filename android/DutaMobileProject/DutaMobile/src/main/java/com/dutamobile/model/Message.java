@@ -7,8 +7,7 @@ public class Message
 {
     public Message()
     {
-        this.isReceived = false;
-        this.messageText = null;
+        this(null, false);
     }
 
     public Message(String messageText, Boolean isReceived)

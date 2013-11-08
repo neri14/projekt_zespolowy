@@ -3,8 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-    >
+                android:padding="8dp">
 
     <ImageView
         android:id="@+id/image_1"
@@ -12,6 +11,7 @@
         android:layout_height="15dp"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
+        android:contentDescription="@string/contentDesc"
         />
 
     <TextView
@@ -23,7 +23,17 @@
         android:layout_alignParentLeft="true"
         android:layout_toLeftOf="@id/image_1"
         android:paddingLeft="4dp"
-
+        />
+    <TextView
+        android:id="@+id/text_2"
+        android:textColor="#f0f0f0"
+        android:textSize="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/text_1"
+        android:layout_toLeftOf="@id/image_1"
+        android:paddingLeft="4dp"
         />
 
 
