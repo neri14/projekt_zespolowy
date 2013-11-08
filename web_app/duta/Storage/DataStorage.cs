@@ -14,7 +14,7 @@ namespace duta.Storage
         public abstract int CreateUser(string login, string password);
 
         public abstract List<Message> GetMessagesSince(int user, DateTime time);
-        public abstract void AddMessage(DateTime time, List<int> users, string message);
+        public abstract void AddMessage(DateTime time, List<int> users, int author, string message);
     }
 
     public static class DataStorageCreator
