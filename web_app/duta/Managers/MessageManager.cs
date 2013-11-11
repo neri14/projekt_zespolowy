@@ -47,7 +47,7 @@ namespace duta.Managers
         public static DateTime SendMessage(int sender, List<int> receivers, string message)
         {
             DateTime time = DateTime.Now;
-            data.AddMessage(time, receivers, message);
+            data.AddMessage(time, receivers, sender, message);
 
             lock (awaitingMessageUpdates)
             {
