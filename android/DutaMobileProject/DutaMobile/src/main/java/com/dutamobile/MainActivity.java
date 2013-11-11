@@ -3,6 +3,7 @@ package com.dutamobile;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
@@ -23,6 +24,7 @@ import com.dutamobile.model.Contact;
 import com.dutamobile.model.Status;
 import com.dutamobile.util.Helper;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,12 +52,12 @@ public class MainActivity extends ActionBarActivity
         if (savedInstanceState != null)
         {
             Fragment fragment = getSupportFragmentManager().getFragment(savedInstanceState, Helper.CURRENT_FRAGMENT);
-            Helper.fragmentReplacement(getSupportFragmentManager(), ((Object)fragment).getClass(), false, fragment.getTag());
+            Helper.fragmentReplacement(getSupportFragmentManager(), ((Object) fragment).getClass(), false, fragment.getTag(), null);
 
             return;
         }
 
-        Helper.fragmentReplacement(getSupportFragmentManager(), ContactListFragment.class, false, "ContactList");
+        Helper.fragmentReplacement(getSupportFragmentManager(), ContactListFragment.class, false, "ContactList", null);
     }
 
     @Override
@@ -70,7 +72,9 @@ public class MainActivity extends ActionBarActivity
             @Override
             public boolean onMenuItemClick(MenuItem item)
             {
-                if(mDrawerLayout.isDrawerOpen(mActiveChatList))
+                if (mDrawerLayout.isDrawerOpen(mDrawerList)) mDrawerLayout.closeDrawer(mDrawerList);
+
+                if (mDrawerLayout.isDrawerOpen(mActiveChatList))
                     mDrawerLayout.closeDrawer(mActiveChatList);
                 else
                     mDrawerLayout.openDrawer(mActiveChatList);
@@ -92,22 +96,19 @@ public class MainActivity extends ActionBarActivity
             {
                 case R.id.action_status_available:
                     editor.putString("status", Status.AVAILABLE.toString());
-                    Toast.makeText(this, item.getTitle().toString(), Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.action_status_away:
                     editor.putString("status", Status.AWAY.toString());
-                    Toast.makeText(this, item.getTitle().toString(), Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.action_status_busy:
                     editor.putString("status", Status.BUSY.toString());
-                    Toast.makeText(this, item.getTitle().toString(), Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.action_status_offline:
                     editor.putString("status", Status.OFFLINE.toString());
-                    Toast.makeText(this, item.getTitle().toString(), Toast.LENGTH_SHORT).show();
                     break;
             }
 
+            Toast.makeText(this, item.getTitle().toString(), Toast.LENGTH_SHORT).show();
             editor.commit();
         }
 
@@ -173,14 +174,17 @@ public class MainActivity extends ActionBarActivity
         {
             public void onDrawerClosed(View view)
             {
-                //getSupportActionBar().setTitle(R.string.app_name);
+                if (mDrawerLayout.isDrawerOpen(mActiveChatList))
+                    mDrawerLayout.closeDrawer(mActiveChatList);
+
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             public void onDrawerOpened(View drawerView)
             {
-                //getSupportActionBar().setTitle("Menu");
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+
+
+                invalidateOptionsMenu();
             }
         };
 
@@ -198,20 +202,32 @@ public class MainActivity extends ActionBarActivity
         public void onItemClick(AdapterView<?> parent, View view, int position, long id)
         {
             //TODO
-            if(parent.getId() == mDrawerList.getId())
+            if (parent.getId() == mDrawerList.getId())
             {
                 switch (position)
                 {
                     default:
-                        //finish();
+                        finish();
                         break;
                 }
-            }
-            else
+            } else
             {
-                //FIXME powrót bezpośrednio do listy kontaków
-                getSupportActionBar().setTitle(activeConversations.get(position).getName());
-                Helper.fragmentReplacement(getSupportFragmentManager(), ChatFragment.class, false, "Chat-" + activeConversations.get(position).getName());
+                Contact contact = activeConversations.get(position);
+
+                if (getSupportFragmentManager().findFragmentByTag("Chat-" + contact.getName()) == null)
+                {
+                    Bundle args = new Bundle();
+                    args.putSerializable("Messages", (Serializable) contact.getMessages());
+                    args.putString("ContactName", contact.getName());
+
+                    while (getSupportFragmentManager().getBackStackEntryCount() > 0)
+                    {
+                        getSupportFragmentManager().popBackStackImmediate();
+                    }
+
+                    Helper.fragmentReplacement(getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + contact.getName(), args);
+                }
+
             }
 
             mDrawerLayout.closeDrawer(parent);

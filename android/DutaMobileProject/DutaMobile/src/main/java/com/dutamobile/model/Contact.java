@@ -1,5 +1,8 @@
 package com.dutamobile.model;
 
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * Created by Bartosz on 12.10.13.
  */
@@ -45,8 +48,21 @@ public class Contact
         this.description = description;
     }
 
+    public List<Message> getMessages()
+    {
+        return messages;
+    }
+
+    public void setMessages(List<Message> messages)
+    {
+        this.messages = messages;
+    }
+
+    public void addMessage(Message message) { this.messages.add(message); }
+
     private int id;
     private String name;
     private Status status;
     private String description;
+    private List<Message> messages;
 }

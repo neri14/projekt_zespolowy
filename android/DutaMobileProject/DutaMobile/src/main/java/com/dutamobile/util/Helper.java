@@ -3,6 +3,7 @@ package com.dutamobile.util;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -31,7 +32,7 @@ public class Helper
 
 
 
-    public static void fragmentReplacement(FragmentManager fragmentManager, Class fragmentClass, boolean addToBackStack, String tag)
+    public static void fragmentReplacement(FragmentManager fragmentManager, Class fragmentClass, boolean addToBackStack, String tag, Bundle passedData)
     {
         Fragment fragment = fragmentManager.findFragmentByTag(tag);
 
@@ -39,26 +40,39 @@ public class Helper
         {
             if(fragment == null)
             {
-                android.util.Log.i("Fragment Replacement", "Creating new instance of fragment...");
+                android.util.Log.i("Fragment Replacement", String.format("Creating new instance of %s...", fragmentClass.getSimpleName()));
                 fragment = (Fragment) fragmentClass.newInstance();
-                android.util.Log.i("Fragment Replacement", "Fragment created.");
+                android.util.Log.i("Fragment Replacement", String.format("%s created.", fragmentClass.getSimpleName()));
+
+                if(passedData != null)
+                {
+                    fragment.setArguments(passedData);
+                }
             }
+            else
+                android.util.Log.i("Fragment Replacement", String.format("%s already exists.", fragmentClass.getSimpleName()));
         }
         catch(Exception e)
         {
-            android.util.Log.e("Fragment Replacement", "Creating new instance of fragment failed. " + e.getMessage());
+            android.util.Log.e("Fragment Replacement", String.format("Creating new instance of %s failed.\n%s", fragmentClass.getSimpleName(), e.getMessage()));
         }
 
+        if(fragment.isVisible())
+        {
+            android.util.Log.i("Fragment Replacement", String.format("No replacement - %s is already shown.", fragmentClass.getSimpleName()));
+            return;
+        }
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-
         transaction.replace(R.id.content_frame, fragment, tag);
+
         CURRENT_FRAGMENT = tag;
 
         if (addToBackStack)
         {
-            transaction.addToBackStack(null);
+            transaction.addToBackStack(tag);
         }
+
         transaction.commit();
     }
 

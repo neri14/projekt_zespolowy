@@ -2,11 +2,7 @@ package com.dutamobile.fragments;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +11,9 @@ import android.widget.Toast;
 
 import com.dutamobile.MainActivity;
 import com.dutamobile.R;
-import com.dutamobile.RESTClient;
 import com.dutamobile.adapter.ContactListAdapter;
 import com.dutamobile.model.Contact;
+import com.dutamobile.model.Message;
 import com.dutamobile.model.Status;
 import com.dutamobile.util.Helper;
 
@@ -27,8 +23,10 @@ import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Bartosz on 12.10.13.
@@ -67,8 +65,10 @@ public class ContactListFragment extends ListFragment
         };*/
 
         Contact c = (Contact)getListAdapter().getItem(position);
-        Helper.getSupportActionBar(getActivity()).setTitle(c.getName());
-        Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + c.getName());
+        Bundle args = new Bundle();
+        args.putSerializable("Messages", (Serializable) c.getMessages());
+        args.putString("ContactName", c.getName());
+        Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + c.getName(), args);
         ((MainActivity)getActivity()).rightAdapter.addItem(c);
     }
 
@@ -80,6 +80,7 @@ public class ContactListFragment extends ListFragment
         c.setName("John");
         c.setDescription("Cool men!");
         c.setStatus(Status.AWAY);
+        c.setMessages(generateConversation(c.getName()));
         data.add(c);
 
         c = new Contact();
@@ -87,6 +88,7 @@ public class ContactListFragment extends ListFragment
         c.setName("Marie");
         c.setDescription("I just bought new shoes!");
         c.setStatus(Status.AVAILABLE);
+        c.setMessages(generateConversation(c.getName()));
         data.add(c);
 
         c = new Contact();
@@ -94,7 +96,39 @@ public class ContactListFragment extends ListFragment
         c.setName("Alice");
         c.setDescription("Fucking rabbit!");
         c.setStatus(Status.BUSY);
+        c.setMessages(generateConversation(c.getName()));
         data.add(c);
+
+        return data;
+    }
+
+    private List<Message> generateConversation(String name)
+    {
+        Random r = new Random();
+
+        String [] mgs = new String []
+                {
+                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut augue eros, ullamcorper id mauris a, lacinia ultricies purus. Phasellus ligula enim, fringilla vitae elit eget, consequat gravida felis. Vivamus sem elit, semper eu rhoncus tristique, porta eget metus. Aliquam erat volutpat. Etiam vel eros vitae sapien ultricies blandit vitae convallis orci. Praesent laoreet ante quis ligula fermentum sodales. Praesent adipiscing lacus in metus tristique, et imperdiet purus eleifend. Vivamus fringilla commodo velit.",
+                        "Ohh cool",
+                        "Aenean lorem erat, pretium id neque non, vulputate vehicula sem. Praesent nec posuere felis, in pellentesque lorem. Ut in tincidunt quam.",
+                        "TEST MESSAGE"
+                };
+
+        List<Message> data = new ArrayList<Message>();
+
+        Message m = new Message();
+        m = new Message();
+        m.setIncoming(true);
+        m.setMessageText(name);
+        data.add(m);
+
+        for(int i = 0 ; i < 4 ; i++)
+        {
+            m = new Message();
+            m.setIncoming(i % 2 == 0);
+            m.setMessageText(mgs[r.nextInt(4)]);
+            data.add(m);
+        }
 
         return data;
     }
