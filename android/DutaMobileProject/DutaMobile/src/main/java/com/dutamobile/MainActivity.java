@@ -2,8 +2,8 @@ package com.dutamobile;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
@@ -23,6 +23,13 @@ import com.dutamobile.fragments.ContactListFragment;
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Status;
 import com.dutamobile.util.Helper;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -67,21 +74,26 @@ public class MainActivity extends ActionBarActivity
         status_item = menu.findItem(R.id.action_status_indicator);
         status_item.setIcon(Helper.getStatusIndicator(this, myStatus));
         MenuItem chatItem = menu.findItem(R.id.action_chats);
-        chatItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener()
+
+        if (chatItem != null)
         {
-            @Override
-            public boolean onMenuItemClick(MenuItem item)
+            chatItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener()
             {
-                if (mDrawerLayout.isDrawerOpen(mDrawerList)) mDrawerLayout.closeDrawer(mDrawerList);
+                @Override
+                public boolean onMenuItemClick(MenuItem item)
+                {
+                    if (mDrawerLayout.isDrawerOpen(mDrawerList)) mDrawerLayout.closeDrawer(mDrawerList);
 
-                if (mDrawerLayout.isDrawerOpen(mActiveChatList))
-                    mDrawerLayout.closeDrawer(mActiveChatList);
-                else
-                    mDrawerLayout.openDrawer(mActiveChatList);
+                    if (mDrawerLayout.isDrawerOpen(mActiveChatList))
+                        mDrawerLayout.closeDrawer(mActiveChatList);
+                    else
+                        mDrawerLayout.openDrawer(mActiveChatList);
 
-                return false;
-            }
-        });
+                    return false;
+                }
+            });
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -162,6 +174,22 @@ public class MainActivity extends ActionBarActivity
 
         rightAdapter = new ActiveConversationsAdapter(this, activeConversations);
         mActiveChatList.setAdapter(rightAdapter);
+        mActiveChatList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
+        {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                rightAdapter.deleteItem(position);
+
+                if(getSupportFragmentManager().findFragmentByTag(Helper.CURRENT_FRAGMENT) instanceof ChatFragment)
+                    onBackPressed();
+
+                Toast.makeText(getApplication(), "Zamknięto konwersację.", Toast.LENGTH_SHORT).show();
+
+                return true;
+            }
+        });
+
         mActiveChatList.setOnItemClickListener(new DrawerItemClickListener());
 
         mDrawerToggle = new ActionBarDrawerToggle(
@@ -206,9 +234,9 @@ public class MainActivity extends ActionBarActivity
             {
                 switch (position)
                 {
-                    default:
-                        finish();
-                        break;
+                    case 0: connect(); break;
+                    case 1: finish(); break;
+                    default: break;
                 }
             } else
             {
@@ -234,5 +262,41 @@ public class MainActivity extends ActionBarActivity
 
         }
 
+    }
+
+    private Boolean connect()
+    {
+        new AsyncTask<Void, Void, Boolean>()
+        {
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //String address = "http://10.0.3.2:1404/Account/Login";
+            String address = "http://192.168.1.5/Account/Login";
+
+            try
+            {
+
+                HttpClient client = new DefaultHttpClient();
+
+                List<NameValuePair> data = new ArrayList<NameValuePair>();
+                data.add(new BasicNameValuePair("username", "asd"));
+                data.add(new BasicNameValuePair("password", "zxc"));
+
+                HttpPost post = new HttpPost(address);
+
+                post.setEntity( new UrlEncodedFormEntity(data));
+
+                //HttpResponse response =
+                        client.execute(post);
+
+            }
+            catch (Exception e) { return false; }
+
+            return true;
+        }
+        }.execute();
+
+        return true;
     }
 }

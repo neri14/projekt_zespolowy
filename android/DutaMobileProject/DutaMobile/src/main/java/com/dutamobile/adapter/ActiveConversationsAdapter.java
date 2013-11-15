@@ -50,6 +50,14 @@ public class ActiveConversationsAdapter extends BaseAdapter
             notifyDataSetChanged();
         }
     }
+
+    public void deleteItem(int position)
+    {
+            data.remove(position);
+            notifyDataSetChanged();
+    }
+
+
     @Override
     public Object getItem(int position)
     {
