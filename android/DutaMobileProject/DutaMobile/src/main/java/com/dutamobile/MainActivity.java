@@ -1,8 +1,8 @@
 package com.dutamobile;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -23,13 +23,6 @@ import com.dutamobile.fragments.ContactListFragment;
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Status;
 import com.dutamobile.util.Helper;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -234,11 +227,12 @@ public class MainActivity extends ActionBarActivity
             {
                 switch (position)
                 {
-                    case 0: connect(); break;
-                    case 1: finish(); break;
+                    case 0: Toast.makeText(getApplication(), "Aktualnie pusto", Toast.LENGTH_SHORT).show(); break;
+                    case 1: startActivity(new Intent(MainActivity.this, LoginActivity.class)); finish(); break;
                     default: break;
                 }
-            } else
+            }
+            else
             {
                 Contact contact = activeConversations.get(position);
 
@@ -264,39 +258,4 @@ public class MainActivity extends ActionBarActivity
 
     }
 
-    private Boolean connect()
-    {
-        new AsyncTask<Void, Void, Boolean>()
-        {
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //String address = "http://10.0.3.2:1404/Account/Login";
-            String address = "http://192.168.1.5/Account/Login";
-
-            try
-            {
-
-                HttpClient client = new DefaultHttpClient();
-
-                List<NameValuePair> data = new ArrayList<NameValuePair>();
-                data.add(new BasicNameValuePair("username", "asd"));
-                data.add(new BasicNameValuePair("password", "zxc"));
-
-                HttpPost post = new HttpPost(address);
-
-                post.setEntity( new UrlEncodedFormEntity(data));
-
-                //HttpResponse response =
-                        client.execute(post);
-
-            }
-            catch (Exception e) { return false; }
-
-            return true;
-        }
-        }.execute();
-
-        return true;
-    }
 }

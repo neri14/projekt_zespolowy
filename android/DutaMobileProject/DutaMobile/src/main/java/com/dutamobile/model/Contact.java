@@ -1,6 +1,5 @@
 package com.dutamobile.model;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**

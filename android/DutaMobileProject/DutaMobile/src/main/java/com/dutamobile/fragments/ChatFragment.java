@@ -31,7 +31,7 @@ import java.util.List;
 public class ChatFragment extends ListFragment
 {
     private EditText message_box;
-    protected ActionMode actionMode;
+    private ActionMode actionMode;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)

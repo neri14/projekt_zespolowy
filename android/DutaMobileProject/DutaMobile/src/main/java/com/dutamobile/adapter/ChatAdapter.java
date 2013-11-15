@@ -31,13 +31,11 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
     private final LayoutInflater inflater;
     private int height;
     private int width;
-    private final Context ctx;
 
     public ChatAdapter(Context context, List<Message> messages)
     {
         this.data = messages;
         this.inflater = LayoutInflater.from(context);
-        this.ctx = context;
 
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         width = metrics.widthPixels;

@@ -14,6 +14,12 @@ import com.dutamobile.R;
 import com.dutamobile.model.Status;
 import com.google.gson.Gson;
 
+import org.apache.http.HttpResponse;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  * Created by Bartosz on 12.10.13.
  */
@@ -95,6 +101,16 @@ public class Helper
             gson = new Gson();
         return gson;
     }
+
+    public static <T> T getObjectFromJson(HttpResponse response, Class<T> classOfT) throws IOException
+    {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+        StringBuilder builder = new StringBuilder();
+        for (String line; (line = reader.readLine()) != null;) builder.append(line).append("\n");
+
+        return getGsonInstance().fromJson(builder.toString(), classOfT);
+    }
+
 
 
 
