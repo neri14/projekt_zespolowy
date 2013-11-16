@@ -41,7 +41,8 @@ namespace duta.Controllers
             SortedSet<GetContactListResponse_User> list = new SortedSet<GetContactListResponse_User>();
             User user = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
 
-            foreach(KeyValuePair<string, User> u in user.contact_list)
+            Dictionary<string, User> contact_list = UserManager.GetContactList(user);
+            foreach(KeyValuePair<string, User> u in contact_list)
             {
                 list.Add(new GetContactListResponse_User
                 {

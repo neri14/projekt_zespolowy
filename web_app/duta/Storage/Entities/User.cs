@@ -14,7 +14,7 @@ namespace duta.Storage.Entities
             this.password = password;
             this.status = EUserStatus.EUserStatus_Offline;
             this.descripton = "";
-            this.contact_list = new Dictionary<string, User>();
+            this.contact_list = new Dictionary<string, int>();
             this.last_status_update = DateTime.Now;
         }
 
@@ -23,7 +23,7 @@ namespace duta.Storage.Entities
         public string password { get; set; }
         public EUserStatus status { get; set; }
         public string descripton { get; set; }
-        public Dictionary<string,User> contact_list { get; set; }
+        public Dictionary<string,int> contact_list { get; set; }
         public DateTime last_status_update { get; set; }
     }
 

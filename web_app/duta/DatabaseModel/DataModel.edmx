@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="DataModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityContainer Name="DataModelStoreContainer">
+          <EntitySet Name="contacts" EntityType="DataModel.Store.contacts" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="messages" EntityType="DataModel.Store.messages" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="messages_users" EntityType="DataModel.Store.messages_users" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="users" EntityType="DataModel.Store.users" store:Type="Tables" Schema="dbo" />
+          <AssociationSet Name="FK_contacts_contact" Association="DataModel.Store.FK_contacts_contact">
+            <End Role="users" EntitySet="users" />
+            <End Role="contacts" EntitySet="contacts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_contacts_user" Association="DataModel.Store.FK_contacts_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="contacts" EntitySet="contacts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_messages_author" Association="DataModel.Store.FK_messages_author">
+            <End Role="users" EntitySet="users" />
+            <End Role="messages" EntitySet="messages" />
+          </AssociationSet>
+          <AssociationSet Name="FK_messages_users_message" Association="DataModel.Store.FK_messages_users_message">
+            <End Role="messages" EntitySet="messages" />
+            <End Role="messages_users" EntitySet="messages_users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_messages_users_user" Association="DataModel.Store.FK_messages_users_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="messages_users" EntitySet="messages_users" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="contacts">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="contact_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="messages">
+          <Key>
+            <PropertyRef Name="message_id" />
+          </Key>
+          <Property Name="message_id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="time" Type="datetime" Nullable="false" />
+          <Property Name="author_id" Type="int" Nullable="false" />
+          <Property Name="message" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="messages_users">
+          <Key>
+            <PropertyRef Name="user_id" />
+            <PropertyRef Name="message_id" />
+          </Key>
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="message_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="users">
+          <Key>
+            <PropertyRef Name="user_id" />
+          </Key>
+          <Property Name="user_id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="login" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="password" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="status" Type="int" Nullable="false" />
+          <Property Name="description" Type="nvarchar" Nullable="false" MaxLength="128" />
+          <Property Name="last_status_update" Type="datetime" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_contacts_contact">
+          <End Role="users" Type="DataModel.Store.users" Multiplicity="1" />
+          <End Role="contacts" Type="DataModel.Store.contacts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="contacts">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_contacts_user">
+          <End Role="users" Type="DataModel.Store.users" Multiplicity="1" />
+          <End Role="contacts" Type="DataModel.Store.contacts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="contacts">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_messages_author">
+          <End Role="users" Type="DataModel.Store.users" Multiplicity="1" />
+          <End Role="messages" Type="DataModel.Store.messages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="messages">
+              <PropertyRef Name="author_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_messages_users_message">
+          <End Role="messages" Type="DataModel.Store.messages" Multiplicity="1" />
+          <End Role="messages_users" Type="DataModel.Store.messages_users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="messages">
+              <PropertyRef Name="message_id" />
+            </Principal>
+            <Dependent Role="messages_users">
+              <PropertyRef Name="message_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_messages_users_user">
+          <End Role="users" Type="DataModel.Store.users" Multiplicity="1" />
+          <End Role="messages_users" Type="DataModel.Store.messages_users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="messages_users">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="DataModel" Alias="Self" p1:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:p1="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="DataEntities" p1:LazyLoadingEnabled="true">
+          <EntitySet Name="contacts" EntityType="DataModel.contact" />
+          <EntitySet Name="messages" EntityType="DataModel.message" />
+          <EntitySet Name="users" EntityType="DataModel.user" />
+          <AssociationSet Name="FK_contacts_contact" Association="DataModel.FK_contacts_contact">
+            <End Role="users" EntitySet="users" />
+            <End Role="contacts" EntitySet="contacts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_contacts_user" Association="DataModel.FK_contacts_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="contacts" EntitySet="contacts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_messages_author" Association="DataModel.FK_messages_author">
+            <End Role="users" EntitySet="users" />
+            <End Role="messages" EntitySet="messages" />
+          </AssociationSet>
+          <AssociationSet Name="messages_users" Association="DataModel.messages_users">
+            <End Role="messages" EntitySet="messages" />
+            <End Role="users" EntitySet="users" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="contact">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" p1:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="contact_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="contact_" Relationship="DataModel.FK_contacts_contact" FromRole="contacts" ToRole="users" />
+          <NavigationProperty Name="contacting_user" Relationship="DataModel.FK_contacts_user" FromRole="contacts" ToRole="users" />
+        </EntityType>
+        <EntityType Name="message">
+          <Key>
+            <PropertyRef Name="message_id" />
+          </Key>
+          <Property Name="message_id" Type="Int32" Nullable="false" p1:StoreGeneratedPattern="Identity" />
+          <Property Name="time" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="author_id" Type="Int32" Nullable="false" />
+          <Property Name="message1" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="author" Relationship="DataModel.FK_messages_author" FromRole="messages" ToRole="users" />
+          <NavigationProperty Name="users" Relationship="DataModel.messages_users" FromRole="messages" ToRole="users" />
+        </EntityType>
+        <EntityType Name="user">
+          <Key>
+            <PropertyRef Name="user_id" />
+          </Key>
+          <Property Name="user_id" Type="Int32" Nullable="false" p1:StoreGeneratedPattern="Identity" />
+          <Property Name="login" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="password" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="status" Type="Int32" Nullable="false" />
+          <Property Name="description" Type="String" Nullable="false" MaxLength="128" Unicode="true" FixedLength="false" />
+          <Property Name="last_status_update" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="others_contacts" Relationship="DataModel.FK_contacts_contact" FromRole="users" ToRole="contacts" />
+          <NavigationProperty Name="contacts" Relationship="DataModel.FK_contacts_user" FromRole="users" ToRole="contacts" />
+          <NavigationProperty Name="sent_messages" Relationship="DataModel.FK_messages_author" FromRole="users" ToRole="messages" />
+          <NavigationProperty Name="messages" Relationship="DataModel.messages_users" FromRole="users" ToRole="messages" />
+        </EntityType>
+        <Association Name="FK_contacts_contact">
+          <End Role="users" Type="DataModel.user" Multiplicity="1" />
+          <End Role="contacts" Type="DataModel.contact" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="contacts">
+              <PropertyRef Name="contact_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_contacts_user">
+          <End Role="users" Type="DataModel.user" Multiplicity="1" />
+          <End Role="contacts" Type="DataModel.contact" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="contacts">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_messages_author">
+          <End Role="users" Type="DataModel.user" Multiplicity="1" />
+          <End Role="messages" Type="DataModel.message" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="messages">
+              <PropertyRef Name="author_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="messages_users">
+          <End Role="messages" Type="DataModel.message" Multiplicity="*" />
+          <End Role="users" Type="DataModel.user" Multiplicity="*" />
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="DataModelStoreContainer" CdmEntityContainer="DataEntities">
+          <EntitySetMapping Name="contacts">
+            <EntityTypeMapping TypeName="DataModel.contact">
+              <MappingFragment StoreEntitySet="contacts">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="contact_id" ColumnName="contact_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="messages">
+            <EntityTypeMapping TypeName="DataModel.message">
+              <MappingFragment StoreEntitySet="messages">
+                <ScalarProperty Name="message_id" ColumnName="message_id" />
+                <ScalarProperty Name="time" ColumnName="time" />
+                <ScalarProperty Name="author_id" ColumnName="author_id" />
+                <ScalarProperty Name="message1" ColumnName="message" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="users">
+            <EntityTypeMapping TypeName="DataModel.user">
+              <MappingFragment StoreEntitySet="users">
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="login" ColumnName="login" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="last_status_update" ColumnName="last_status_update" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <AssociationSetMapping Name="messages_users" TypeName="DataModel.messages_users" StoreEntitySet="messages_users">
+            <EndProperty Name="messages">
+              <ScalarProperty Name="message_id" ColumnName="message_id" />
+            </EndProperty>
+            <EndProperty Name="users">
+              <ScalarProperty Name="user_id" ColumnName="user_id" />
+            </EndProperty>
+          </AssociationSetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -25,7 +25,7 @@ namespace duta.Storage
             User user_a = GetUser("user_a");
             User user_b = GetUser("user_b");
 
-            user_a.contact_list.Add("nick_b", user_b);
+            user_a.contact_list.Add("nick_b", user_b.user_id);
         }
 
         public override User GetUser(int user_id)
@@ -48,12 +48,12 @@ namespace duta.Storage
         {
             lock (users)
             {
-                List<string> logins = users.Where(u1 =>
-                    null != u1.contact_list.Values.FirstOrDefault(u2 => u2.login == login)).
-                    Select(u3 => u3.login).ToList();
+                //List<string> logins = users.Where(u1 =>
+                //    null != u1.contact_list.Values.FirstOrDefault(u2 => u2.login == login)).
+                //    Select(u3 => u3.login).ToList();
 
-                return logins;
-            }
+                //return logins;
+            } return new List<string>();
         }
 
         public override int CreateUser(string login, string password)

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="2e0628c378944adb97318cf55a372525" Name="Diagram1">
+        <EntityTypeShape EntityType="DataModel.contact" Width="1.5" PointX="1.5" PointY="2.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DataModel.message" Width="1.5" PointX="8" PointY="2.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DataModel.user" Width="1.5" PointX="4.375" PointY="1.875" IsExpanded="true" />
+        <AssociationConnector Association="DataModel.FK_contacts_contact" ManuallyRouted="false" />
+        <AssociationConnector Association="DataModel.FK_contacts_user" ManuallyRouted="false" />
+        <AssociationConnector Association="DataModel.FK_messages_author" ManuallyRouted="false" />
+        <AssociationConnector Association="DataModel.messages_users" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
