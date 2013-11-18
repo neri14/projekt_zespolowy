@@ -6,9 +6,11 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,14 +25,17 @@ import com.dutamobile.fragments.ContactListFragment;
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Status;
 import com.dutamobile.util.Helper;
+import com.dutamobile.util.NetClient;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class MainActivity extends ActionBarActivity
 {
-    public static final String PREFS_MAIN = "main-prefs";
+
     private MenuItem status_item;
     private Status myStatus;
     private DrawerLayout mDrawerLayout;
@@ -95,30 +100,30 @@ public class MainActivity extends ActionBarActivity
     {
         if (item.getGroupId() == R.id.status_group)
         {
-            SharedPreferences.Editor editor = getSharedPreferences(PREFS_MAIN, MODE_PRIVATE).edit();
+            SharedPreferences.Editor editor = getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).edit();
             status_item.setIcon(item.getIcon());
+            Status status = null;
+
             switch (item.getItemId())
             {
                 case R.id.action_status_available:
-                    editor.putString("status", Status.AVAILABLE.toString());
+                    status = Status.AVAILABLE;
                     break;
                 case R.id.action_status_away:
-                    editor.putString("status", Status.AWAY.toString());
+                    status = Status.AWAY;
                     break;
                 case R.id.action_status_busy:
-                    editor.putString("status", Status.BUSY.toString());
+                    status = Status.BUSY;
                     break;
                 case R.id.action_status_offline:
-                    editor.putString("status", Status.OFFLINE.toString());
+                    status = Status.OFFLINE;
                     break;
             }
 
+            editor.putString("status", status.toString()).commit();
             Toast.makeText(this, item.getTitle().toString(), Toast.LENGTH_SHORT).show();
-            editor.commit();
+            NetClient.GetInstance().SetStatus(status, "Mój opis" );
         }
-
-        //if(mDrawerToggle.onOptionsItemSelected(item))
-        //    return true;
 
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
@@ -150,7 +155,7 @@ public class MainActivity extends ActionBarActivity
 
         activeConversations = new ArrayList<Contact>();
 
-        myStatus = Status.valueOf(getSharedPreferences(PREFS_MAIN, MODE_PRIVATE).getString("status", "OFFLINE"));
+        myStatus = Status.valueOf(getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("status", "OFFLINE"));
 
         String[] drawerItemsStrings = getResources().getStringArray(R.array.drawer_items);
 
@@ -172,12 +177,12 @@ public class MainActivity extends ActionBarActivity
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
             {
+                String name = ((Contact)rightAdapter.getItem(position)).getName();
                 rightAdapter.deleteItem(position);
 
-                if(getSupportFragmentManager().findFragmentByTag(Helper.CURRENT_FRAGMENT) instanceof ChatFragment)
-                    onBackPressed();
+                if(Helper.CURRENT_FRAGMENT.equals("Chat-" + name)) onBackPressed();
 
-                Toast.makeText(getApplication(), "Zamknięto konwersację.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplication(), R.string.conversation_closed, Toast.LENGTH_SHORT).show();
 
                 return true;
             }
@@ -203,19 +208,33 @@ public class MainActivity extends ActionBarActivity
 
             public void onDrawerOpened(View drawerView)
             {
-
-
                 invalidateOptionsMenu();
             }
         };
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mActiveChatList);
+        //mActiveChatList.setFocusableInTouchMode(true);
+       // mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mActiveChatList);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        if (mDrawerLayout.isDrawerOpen(mActiveChatList))
+        {
+           mDrawerLayout.closeDrawer(mActiveChatList);
+        }
+        else
+        {
+            super.onBackPressed();
+            Helper.CURRENT_FRAGMENT = "ContactList";
+        }
+
+
+    }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener
     {
@@ -227,8 +246,17 @@ public class MainActivity extends ActionBarActivity
             {
                 switch (position)
                 {
-                    case 0: Toast.makeText(getApplication(), "Aktualnie pusto", Toast.LENGTH_SHORT).show(); break;
-                    case 1: startActivity(new Intent(MainActivity.this, LoginActivity.class)); finish(); break;
+                    case 0:
+                    {
+                        Toast.makeText(getApplication(), "Nuuuuda!", Toast.LENGTH_SHORT).show(); break;
+                    }
+                    case 1:
+                    {
+                        NetClient.GetInstance().Logout();
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        finish();
+                        break;
+                    }
                     default: break;
                 }
             }
@@ -249,7 +277,6 @@ public class MainActivity extends ActionBarActivity
 
                     Helper.fragmentReplacement(getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + contact.getName(), args);
                 }
-
             }
 
             mDrawerLayout.closeDrawer(parent);

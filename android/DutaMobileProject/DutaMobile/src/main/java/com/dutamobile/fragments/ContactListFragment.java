@@ -1,14 +1,13 @@
 package com.dutamobile.fragments;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
 
+import com.dutamobile.DutaApplication;
 import com.dutamobile.MainActivity;
 import com.dutamobile.R;
 import com.dutamobile.adapter.ContactListAdapter;
@@ -33,7 +32,7 @@ public class ContactListFragment extends ListFragment
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         if(getListAdapter() == null)
-            setListAdapter(new ContactListAdapter(getActivity(), getContacts()));
+            setListAdapter(new ContactListAdapter(getActivity(), GetContacts()));
 
         Helper.getSupportActionBar(getActivity()).setTitle(getString(R.string.app_name));
 
@@ -49,15 +48,23 @@ public class ContactListFragment extends ListFragment
         Bundle args = new Bundle();
         args.putSerializable("Messages", (Serializable) c.getMessages());
         args.putString("ContactName", c.getName());
+        args.putInt("ContactID", c.getId());
         Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + c.getName(), args);
         ((MainActivity)getActivity()).rightAdapter.addItem(c);
     }
 
-    private List<Contact> getContacts()
+    private List<Contact> GetContacts()
     {
-        List<Contact> data = new ArrayList<Contact>();
+        List<Contact> data = ((DutaApplication)getActivity().getApplication()).getContactList();
+
+        for(Contact c : data)
+            c.setMessages(generateConversation(c.getName()));
+
+        int counter = data.size();
+
         Contact c = new Contact();
-        c.setId(0);
+        c.setId(counter++);
+        c.setLogin("john12");
         c.setName("John");
         c.setDescription("Cool men!");
         c.setStatus(Status.AWAY);
@@ -65,16 +72,18 @@ public class ContactListFragment extends ListFragment
         data.add(c);
 
         c = new Contact();
-        c.setId(1);
+        c.setId(counter++);
         c.setName("Marie");
+        c.setLogin("cuntMarie");
         c.setDescription("I just bought new shoes!");
         c.setStatus(Status.AVAILABLE);
         c.setMessages(generateConversation(c.getName()));
         data.add(c);
 
         c = new Contact();
-        c.setId(2);
+        c.setId(counter);
         c.setName("Alice");
+        c.setLogin("junkiegirl14");
         c.setDescription("Fucking rabbit!");
         c.setStatus(Status.BUSY);
         c.setMessages(generateConversation(c.getName()));
@@ -96,17 +105,18 @@ public class ContactListFragment extends ListFragment
                 };
 
         List<Message> data = new ArrayList<Message>();
+        int []  l = new int [] {Helper.MyID, 1 };
 
-        Message m = new Message();
-        m = new Message();
-        m.setIncoming(true);
-        m.setMessageText(name);
+        Message m = new Message(name, l);
+        m.setAuthor(0);
+        m.setTimestamp(System.currentTimeMillis());
         data.add(m);
 
         for(int i = 0 ; i < 4 ; i++)
         {
             m = new Message();
-            m.setIncoming(i % 2 == 0);
+            m.setAuthor(i%2);
+            m.setTimestamp(System.currentTimeMillis());
             m.setMessageText(mgs[r.nextInt(4)]);
             data.add(m);
         }

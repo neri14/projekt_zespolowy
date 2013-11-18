@@ -3,7 +3,7 @@
 
     <string name="app_name">Duta Mobile</string>
     <string name="title_activity_main">Duta Mobile</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Ustawienia</string>
     <string name="action_test">MENU</string>
     <string name="action_status_available">Dostępny</string>
     <string name="action_status_away">Zaraz wracam</string>
@@ -12,8 +12,11 @@
     <string name="contentDesc">content</string>
     <string name="drawer_open">Menu</string>
 
+    <string name="conversation_closed">Zamknięto konwersację.</string>
+
     <string-array name="drawer_items">
         <item>Test</item>
+        <item>Zmień opis</item>
         <item>Wyloguj</item>
     </string-array>
 

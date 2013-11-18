@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.dutamobile.R;
 import com.dutamobile.model.Message;
+import com.dutamobile.util.Helper;
 
 import java.util.List;
 
@@ -92,7 +93,7 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
             holder.messageView.setText(msg.getMessageText());
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
-            if(msg.isReceived())
+            if(msg.getAuthor() != Helper.MyID)
             {
                 holder.messageView.setBackgroundResource(R.drawable.receive_msg_bg);
                 params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);

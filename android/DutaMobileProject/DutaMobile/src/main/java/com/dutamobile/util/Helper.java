@@ -19,12 +19,15 @@ import org.apache.http.HttpResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 
 /**
  * Created by Bartosz on 12.10.13.
  */
 public class Helper
 {
+    public static int MyID;
+    public static final String PREFS_MAIN = "main-prefs";
     public static String CURRENT_FRAGMENT;
     private static ActionBar actionBar = null;
     private static Gson gson = null;
@@ -36,12 +39,9 @@ public class Helper
                     R.drawable.status_offline
             };
 
-
-
     public static void fragmentReplacement(FragmentManager fragmentManager, Class fragmentClass, boolean addToBackStack, String tag, Bundle passedData)
     {
         Fragment fragment = fragmentManager.findFragmentByTag(tag);
-
         try
         {
             if(fragment == null)
@@ -95,6 +95,8 @@ public class Helper
         return context.getResources().getDrawable(statusIcons[status.ordinal()]);
     }
 
+
+    //JSON
     public synchronized static Gson getGsonInstance()
     {
         if(gson == null)
@@ -102,13 +104,26 @@ public class Helper
         return gson;
     }
 
-    public static <T> T getObjectFromJson(HttpResponse response, Class<T> classOfT) throws IOException
+
+    private static String getJsonFromResponse(HttpResponse response)  throws IOException
     {
         BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
         StringBuilder builder = new StringBuilder();
         for (String line; (line = reader.readLine()) != null;) builder.append(line).append("\n");
 
-        return getGsonInstance().fromJson(builder.toString(), classOfT);
+        return builder.toString();
+    }
+
+    public static <T> T getObjectFromJson(HttpResponse response, Class<T> classOfT) throws IOException
+    {
+        String json = getJsonFromResponse(response);
+        return getGsonInstance().fromJson(json, classOfT);
+    }
+
+    public static <T> T getObjectFromJson(HttpResponse response, Type type) throws IOException
+    {
+        String json = getJsonFromResponse(response);
+        return getGsonInstance().fromJson(json, type);
     }
 
 

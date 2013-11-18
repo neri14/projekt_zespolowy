@@ -15,6 +15,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.dutamobile.util.Helper;
 import com.dutamobile.util.NetClient;
 
 import java.util.concurrent.ExecutionException;
@@ -44,7 +45,7 @@ public class LoginActivity extends ActionBarActivity
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
-        mUserId = getSharedPreferences(MainActivity.PREFS_MAIN, MODE_PRIVATE).getString("Login", "");
+        mUserId = getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("Login", "");
         mUserIdView = (EditText) findViewById(R.id.email);
         mUserIdView.setText(mUserId);
 
@@ -199,7 +200,7 @@ public class LoginActivity extends ActionBarActivity
 
         try
         {
-            success = NetClient.getInstance().Login(mUserId, mPassword);
+            success = NetClient.GetInstance().Login(mUserId, mPassword);
         }
         catch (ExecutionException e)
         {

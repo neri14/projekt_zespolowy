@@ -1,4 +1,4 @@
-package com.dutamobile.model;
+package com.dutamobile.model.response;
 
 /**
  * Created by Bartosz on 15.11.13.
