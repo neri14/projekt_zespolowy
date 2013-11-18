@@ -28,6 +28,7 @@ namespace duta.DatabaseModel
         public int status { get; set; }
         public string description { get; set; }
         public System.DateTime last_status_update { get; set; }
+        public System.DateTime last_messages_download { get; set; }
     
         public virtual ICollection<contact> others_contacts { get; set; }
         public virtual ICollection<contact> contacts { get; set; }

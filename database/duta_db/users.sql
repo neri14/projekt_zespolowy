@@ -6,6 +6,7 @@
     [status] INT NOT NULL, 
     [description] NVARCHAR(128) NOT NULL, 
     [last_status_update] DATETIME NOT NULL, 
+    [last_messages_download] DATETIME NOT NULL, 
     PRIMARY KEY ([user_id]), 
     CONSTRAINT [PK_users_login] UNIQUE ([login]) 
 )

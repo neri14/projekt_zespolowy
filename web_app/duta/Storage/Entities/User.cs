@@ -16,6 +16,7 @@ namespace duta.Storage.Entities
             this.descripton = "";
             this.contact_list = new Dictionary<string, int>();
             this.last_status_update = DateTime.Now;
+            this.last_messages_download = DateTime.Now;
         }
 
         public int user_id { get; set; }
@@ -25,6 +26,7 @@ namespace duta.Storage.Entities
         public string descripton { get; set; }
         public Dictionary<string,int> contact_list { get; set; }
         public DateTime last_status_update { get; set; }
+        public DateTime last_messages_download { get; set; }
     }
 
     public enum EUserStatus

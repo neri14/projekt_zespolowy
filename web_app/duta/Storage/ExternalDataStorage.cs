@@ -45,7 +45,8 @@ namespace duta.Storage
                         password = password,
                         status = 0,
                         description = "",
-                        last_status_update = DateTime.Now
+                        last_status_update = DateTime.Now,
+                        last_messages_download = DateTime.Now
                     };
                     ctx.users.Add(new_user);
                     ctx.SaveChanges();
@@ -62,7 +63,7 @@ namespace duta.Storage
             using (DataEntities ctx = new DataEntities())
             {
                 List<Message> msgs = new List<Message>();
-                foreach (message msg in ctx.messages.Where(m => m.users.FirstOrDefault(u => u.user_id == user) != null && m.time >= time))
+                foreach (message msg in ctx.messages.Where(m => m.author_id != user && m.users.FirstOrDefault(u => u.user_id == user) != null && m.time >= time))
                 {
                     msgs.Add(Convert(msg));
                 }
@@ -103,12 +104,40 @@ namespace duta.Storage
             }
         }
 
+        public override DateTime GetLastMessageUpdate(int user_id)
+        {
+            using (DataEntities ctx = new DataEntities())
+            {
+                user usr = ctx.users.FirstOrDefault(u => u.user_id == user_id);
+                if (usr == null)
+                {
+                    throw new UserNotExistingException();
+                }
+                return usr.last_messages_download;
+            }
+        }
+
+        public override void SetLastMessageUpdate(int user_id, DateTime time)
+        {
+            using (DataEntities ctx = new DataEntities())
+            {
+                user usr = ctx.users.FirstOrDefault(u => u.user_id == user_id);
+                if (usr == null)
+                {
+                    throw new UserNotExistingException();
+                }
+                usr.last_messages_download = time;
+                ctx.SaveChanges();
+            }
+        }
+
         private User Convert(user u)
         {
             User entity = new User(u.user_id, u.login, u.password)
             {
                 descripton = u.description,
                 last_status_update = u.last_status_update,
+                last_messages_download = u.last_messages_download,
                 status = (EUserStatus)u.status,
                 contact_list = new Dictionary<string,int>()
             };

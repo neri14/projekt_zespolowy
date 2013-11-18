@@ -3,3 +3,7 @@ Z:\github\projekt_zespolowy\database\duta_db\bin\Debug\duta_db.dll
 Z:\github\projekt_zespolowy\database\duta_db\bin\Debug\duta_db.pdb
 Z:\github\projekt_zespolowy\database\duta_db\obj\Debug\duta_db.dll
 Z:\github\projekt_zespolowy\database\duta_db\obj\Debug\duta_db.pdb
+Z:\github\projekt_zespolowy\database\duta_db\obj\Debug\Model.xml
+Z:\github\projekt_zespolowy\database\duta_db\obj\Debug\refactor.xml
+Z:\github\projekt_zespolowy\database\duta_db\obj\Debug\postdeploy.sql
+Z:\github\projekt_zespolowy\database\duta_db\obj\Debug\predeploy.sql

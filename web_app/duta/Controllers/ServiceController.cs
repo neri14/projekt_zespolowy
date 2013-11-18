@@ -24,7 +24,6 @@ namespace duta.Controllers
             //bool resp = login == "user_a" && password == "qwerty";
             bool resp = UserManager.Login(login, password);
             Session["last_sent_status_update"] = new DateTime(1970, 1, 1); //TODO change to saved in db
-            Session["last_sent_message_update"] = new DateTime(1970, 1, 1); //TODO change to saved in db
             return Json(new LoginResponse(resp));
         }
 
@@ -114,9 +113,9 @@ namespace duta.Controllers
         [HttpPost]
         public async Task<JsonResult> GetMessage()
         {
-            User user = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
-            List<Message> messages = await MessageManager.GetMessageUpdate(user.user_id, (DateTime)Session["last_sent_message_update"]);
-            Session["last_sent_message_update"] = DateTime.Now;
+            User usr = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
+            List<Message> messages = await MessageManager.GetMessageUpdate(usr.user_id, MessageManager.GetLastMessageUpdate(usr.user_id));
+            MessageManager.SetLastMessageUpdate(usr.user_id, DateTime.Now);
 
             List<GetMessageResponse_Message> response = new List<GetMessageResponse_Message>();
 
