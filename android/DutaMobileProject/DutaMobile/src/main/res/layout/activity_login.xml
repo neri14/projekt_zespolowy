@@ -3,7 +3,8 @@
     tools:context=".LoginActivity">
 
     <!-- Login progress -->
-    <LinearLayout android:id="@+id/login_status"
+    <LinearLayout
+        android:id="@+id/login_status"
         android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,10 +29,13 @@
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        >
 
-        <LinearLayout style="@style/LoginFormContainer"
-            android:orientation="vertical">
+        <LinearLayout
+            style="@style/LoginFormContainer"
+            android:orientation="vertical"
+            android:layout_marginTop="80dp">
 
             <EditText
                 android:id="@+id/email"

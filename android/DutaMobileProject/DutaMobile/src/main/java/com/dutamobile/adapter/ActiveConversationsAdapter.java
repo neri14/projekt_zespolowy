@@ -24,7 +24,6 @@ public class ActiveConversationsAdapter extends BaseAdapter
     static class ViewHolder
     {
         TextView text;
-        Fragment fragment;
     }
 
     private final LayoutInflater inflater;

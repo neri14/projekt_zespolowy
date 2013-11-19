@@ -17,11 +17,13 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.dutamobile.DutaApplication;
 import com.dutamobile.MainActivity;
 import com.dutamobile.R;
 import com.dutamobile.adapter.ChatAdapter;
 import com.dutamobile.model.Message;
 import com.dutamobile.util.Helper;
+import com.dutamobile.util.NetClient;
 
 import java.util.List;
 
@@ -31,7 +33,7 @@ import java.util.List;
 public class ChatFragment extends ListFragment
 {
     private EditText message_box;
-    protected ActionMode actionMode;
+    private ActionMode actionMode;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -45,7 +47,9 @@ public class ChatFragment extends ListFragment
             @Override
             public void onClick(View v)
             {
-                ((ChatAdapter) getListAdapter()).addMessage(new Message(message_box.getText().toString(), false));
+                Message msg = new Message(message_box.getText().toString(), new int[] { 1, 2});
+                long timestamp = NetClient.GetInstance().SendMessage(msg.getMessageText(), msg.getUsers());
+                        ((ChatAdapter) getListAdapter()).addMessage(msg);
                 message_box.setText(null);
                 getListView().setSelection(getListAdapter().getCount() - 1);
             }
@@ -61,8 +65,6 @@ public class ChatFragment extends ListFragment
 
         return v;
     }
-
-
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
@@ -95,7 +97,7 @@ public class ChatFragment extends ListFragment
                 actionMode.setTitle("Selected " + position);
                 }
 
-                ((ChatAdapter)getListAdapter()).notifyDataSetChanged();
+        ((ChatAdapter) getListAdapter()).notifyDataSetChanged();
 
                 return true;
             }
@@ -132,6 +134,5 @@ public class ChatFragment extends ListFragment
             actionMode = null;
         }
     };
-
 
 }

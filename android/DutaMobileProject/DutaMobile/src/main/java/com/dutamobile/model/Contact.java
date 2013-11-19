@@ -1,6 +1,8 @@
 package com.dutamobile.model;
 
-import java.io.Serializable;
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -20,12 +22,17 @@ public class Contact
 
     public Status getStatus()
     {
-        return status;
+        return Status.values()[status];
+    }
+
+    public void setStatus(int status)
+    {
+        this.status = status;
     }
 
     public void setStatus(Status status)
     {
-        this.status = status;
+        this.status = status.ordinal();
     }
 
     public String getName()
@@ -60,9 +67,26 @@ public class Contact
 
     public void addMessage(Message message) { this.messages.add(message); }
 
+    public String getLogin()
+    {
+        return login;
+    }
+
+    public void setLogin(String login)
+    {
+        this.login = login;
+    }
+
+    @SerializedName("user_id")
     private int id;
+    @SerializedName("login")
+    private String login;
+    @SerializedName("nickname")
     private String name;
-    private Status status;
+    @SerializedName("status")
+    private int status;
+    @SerializedName("description")
     private String description;
+
     private List<Message> messages;
 }

@@ -8,5 +8,5 @@ public enum Status
     AVAILABLE,
     AWAY,
     BUSY,
-    OFFLINE
+    OFFLINE;
 }
