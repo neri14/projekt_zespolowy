@@ -1,0 +1,26 @@
+﻿** Highlights
+     Tables that will be rebuilt
+       None
+     Clustered indexes that will be dropped
+       None
+     Clustered indexes that will be created
+       None
+     Possible data issues
+       None
+
+** User actions
+     Create
+       [dbo].[contacts] (Table)
+       [dbo].[messages] (Table)
+       [dbo].[messages_users] (Table)
+       [dbo].[users] (Table)
+       [dbo].[FK_contacts_user] (Foreign Key)
+       [dbo].[FK_contacts_contact] (Foreign Key)
+       [dbo].[FK_messages_author] (Foreign Key)
+       [dbo].[FK_messages_users_user] (Foreign Key)
+       [dbo].[FK_messages_users_message] (Foreign Key)
+
+** Supporting actions
+
+The project and target databases have different collation settings. Deployment errors might occur.
+
