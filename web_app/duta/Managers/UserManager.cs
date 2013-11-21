@@ -97,10 +97,30 @@ namespace duta.Managers
             }
         }
 
+        public static Dictionary<string, User> GetContactList(User user)
+        {
+            Dictionary<string, User> contact_list = new Dictionary<string, User>();
+            foreach (KeyValuePair<string, int> pair in user.contact_list)
+            {
+                contact_list[pair.Key] = GetUser(pair.Value);
+            }
+            return contact_list;
+        }
+
         private static List<User> GetChangedStatuses(string login, DateTime lastUpdate)
         {
             User u = data.GetUser(login);
-            List<User> changed = u.contact_list.Values.Where(c => c.last_status_update > lastUpdate).ToList();
+
+            List<User> changed = new List<User>();
+            foreach (KeyValuePair<string, int> pair in u.contact_list)
+            {
+                User contact = data.GetUser(pair.Value);
+                if (contact.last_status_update > lastUpdate)
+                {
+                    changed.Add(contact);
+                }
+            }
+            //List<User> changed = u.contact_list.Values.Where(c => c.last_status_update > lastUpdate).ToList();
             return changed;
         }
     }
