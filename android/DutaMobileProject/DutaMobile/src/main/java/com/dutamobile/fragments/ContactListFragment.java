@@ -24,7 +24,7 @@ import java.util.Random;
 /**
  * Created by Bartosz on 12.10.13.
  */
-public class ContactListFragment extends ListFragment
+public class ContactListFragment extends ListFragment implements RefreshableFragment
 {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -55,44 +55,50 @@ public class ContactListFragment extends ListFragment
 
     private List<Contact> GetContacts()
     {
-        List<Contact> data = ((DutaApplication)getActivity().getApplication()).getContactList();
+        int counter = -1;
 
-        for(Contact c : data)
-            c.setMessages(generateConversation(c.getName()));
+        List<Contact> contacts = ((DutaApplication)getActivity().getApplication()).getContactList();
 
-        int counter = data.size();
+        if(contacts == null)
+            contacts = new ArrayList<Contact>(); //FIXME
+
+        for(Contact c : contacts)
+        {
+            counter = c.getId();
+            c.setMessages(generateConversation(c.getName(),counter));
+        }
 
         Contact c = new Contact();
-        c.setId(counter++);
+        c.setId(++counter);
         c.setLogin("john12");
         c.setName("John");
         c.setDescription("Cool men!");
         c.setStatus(Status.AWAY);
-        c.setMessages(generateConversation(c.getName()));
-        data.add(c);
+        c.setMessages(generateConversation(c.getName(), counter));
+        contacts.add(c);
 
         c = new Contact();
-        c.setId(counter++);
+        c.setId(++counter);
         c.setName("Marie");
         c.setLogin("cuntMarie");
         c.setDescription("I just bought new shoes!");
         c.setStatus(Status.AVAILABLE);
-        c.setMessages(generateConversation(c.getName()));
-        data.add(c);
+        c.setMessages(generateConversation(c.getName(), counter));
+        contacts.add(c);
 
         c = new Contact();
-        c.setId(counter);
+        c.setId(++counter);
         c.setName("Alice");
         c.setLogin("junkiegirl14");
         c.setDescription("Fucking rabbit!");
         c.setStatus(Status.BUSY);
-        c.setMessages(generateConversation(c.getName()));
-        data.add(c);
+        c.setMessages(generateConversation(c.getName(), counter));
+        contacts.add(c);
 
-        return data;
+        return contacts;
     }
 
-    private List<Message> generateConversation(String name)
+    private List<Message> generateConversation(String name, int id) //FIXME usunąć w ostatecznej wersji
     {
         Random r = new Random();
 
@@ -100,27 +106,43 @@ public class ContactListFragment extends ListFragment
                 {
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut augue eros, ullamcorper id mauris a, lacinia ultricies purus. Phasellus ligula enim, fringilla vitae elit eget, consequat gravida felis. Vivamus sem elit, semper eu rhoncus tristique, porta eget metus. Aliquam erat volutpat. Etiam vel eros vitae sapien ultricies blandit vitae convallis orci. Praesent laoreet ante quis ligula fermentum sodales. Praesent adipiscing lacus in metus tristique, et imperdiet purus eleifend. Vivamus fringilla commodo velit.",
                         "Ohh cool",
-                        "Aenean lorem erat, pretium id neque non, vulputate vehicula sem. Praesent nec posuere felis, in pellentesque lorem. Ut in tincidunt quam.",
-                        "TEST MESSAGE"
+                        "Hi! Don't believe man, I just get new job!",
+                        "Hi, what's up?"
                 };
 
         List<Message> data = new ArrayList<Message>();
-        int []  l = new int [] {Helper.MyID, 1 };
+        int []  l = new int [] {Helper.MyID, id };
 
         Message m = new Message(name, l);
-        m.setAuthor(0);
+        m.setAuthor(id);
         m.setTimestamp(System.currentTimeMillis());
         data.add(m);
 
         for(int i = 0 ; i < 4 ; i++)
         {
             m = new Message();
-            m.setAuthor(i%2);
+            m.setAuthor(i%2 == 0 ? Helper.MyID : id);
             m.setTimestamp(System.currentTimeMillis());
             m.setMessageText(mgs[r.nextInt(4)]);
             data.add(m);
         }
 
         return data;
+    }
+
+    @Override
+    public void RefreshView(final boolean newDataSet)
+    {
+            getListView().post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    if(newDataSet)
+                    ((ContactListAdapter)getListAdapter()).setData(GetContacts());
+                    else
+                    ((ContactListAdapter)getListAdapter()).notifyDataSetChanged();
+                }
+            });
     }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Bartosz on 17.11.13.
  */
-public interface AutoRefresh
+public interface RefreshableFragment
 {
-    void RefreshView(List<?> data);
+    void RefreshView(boolean newDataSet);
 }
