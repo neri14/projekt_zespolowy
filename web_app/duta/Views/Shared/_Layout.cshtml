@@ -6,7 +6,9 @@
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
         <meta name="viewport" content="width=device-width" />
         @Styles.Render("~/Content/css")
+        @Styles.Render("~/Scripts/bootstrap/css/bootstrap.css")
         @Scripts.Render("~/bundles/modernizr")
+
     </head>
     <body>
         <header>
@@ -23,6 +25,7 @@
                             <li>@Html.ActionLink("Home", "Index", "Home")</li>
                             <li>@Html.ActionLink("About", "About", "Home")</li>
                             <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                            <li>@Html.ActionLink("komunikator", "komunikator", "Home")</li>
                         </ul>
                     </nav>
                 </div>

@@ -28,5 +28,30 @@ namespace duta.Controllers
 
             return View();
         }
+
+        public ActionResult komunikator()
+        {
+            ViewBag.Message = "Duta";
+
+            return View();
+        }
+
+        public ActionResult contactView()
+        {
+            return PartialView();
+        }
+
+        public ActionResult tabListItemView()
+        {
+            return PartialView();
+        }
+        public ActionResult messagesPanelView()
+        {
+            return PartialView();
+        }
+        public ActionResult conversationView()
+        {
+            return PartialView();
+        }
     }
 }
