@@ -94,7 +94,7 @@ var duta = function () {
 	function logout(){
 		$.ajax({
 			type: "post",
-			url: window.location.host+"/Service/logout",
+			url: window.location.origin + "/Service/logout",
 			dataType : "json",
 			success: function(response) {
 				alert(response);
