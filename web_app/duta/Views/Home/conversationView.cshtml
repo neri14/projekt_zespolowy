@@ -1,4 +1,4 @@
-﻿<div class="tab-pane active conversation" id="{{conversationId}}">
+﻿<div class="tab-pane active conversation" id="{{users}}">
 	<div class="tabMenu">
 		<div class="btn-group">
 			<button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown">
@@ -17,10 +17,10 @@
 						
 	</div>
 	<div class="tabMyMessage">
-		<textarea rows="4" cols="72" class="messageToSend"></textarea>
+		<textarea rows="4" style="width: inherit" class="messageToSend"></textarea>
 	</div>
 	<div class="tabBottomMenu">
-		<button type="button" class="btn btn-sm" onClick="duta.sendMessage('{{conversationId}}')">
+		<button type="button" class="btn btn-sm" onClick="duta.sendMessage('{{users}}')">
 			Wyślij
 		</button>
 	</div>

@@ -43,6 +43,10 @@ function getRadio(){
 var duta = function () { 
 	var messagesPanelExists = false;
 	var dutaModel = {};
+	window.onload = function () {
+	//    login();
+	    
+	};
 	
 	function getActualContact(id) {
 	    var cont = {};
@@ -54,22 +58,43 @@ var duta = function () {
 		return cont;
 	}
 	
-	function login(){
+	function login() {
+	    var url = window.location.origin + "/Service/Login";
 		$.ajax({
 			type: "post",
-			url: "http://localhost:1404/Service/Login",
+			url: url,
 			data: {login: "user_a", password: "pass"},
 			dataType : "json",
-			success: function(response) {
-				alert(response);
+			success: function (response) {
+			    if (response.logged_in == 1) {
+			        $('#dutaContainer #application #userName').html(response.user_id);
+			        dutaModel.myId = response.user_id;
+			        getContactList();
+			    }
 			}
 		});
+	}
+
+	function login2() {
+	    $.ajax({
+	        type: "post",
+	        url: window.location.origin + "/Service/Login",
+	        data: { login: "user_b", password: "pass" },
+	        dataType: "json",
+	        success: function (response) {
+	            if (response.logged_in == 1) {
+	                $('#dutaContainer #application #userName').html(response.user_id);
+	                dutaModel.myId = response.user_id;
+	                getContactList();
+	            }
+	        }
+	    });
 	}
 	
 	function logout(){
 		$.ajax({
 			type: "post",
-			url: "http://localhost:1404/Service/logout",
+			url: window.location.host+"/Service/logout",
 			dataType : "json",
 			success: function(response) {
 				alert(response);
@@ -86,30 +111,32 @@ var duta = function () {
 	function renderMessage(model){
 		var template = constants.templates.message;
 		var rendered = Handlebars.compile(template)(model);
-		var div =$('#messagesPanel .conversation#'+model.conversationId+' .tabMessages');
+		var div = $('#messagesPanel .conversation#' + model.users + ' .tabMessages');
 		if(div.length==0){
 			prepareConversation(model);
 		}
-		$('#messagesPanel .conversation#'+model.conversationId+' .tabMessages').append(rendered);
+		$('#messagesPanel .conversation#' + model.users + ' .tabMessages').append(rendered);
 		
 	}
 	function sendMessage(conversationId){
 		messageText = $('#messagesPanel .conversation#'+conversationId+' .messageToSend').val();
 		//jakis post a w jego callback:
 		var data = {
-			users : [conversationId],
+		    users: [conversationId, dutaModel.myId],
 			message : messageText
 		}
 		ajaxHelper.post(constants.urls.sendMessage,data,
-			function(result){
+			function (result) {
+			    var date =new Date(result.timestamp);
 				var model={
-					conversationId : conversationId,
+					users : conversationId,
 					author : 'Ja',
 					messageText : messageText,
-					dateTime : result.timestamp
+					dateTime: date.toLocaleTimeString()
 				};
 				
 				renderMessage(model);
+				$('#messagesPanel .conversation#' + conversationId + ' .messageToSend').val('');
 			}
 		);
 	}
@@ -118,13 +145,14 @@ var duta = function () {
 		ajaxHelper.poll(constants.urls.getMessage,{},getMessages,
 			function(result){
 				$.each(result, function(index, value ) {
-					var conversationId = value.users[0];
+				    var conversationId = value.users[0];
+				    var date = new Date(value.timestamp);
 					var model={
-						conversationId : conversationId,
-						author : value.author,
+					    users: value.author,
+						author: getActualContact(value.author).nickname,
 						messageText : value.message,
-						dateTime : value.timestamp,
-						participants : conversationId
+						dateTime: date.toLocaleTimeString(),
+						participants: getActualContact(value.author).nickname
 					};
 					renderMessage(model);
 				});					
@@ -181,7 +209,7 @@ var duta = function () {
 			description : ''
 			}		
 		];
-		renderContactList(contacts);
+		//renderContactList(contacts);
 		
 	}
 	
@@ -224,8 +252,9 @@ var duta = function () {
 		startConversation : startConversation,
 		getContactList : getContactList,
 		sendMessage : sendMessage,
-		login:login,
-		logout : logout
+		login: login,
+		login2: login2,
+		logout: logout
 	
 	};
 
@@ -264,6 +293,7 @@ var ajaxHelper = function () {
 			data: data,
 			dataType : "json",
 			success: success,
+			traditional: true,
 			failure: failure
 		});
 	}
@@ -294,20 +324,21 @@ var ajaxHelper = function () {
 
 var constants = function () { 
     var templates = {};
-	templates.message = "message.html";
-	templates.tabListItem = ajaxHelper.getTemplate("http://localhost:1404/Home/tabListItemView");
-	templates.messagesPanel = ajaxHelper.getTemplate("http://localhost:1404/Home/messagesPanelView");
-	templates.conversation = ajaxHelper.getTemplate("http://localhost:1404/Home/conversationView");
-	templates.contact = ajaxHelper.getTemplate("http://localhost:1404/Home/contactView");
+    contextRoot = window.location.origin + "/";
+    templates.message = ajaxHelper.getTemplate(contextRoot+"Home/messageView");
+    templates.tabListItem = ajaxHelper.getTemplate(contextRoot+"Home/tabListItemView");
+    templates.messagesPanel = ajaxHelper.getTemplate(contextRoot+"Home/messagesPanelView");
+    templates.conversation = ajaxHelper.getTemplate(contextRoot+"Home/conversationView");
+    templates.contact = ajaxHelper.getTemplate(contextRoot+"Home/contactView");
 	
 	var urls = {
-		sendMessage : "http://localhost:1404/Service/SendMessage",
-		getMessage : "http://localhost:1404/Service/GetMessage",
+	    sendMessage : contextRoot+"Service/SendMessage",
+	    getMessage : contextRoot+"Service/GetMessage",
 		setStatus : "",
 		getStatus : "",
-		login : "http://localhost:1404/Service/Login",
-		logout : "http://localhost:1404/Service/Logout",
-		getContactList : "http://localhost:1404/Service/GetContactList"
+		login : contextRoot+"Service/Login",
+		logout : contextRoot+"Service/Logout",
+		getContactList: contextRoot + "Service/GetContactList"
 	}
 
 	return{

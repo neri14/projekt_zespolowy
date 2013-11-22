@@ -10,7 +10,7 @@ namespace duta.Controllers
     {
         public ActionResult Index()
         {
-            ViewBag.Message = "Modify this template to jump-start your ASP.NET MVC application.";
+            ViewBag.Message = "Connecting people.";
 
             return View();
         }
@@ -50,6 +50,11 @@ namespace duta.Controllers
             return PartialView();
         }
         public ActionResult conversationView()
+        {
+            return PartialView();
+        }
+
+        public ActionResult messageView()
         {
             return PartialView();
         }
