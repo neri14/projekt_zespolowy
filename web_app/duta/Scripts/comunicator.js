@@ -122,7 +122,7 @@ var duta = function () {
 		messageText = $('#messagesPanel .conversation#'+conversationId+' .messageToSend').val();
 		//jakis post a w jego callback:
 		var data = {
-		    users: [conversationId, dutaModel.myId],
+		    users: [conversationId.split('a')[0], dutaModel.myId],
 			message : messageText
 		}
 		ajaxHelper.post(constants.urls.sendMessage,data,
@@ -148,7 +148,7 @@ var duta = function () {
 				    var conversationId = value.users[0];
 				    var date = new Date(value.timestamp);
 					var model={
-					    users: value.author,
+					    users: value.author+'a',
 						author: getActualContact(value.author).nickname,
 						messageText : value.message,
 						dateTime: date.toLocaleTimeString(),
@@ -224,7 +224,7 @@ var duta = function () {
 	    //jakis post a w jego callback:
 	    var cont = getActualContact(identificator);
 		var model = {
-			users : [identificator],
+			users : identificator+'a',
 			participants: cont.nickname
 		};
 		prepareConversation(model);
@@ -243,6 +243,7 @@ var duta = function () {
 		var conversation = constants.templates.conversation;
 		var rendered = Handlebars.compile(conversation)(model);
 		$('#messagesPanel .tab-content').append(rendered);
+		$('#messagesPanel .nav-tabs a:last').tab('show');
 		return rendered;
 	}
 	
