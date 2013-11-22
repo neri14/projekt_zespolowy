@@ -84,7 +84,7 @@ var duta = function () {
 	
 	
 	function renderMessage(model){
-		var template = ajaxHelper.getTemplate(constants.templates.message);
+		var template = constants.templates.message;
 		var rendered = Handlebars.compile(template)(model);
 		var div =$('#messagesPanel .conversation#'+model.conversationId+' .tabMessages');
 		if(div.length==0){
@@ -133,7 +133,7 @@ var duta = function () {
 	}
 	
 	function renderContact(model){
-		var template = ajaxHelper.getTemplate(constants.templates.contact);
+		var template = constants.templates.contact;
 		var rendered = Handlebars.compile(template)(model);
 		
 		$('#application #contacts').append(rendered);		
@@ -204,15 +204,15 @@ var duta = function () {
 	
 	function prepareConversation(model){
 		if(!messagesPanelExists){
-			var messagesPanel = ajaxHelper.getTemplate(constants.templates.messagesPanel);
+			var messagesPanel = constants.templates.messagesPanel;
 			$('#dutaContainer').append(messagesPanel);
 			messagesPanelExists = true;
 		}
-		var tabListItem = ajaxHelper.getTemplate(constants.templates.tabListItem);
+		var tabListItem = constants.templates.tabListItem;
 		var renderedTab = Handlebars.compile(tabListItem)(model);
 		$('#messagesPanel .nav.nav-tabs').append(renderedTab);
 		
-		var conversation = ajaxHelper.getTemplate(constants.templates.conversation);
+		var conversation = constants.templates.conversation;
 		var rendered = Handlebars.compile(conversation)(model);
 		$('#messagesPanel .tab-content').append(rendered);
 		return rendered;
@@ -293,14 +293,12 @@ var ajaxHelper = function () {
 }();
 
 var constants = function () { 
-	var templates = {
-		message : "message.html",
-		tabListItem: "http://localhost:1404/Home/tabListItemView",
-		messagesPanel: "http://localhost:1404/Home/messagesPanelView",
-		conversation: "http://localhost:1404/Home/conversationView",
-		
-		contact: "http://localhost:1404/Home/contactView"
-	}
+    var templates = {};
+	templates.message = "message.html";
+	templates.tabListItem = ajaxHelper.getTemplate("http://localhost:1404/Home/tabListItemView");
+	templates.messagesPanel = ajaxHelper.getTemplate("http://localhost:1404/Home/messagesPanelView");
+	templates.conversation = ajaxHelper.getTemplate("http://localhost:1404/Home/conversationView");
+	templates.contact = ajaxHelper.getTemplate("http://localhost:1404/Home/contactView");
 	
 	var urls = {
 		sendMessage : "http://localhost:1404/Service/SendMessage",
