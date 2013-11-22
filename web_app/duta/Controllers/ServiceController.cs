@@ -21,10 +21,11 @@ namespace duta.Controllers
         [AllowAnonymous]
         public JsonResult Login(string login, string password)
         {
-            //bool resp = login == "user_a" && password == "qwerty";
             bool resp = UserManager.Login(login, password);
-            Session["last_sent_status_update"] = new DateTime(1970, 1, 1); //TODO change to saved in db
-            return Json(new LoginResponse(resp));
+            Session["last_sent_status_update"] = new DateTime(1970, 1, 1);
+
+            int user_id = resp ? UserManager.GetUser(login).user_id : 0;
+            return Json(new LoginResponse(resp, user_id));
         }
 
         [HttpPost]
@@ -105,7 +106,6 @@ namespace duta.Controllers
             }
             catch (Exception)
             {
-                //return new HttpStatusCodeResult(HttpStatusCode.OK);
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }

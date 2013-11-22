@@ -21,11 +21,25 @@ namespace duta.Storage
             //test data
             CreateUser("user_a", "pass");
             CreateUser("user_b", "pass");
+            CreateUser("user_c", "pass");
+            CreateUser("user_d", "pass");
+            CreateUser("user_e", "pass");
 
             User user_a = GetUser("user_a");
             User user_b = GetUser("user_b");
+            User user_c = GetUser("user_c");
+            User user_d = GetUser("user_d");
+            User user_e = GetUser("user_e");
 
             user_a.contact_list.Add("nick_b", user_b.user_id);
+            user_a.contact_list.Add("nick_c", user_c.user_id);
+            user_a.contact_list.Add("nick_d", user_d.user_id);
+            user_a.contact_list.Add("nick_e", user_e.user_id);
+
+            user_b.contact_list.Add("nick_a", user_a.user_id);
+            user_b.contact_list.Add("nick_c", user_c.user_id);
+            user_b.contact_list.Add("nick_d", user_d.user_id);
+            user_b.contact_list.Add("nick_e", user_e.user_id);
         }
 
         public override User GetUser(int user_id)

@@ -770,6 +770,7 @@ tr.pager td {
 	width:250px;
 	border: 2px solid #DDDDDD;
 	vertical-align: top;
+    background-color:#7ac0da;
 }
 
 #applicationMenu{
@@ -792,6 +793,10 @@ tr.pager td {
 	
 }
 
+.message{
+	margin-bottom:4px;	
+}
+
 #messagesPanel .tab-content{
 	border-left: 1px solid #DDDDDD;
 	border-right: 1px solid #DDDDDD;
@@ -806,6 +811,13 @@ tr.pager td {
 	border-left: 1px solid #DDDDDD;
 	border-right: 1px solid #DDDDDD;
 	border-bottom: 1px solid #DDDDDD;
+}
+
+.contact{
+	margin:5px;
+	border: 1px solid #DDDDDD;
+	cursor:pointer;
+    background-color:#d3dce0;
 }
 
 #userInfo{
@@ -825,8 +837,15 @@ tr.pager td {
 .conversation{
 	margin:0px 4px 4px 4px;
 }
+li.active a{
+    background-color:#7ac0da;
+}
 .tabMenu{
 	text-align:right;
+    background-color:#7ac0da;
+}
+.tab-content {
+    background-color:#7ac0da;
 }
 
 .tabMenu .btn{
@@ -849,20 +868,17 @@ tr.pager td {
 
 .tabMyMessage{
 	margin:4px 0px 2px 0px;
+    width:100%;
 }
 
 .blueColor{
 	background: #BFF2FF;
 }
 .yellowColor{
-	background: #FCF5C7;
+	background-color:#d3dce0;
 }
 
-.contact{
-	margin:5px;
-	border: 1px solid #DDDDDD;
-	cursor:pointer;
-}
+
 
 .name{
 	display:inline-block;
