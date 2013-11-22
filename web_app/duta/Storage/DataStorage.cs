@@ -34,8 +34,8 @@ namespace duta.Storage
         {
             if (instance == null)
             {
-                return Create<InternalDataStorage>();
-                //return Create<ExternalDataStorage>();
+                //return Create<InternalDataStorage>();
+                return Create<ExternalDataStorage>();
             }
             return instance;
         }
