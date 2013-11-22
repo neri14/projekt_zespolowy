@@ -5,6 +5,21 @@ package com.dutamobile.model.response;
  */
 public class StatusUpdateResponse
 {
+    public void setUser_id(int user_id)
+    {
+        this.user_id = user_id;
+    }
+
+    public void setStatus(int status)
+    {
+        this.status = status;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
     private int user_id;
     private int status;
     private String description;

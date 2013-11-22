@@ -48,6 +48,8 @@ public class DutaApplication extends Application
         {
             for(int id : m.getUsers())
             {
+                if(id == Helper.MyID) continue;
+
                 for(Contact c : contactList)
                 {
                     if(c.getId() == id)
@@ -55,6 +57,8 @@ public class DutaApplication extends Application
                 }
             }
         }
+
+        messageList.clear();
     }
 
     private void UpdateContactStatuses(List<StatusUpdateResponse> update)
@@ -65,6 +69,7 @@ public class DutaApplication extends Application
                 if(c.getId() == u.getUser_id())
                 {
                     c.Update(u);
+                    break;
                 }
         }
     }
@@ -102,7 +107,7 @@ public class DutaApplication extends Application
             protected void onPostExecute(Void aVoid)
             {
                 super.onPostExecute(aVoid);
-                RefreshView(Helper.CURRENT_FRAGMENT);
+                RefreshView(Helper.CURRENT_FRAGMENT, true);
 
             }
         }.execute();
@@ -125,7 +130,7 @@ public class DutaApplication extends Application
                 messageList = NetClient.GetInstance().GetMessage();
                 MergeMessagesWithContacts();
 
-                RefreshView(Helper.CURRENT_FRAGMENT);
+                RefreshView(Helper.CURRENT_FRAGMENT, false);
             }
 
             return null;
@@ -155,11 +160,11 @@ public class DutaApplication extends Application
         }
     }
 
-    private void RefreshView(String tag)
+    private void RefreshView(String tag, Boolean newDataSet)
     {
         Fragment f = _fragmentManager.findFragmentByTag(tag);
         if(f instanceof RefreshableFragment)
-            ((RefreshableFragment) f).RefreshView(true);
+            ((RefreshableFragment) f).RefreshView(newDataSet);
     }
 
     public void StartReceiving()
@@ -183,6 +188,19 @@ public class DutaApplication extends Application
         if(statusUpdater != null) statusUpdater.stop();
         if(messageReceiver != null) messageReceiver.stop();
 
+    }
+
+    public void MockUpdate(List<Message> messageList, List<StatusUpdateResponse> statusUpdate)
+    {
+        this.messageList = messageList;
+
+        MergeMessagesWithContacts();
+
+        if(statusUpdate != null)
+        {
+            UpdateContactStatuses(statusUpdate);
+            RefreshView(Helper.CURRENT_FRAGMENT, false);
+        }
     }
 
 }

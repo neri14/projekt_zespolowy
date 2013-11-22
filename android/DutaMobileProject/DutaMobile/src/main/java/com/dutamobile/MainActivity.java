@@ -23,13 +23,16 @@ import com.dutamobile.adapter.ActiveConversationsAdapter;
 import com.dutamobile.fragments.ChatFragment;
 import com.dutamobile.fragments.ContactListFragment;
 import com.dutamobile.model.Contact;
+import com.dutamobile.model.Message;
 import com.dutamobile.model.Status;
+import com.dutamobile.model.response.StatusUpdateResponse;
 import com.dutamobile.util.Helper;
 import com.dutamobile.util.NetClient;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -247,7 +250,31 @@ public class MainActivity extends ActionBarActivity
                 {
                     case 0:
                     {
-                        Toast.makeText(getApplication(), "Nuuuuda!", Toast.LENGTH_SHORT).show();
+                        List<Message> ml = new ArrayList<Message>();
+                        List<StatusUpdateResponse> su = new ArrayList<StatusUpdateResponse>();
+
+
+                        Random r = new Random();
+                        for(int i = 0; i < 4 ; i++)
+                        {
+                            int t_id = ((DutaApplication)getApplication()).getContactList().get(r.nextInt(4)).getId();
+                            Message m = new Message("text" + i, new int[] { Helper.MyID , t_id});
+                            m.setAuthor(m.getUsers().get(r.nextInt(1)));
+                            m.setTimestamp(System.currentTimeMillis());
+                            ml.add(m);
+                        }
+
+                        int index = r.nextInt(4);
+                        StatusUpdateResponse su_i = new StatusUpdateResponse();
+                        su_i.setUser_id(index);
+                        su_i.setDescription("TEST-" + r.nextInt(100));
+                        su_i.setStatus(Status.OFFLINE.ordinal());
+
+                        su.add(su_i);
+
+                        ((DutaApplication)getApplication()).MockUpdate(ml, su);
+
+                        Toast.makeText(getApplication(), "Nuuuuda! " + index, Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case 1:
