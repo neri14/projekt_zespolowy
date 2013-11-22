@@ -15,9 +15,11 @@ namespace duta.Managers
         private static Dictionary<int, TaskCompletionSource<bool>> awaitingMessageUpdates
             = new Dictionary<int, TaskCompletionSource<bool>>();
 
+        private static Object locker = new Object();
+
         public static async Task<List<Message>> GetMessageUpdate(int user, DateTime lastUpdate)
         {
-            lock (awaitingMessageUpdates)
+            lock (locker)
             {
                 awaitingMessageUpdates.Remove(user);
             }
@@ -28,7 +30,7 @@ namespace duta.Managers
             }
 
             TaskCompletionSource<bool> task;
-            lock(awaitingMessageUpdates)
+            lock (locker)
             {
                 task = new TaskCompletionSource<bool>();
                 awaitingMessageUpdates.Add(user, task);
@@ -36,7 +38,7 @@ namespace duta.Managers
 
             await task.Task;
 
-            lock (awaitingMessageUpdates)
+            lock (locker)
             {
                 task = null;
                 awaitingMessageUpdates.Remove(user);
@@ -49,7 +51,7 @@ namespace duta.Managers
             DateTime time = DateTime.Now;
             data.AddMessage(time, receivers, sender, message);
 
-            lock (awaitingMessageUpdates)
+            lock (locker)
             {
                 foreach (int u in receivers.Where(r => r != sender))
                 {
