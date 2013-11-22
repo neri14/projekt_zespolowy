@@ -43,7 +43,7 @@ public class MainActivity extends ActionBarActivity
     private ListView mActiveChatList;
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private List<Contact> activeConversations;
+
     public ActiveConversationsAdapter rightAdapter;
 
     @Override
@@ -152,10 +152,10 @@ public class MainActivity extends ActionBarActivity
 
     private void setup()
     {
+        ((DutaApplication) getApplication()).DownloadData(getSupportFragmentManager());
+        //((DutaApplication) getApplication()).StartReceiving();
 
-        activeConversations = new ArrayList<Contact>();
-
-        myStatus = Status.valueOf(getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("status", "OFFLINE"));
+        myStatus = Status.valueOf(getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("status", "AVAILABLE"));
 
         String[] drawerItemsStrings = getResources().getStringArray(R.array.drawer_items);
 
@@ -170,7 +170,7 @@ public class MainActivity extends ActionBarActivity
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, drawerItemsStrings));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-        rightAdapter = new ActiveConversationsAdapter(this, activeConversations);
+        rightAdapter = new ActiveConversationsAdapter(this, ((DutaApplication)getApplication()).getActiveConversationsList());
         mActiveChatList.setAdapter(rightAdapter);
         mActiveChatList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
         {
@@ -200,8 +200,7 @@ public class MainActivity extends ActionBarActivity
         {
             public void onDrawerClosed(View view)
             {
-                if (mDrawerLayout.isDrawerOpen(mActiveChatList))
-                    mDrawerLayout.closeDrawer(mActiveChatList);
+                if (mDrawerLayout.isDrawerOpen(mActiveChatList)) mDrawerLayout.closeDrawer(mActiveChatList);
 
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
@@ -248,10 +247,16 @@ public class MainActivity extends ActionBarActivity
                 {
                     case 0:
                     {
-                        Toast.makeText(getApplication(), "Nuuuuda!", Toast.LENGTH_SHORT).show(); break;
+                        Toast.makeText(getApplication(), "Nuuuuda!", Toast.LENGTH_SHORT).show();
+                        break;
                     }
                     case 1:
                     {
+                        Toast.makeText(getApplication(), "Tu się będzie ustawiało opis.", Toast.LENGTH_SHORT).show(); break;
+                    }
+                    case 2:
+                    {
+                        ((DutaApplication)getApplication()).StopReceiving();
                         NetClient.GetInstance().Logout();
                         startActivity(new Intent(MainActivity.this, LoginActivity.class));
                         finish();
@@ -262,13 +267,14 @@ public class MainActivity extends ActionBarActivity
             }
             else
             {
-                Contact contact = activeConversations.get(position);
+                Contact contact = ((DutaApplication)getApplication()).getActiveConversationsList().get(position);
 
                 if (getSupportFragmentManager().findFragmentByTag("Chat-" + contact.getName()) == null)
                 {
                     Bundle args = new Bundle();
                     args.putSerializable("Messages", (Serializable) contact.getMessages());
                     args.putString("ContactName", contact.getName());
+                    args.putInt("ContactID", contact.getId());
 
                     while (getSupportFragmentManager().getBackStackEntryCount() > 0)
                     {
@@ -282,7 +288,6 @@ public class MainActivity extends ActionBarActivity
             mDrawerLayout.closeDrawer(parent);
 
         }
-
     }
 
 }

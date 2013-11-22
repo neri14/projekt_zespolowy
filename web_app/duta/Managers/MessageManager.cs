@@ -61,5 +61,15 @@ namespace duta.Managers
             }
             return time;
         }
+
+        public static DateTime GetLastMessageUpdate(int user_id)
+        {
+            return data.GetLastMessageUpdate(user_id);
+        }
+
+        public static void SetLastMessageUpdate(int user_id, DateTime time)
+        {
+            data.SetLastMessageUpdate(user_id, time);
+        }
     }
 }

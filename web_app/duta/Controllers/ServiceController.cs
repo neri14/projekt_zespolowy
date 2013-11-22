@@ -21,11 +21,11 @@ namespace duta.Controllers
         [AllowAnonymous]
         public JsonResult Login(string login, string password)
         {
-            //bool resp = login == "user_a" && password == "qwerty";
             bool resp = UserManager.Login(login, password);
-            Session["last_sent_status_update"] = new DateTime(1970, 1, 1); //TODO change to saved in db
-            Session["last_sent_message_update"] = new DateTime(1970, 1, 1); //TODO change to saved in db
-            return Json(new LoginResponse(resp));
+            Session["last_sent_status_update"] = new DateTime(1970, 1, 1);
+
+            int user_id = resp ? UserManager.GetUser(login).user_id : 0;
+            return Json(new LoginResponse(resp, user_id));
         }
 
         [HttpPost]
@@ -41,7 +41,8 @@ namespace duta.Controllers
             SortedSet<GetContactListResponse_User> list = new SortedSet<GetContactListResponse_User>();
             User user = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
 
-            foreach(KeyValuePair<string, User> u in user.contact_list)
+            Dictionary<string, User> contact_list = UserManager.GetContactList(user);
+            foreach(KeyValuePair<string, User> u in contact_list)
             {
                 list.Add(new GetContactListResponse_User
                 {
@@ -105,7 +106,6 @@ namespace duta.Controllers
             }
             catch (Exception)
             {
-                //return new HttpStatusCodeResult(HttpStatusCode.OK);
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }
@@ -113,9 +113,9 @@ namespace duta.Controllers
         [HttpPost]
         public async Task<JsonResult> GetMessage()
         {
-            User user = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
-            List<Message> messages = await MessageManager.GetMessageUpdate(user.user_id, (DateTime)Session["last_sent_message_update"]);
-            Session["last_sent_message_update"] = DateTime.Now;
+            User usr = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
+            List<Message> messages = await MessageManager.GetMessageUpdate(usr.user_id, MessageManager.GetLastMessageUpdate(usr.user_id));
+            MessageManager.SetLastMessageUpdate(usr.user_id, DateTime.Now);
 
             List<GetMessageResponse_Message> response = new List<GetMessageResponse_Message>();
 

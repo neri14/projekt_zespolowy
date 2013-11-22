@@ -1,5 +1,6 @@
 package com.dutamobile.model;
 
+import com.dutamobile.model.response.StatusUpdateResponse;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
@@ -89,4 +90,10 @@ public class Contact
     private String description;
 
     private List<Message> messages;
+
+    public void Update(StatusUpdateResponse update)
+    {
+        status = update.getStatus();
+        description = update.getDescription();
+    }
 }
