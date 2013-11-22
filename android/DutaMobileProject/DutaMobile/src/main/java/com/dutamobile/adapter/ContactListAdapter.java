@@ -49,6 +49,13 @@ public class ContactListAdapter extends BaseAdapter
         return data.get(position).hashCode();
     }
 
+    public void setData(List<Contact> data)
+    {
+        this.data = data;
+        notifyDataSetChanged();
+    }
+
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {

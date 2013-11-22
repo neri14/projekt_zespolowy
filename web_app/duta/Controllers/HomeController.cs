@@ -10,7 +10,7 @@ namespace duta.Controllers
     {
         public ActionResult Index()
         {
-            ViewBag.Message = "Modify this template to jump-start your ASP.NET MVC application.";
+            ViewBag.Message = "Connecting people.";
 
             return View();
         }
@@ -27,6 +27,36 @@ namespace duta.Controllers
             ViewBag.Message = "Your contact page.";
 
             return View();
+        }
+
+        public ActionResult komunikator()
+        {
+            ViewBag.Message = "Duta";
+
+            return View();
+        }
+
+        public ActionResult contactView()
+        {
+            return PartialView();
+        }
+
+        public ActionResult tabListItemView()
+        {
+            return PartialView();
+        }
+        public ActionResult messagesPanelView()
+        {
+            return PartialView();
+        }
+        public ActionResult conversationView()
+        {
+            return PartialView();
+        }
+
+        public ActionResult messageView()
+        {
+            return PartialView();
         }
     }
 }

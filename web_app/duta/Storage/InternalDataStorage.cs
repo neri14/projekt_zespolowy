@@ -21,11 +21,25 @@ namespace duta.Storage
             //test data
             CreateUser("user_a", "pass");
             CreateUser("user_b", "pass");
+            CreateUser("user_c", "pass");
+            CreateUser("user_d", "pass");
+            CreateUser("user_e", "pass");
 
             User user_a = GetUser("user_a");
             User user_b = GetUser("user_b");
+            User user_c = GetUser("user_c");
+            User user_d = GetUser("user_d");
+            User user_e = GetUser("user_e");
 
-            user_a.contact_list.Add("nick_b", user_b);
+            user_a.contact_list.Add("nick_b", user_b.user_id);
+            user_a.contact_list.Add("nick_c", user_c.user_id);
+            user_a.contact_list.Add("nick_d", user_d.user_id);
+            user_a.contact_list.Add("nick_e", user_e.user_id);
+
+            user_b.contact_list.Add("nick_a", user_a.user_id);
+            user_b.contact_list.Add("nick_c", user_c.user_id);
+            user_b.contact_list.Add("nick_d", user_d.user_id);
+            user_b.contact_list.Add("nick_e", user_e.user_id);
         }
 
         public override User GetUser(int user_id)
@@ -48,9 +62,16 @@ namespace duta.Storage
         {
             lock (users)
             {
-                List<string> logins = users.Where(u1 =>
-                    null != u1.contact_list.Values.FirstOrDefault(u2 => u2.login == login)).
-                    Select(u3 => u3.login).ToList();
+                List<string> logins = new List<string>();
+                int id = GetUser(login).user_id;
+
+                foreach (User user in users)
+                {
+                    if (user.contact_list.Values.Contains(id))
+                    {
+                        logins.Add(user.login);
+                    }
+                }
 
                 return logins;
             }
@@ -75,7 +96,7 @@ namespace duta.Storage
         {
             lock (messages)
             {
-                return messages.Where(m => m.users.Contains(user) && m.time >= time).ToList();
+                return messages.Where(m => m.users.Contains(user) && m.author != user && m.time >= time).ToList();
             }
         }
 
@@ -99,6 +120,32 @@ namespace duta.Storage
                 }
 
                 messages.Add(new Message(++last_message_id, time, msg_users, author, message));
+            }
+        }
+
+        public override DateTime GetLastMessageUpdate(int user_id)
+        {
+            lock (users)
+            {
+                User user = users.FirstOrDefault(u => u.user_id == user_id);
+                if (user == null)
+                {
+                    throw new UserNotExistingException();
+                }
+                return user.last_messages_download;
+            }
+        }
+
+        public override void SetLastMessageUpdate(int user_id, DateTime time)
+        {
+            lock (users)
+            {
+                User user = users.FirstOrDefault(u => u.user_id == user_id);
+                if (user == null)
+                {
+                    throw new UserNotExistingException();
+                }
+                user.last_messages_download = time;
             }
         }
     }

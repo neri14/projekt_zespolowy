@@ -6,13 +6,15 @@
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
         <meta name="viewport" content="width=device-width" />
         @Styles.Render("~/Content/css")
+        @Styles.Render("~/Scripts/bootstrap/css/bootstrap.css")
         @Scripts.Render("~/bundles/modernizr")
+
     </head>
     <body>
         <header>
             <div class="content-wrapper">
                 <div class="float-left">
-                    <p class="site-title">@Html.ActionLink("your logo here", "Index", "Home")</p>
+                    <p class="site-title">@Html.ActionLink("दूता", "Index", "Home")</p>
                 </div>
                 <div class="float-right">
                     <section id="login">
@@ -23,6 +25,7 @@
                             <li>@Html.ActionLink("Home", "Index", "Home")</li>
                             <li>@Html.ActionLink("About", "About", "Home")</li>
                             <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                            <li>@Html.ActionLink("komunikator", "komunikator", "Home")</li>
                         </ul>
                     </nav>
                 </div>

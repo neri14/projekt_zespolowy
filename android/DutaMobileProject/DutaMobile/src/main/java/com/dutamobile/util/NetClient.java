@@ -3,10 +3,11 @@ package com.dutamobile.util;
 import android.os.AsyncTask;
 
 import com.dutamobile.model.Contact;
-import com.dutamobile.model.response.LoginResponse;
 import com.dutamobile.model.Message;
 import com.dutamobile.model.Status;
-import com.dutamobile.model.response.MessageRespone;
+import com.dutamobile.model.response.LoginResponse;
+import com.dutamobile.model.response.MessageResponse;
+import com.dutamobile.model.response.StatusUpdateResponse;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.http.HttpResponse;
@@ -24,14 +25,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.dutamobile.util.Helper.*;
+import static com.dutamobile.util.Helper.getObjectFromJson;
 
+//FIXME Usunąć wszystkie asynctaski.
 
 public class NetClient
 {
     private HttpClient Client;
     private final String ServerAddress = "http://10.0.3.2:1404/Service";
-    private final long TIME_OUT = 10000;
+    public final long TIME_OUT = 10000;
 
     private NetClient()
     {
@@ -40,46 +42,48 @@ public class NetClient
 
     private static NetClient mInstance = null;
 
-    public static synchronized NetClient GetInstance() {
-        if (mInstance == null) {
+    public static synchronized NetClient GetInstance()
+    {
+        if (mInstance == null)
+        {
             mInstance = new NetClient();
         }
         return mInstance;
     }
 
-    public Boolean Login(String login, String password) throws ExecutionException, InterruptedException, TimeoutException
+    public Boolean Login(final String login, final String password) throws InterruptedException, ExecutionException, TimeoutException
     {
         final String endpoint = "/Login";
 
-        return new AsyncTask<String, Void, Boolean>()
-        {
-            @Override
-            protected Boolean doInBackground(String... params)
-            {
-                LoginResponse lr = null;
+       return new AsyncTask<Void, Void, Boolean>()
+       {
+           @Override
+           protected Boolean doInBackground(Void... params)
+           {
+               LoginResponse lr = null;
 
-                try
-                {
-                    List<NameValuePair> data = new ArrayList<NameValuePair>();
-                    data.add(new BasicNameValuePair("login", params[0]));
-                    data.add(new BasicNameValuePair("password", params[1]));
+               try
+               {
+                   List<NameValuePair> data = new ArrayList<NameValuePair>();
+                   data.add(new BasicNameValuePair("login", login));
+                   data.add(new BasicNameValuePair("password", password));
 
-                    HttpPost post = new HttpPost(ServerAddress + endpoint);
-                    post.setEntity(new UrlEncodedFormEntity(data));
+                   HttpPost post = new HttpPost(ServerAddress + endpoint);
+                   post.setEntity(new UrlEncodedFormEntity(data));
 
-                    HttpResponse response = Client.execute(post);
+                   HttpResponse response = Client.execute(post);
 
-                    lr = getObjectFromJson(response, LoginResponse.class);
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
+                   lr = getObjectFromJson(response, LoginResponse.class);
+               }
+               catch (Exception e)
+               {
+                   e.printStackTrace();
+               }
 
-                return lr != null && lr.isLoggedIn() == 1;
+               return lr != null && lr.isLoggedIn() == 1;
+           }
+       }.execute().get(TIME_OUT, TimeUnit.MILLISECONDS);
 
-            }
-        }.execute(login, password).get(TIME_OUT, TimeUnit.MILLISECONDS);
 
     }
 
@@ -111,71 +115,48 @@ public class NetClient
     {
         final String endpoint = "/GetContactList";
 
+        List<Contact> data = null;
+
         try
         {
-            return new AsyncTask<Void, Void, List<Contact>>()
-            {
-                @Override
-                protected List<Contact> doInBackground(Void... params)
-                {
-                    List<Contact> data = null;
+            HttpPost post = new HttpPost(ServerAddress + endpoint);
 
-                    try
-                    {
-                        HttpPost post = new HttpPost(ServerAddress + endpoint);
+            HttpResponse response = Client.execute(post);
 
-                        HttpResponse response = Client.execute(post);
-
-                        Type type = new TypeToken<List<Contact>>(){}.getType();
-                        data = getObjectFromJson(response, type);
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-
-                    return data;
-                }
-            }.execute().get(TIME_OUT, TimeUnit.MILLISECONDS);
+            Type type = new TypeToken<List<Contact>>(){}.getType();
+            data = getObjectFromJson(response, type);
         }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-        catch (ExecutionException e)
-        {
-            e.printStackTrace();
-        }
-        catch (TimeoutException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return null;
-    }
+        return data;
+}
 
-    public void GetStatusUpdate()
+    public List<StatusUpdateResponse> GetStatusUpdate()
     {
         final String endpoint = "/GetStatusUpdate";
 
-        new AsyncTask<Void, Void, Void>()
-        {
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                try
-                {
-                    HttpPost post = new HttpPost(ServerAddress + endpoint);
-                    Client.execute(post);
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
+        List<StatusUpdateResponse> statusUpdates = null;
 
-                return null;
-            }
-        }.execute();
+        try
+        {
+            HttpPost post = new HttpPost(ServerAddress + endpoint);
+            HttpResponse response = Client.execute(post);
+
+            Type type = new TypeToken<List<StatusUpdateResponse>>()
+            {
+            }.getType();
+            statusUpdates = Helper.getObjectFromJson(response, type);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return statusUpdates;
+
     }
 
     public void SetStatus(final Status status, final String description)
@@ -191,7 +172,7 @@ public class NetClient
                 {
                     List<NameValuePair> data = new ArrayList<NameValuePair>();
                     data.add(new BasicNameValuePair("status", "" + status.ordinal()));
-                    data.add(new BasicNameValuePair("description", description ));
+                    data.add(new BasicNameValuePair("description", description));
 
                     HttpPost post = new HttpPost(ServerAddress + endpoint);
                     post.setEntity(new UrlEncodedFormEntity(data));
@@ -210,96 +191,50 @@ public class NetClient
     {
         final String endpoint = "/SendMessage";
 
+        MessageResponse timestamp = null;
+
         try
         {
-            return new AsyncTask<Void, Void, Long>()
-            {
-                MessageRespone timestamp = null;
-                @Override
-                protected Long doInBackground(Void... params)
-                {
-                    try
-                    {
-                        List<NameValuePair> data = new ArrayList<NameValuePair>();
-                        data.add(new BasicNameValuePair("message", message));
-                        for(int id : usersIds)
-                            data.add(new BasicNameValuePair("users", "" + id));
+            List<NameValuePair> data = new ArrayList<NameValuePair>();
+            data.add(new BasicNameValuePair("message", message));
+            for (int id : usersIds)
+                data.add(new BasicNameValuePair("users", "" + id));
 
-                        HttpPost post = new HttpPost(ServerAddress + endpoint);
-                        post.setEntity(new UrlEncodedFormEntity(data));
+            HttpPost post = new HttpPost(ServerAddress + endpoint);
+            post.setEntity(new UrlEncodedFormEntity(data));
 
-                        HttpResponse response = Client.execute(post);
+            HttpResponse response = Client.execute(post);
 
-                        timestamp = getObjectFromJson(response, MessageRespone.class);
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-
-                    return timestamp.getTimestamp();
-                }
-            }.execute().get(TIME_OUT,TimeUnit.MILLISECONDS);
+            timestamp = getObjectFromJson(response, MessageResponse.class);
         }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-        catch (ExecutionException e)
-        {
-            e.printStackTrace();
-        }
-        catch (TimeoutException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return -2;
+        return timestamp == null ? -1 : timestamp.getTimestamp();
     }
 
     public List<Message> GetMessage()
     {
         final String endpoint = "/GetMessage";
 
+        List<Message> data = null;
+
         try
         {
-            return new AsyncTask<Void, Void, List<Message>>()
-            {
-                @Override
-                protected List<Message> doInBackground(Void... params)
-                {
-                    List<Message> data = null;
+            HttpPost post = new HttpPost(ServerAddress + endpoint);
+            HttpResponse response = Client.execute(post);
 
-                    try
-                    {
-                        HttpPost post = new HttpPost(ServerAddress + endpoint);
-                        HttpResponse response = Client.execute(post);
-
-                        Type type = new TypeToken<List<Message>>(){}.getType();
-                        data = getObjectFromJson(response, type);
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-
-                    return data;
-                }
-            }.execute().get(TIME_OUT, TimeUnit.MILLISECONDS);
+            Type type = new TypeToken<List<Message>>(){}.getType();
+            data = getObjectFromJson(response, type);
         }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-        catch (ExecutionException e)
-        {
-            e.printStackTrace();
-        }
-        catch (TimeoutException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return null;
+        return data;
     }
 }
+
