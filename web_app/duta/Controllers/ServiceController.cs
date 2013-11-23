@@ -11,33 +11,47 @@ using duta.Storage;
 using duta.Managers;
 using System.Web.Security;
 using duta.Storage.Entities;
+using duta.Debug;
+using System.Web.SessionState;
 
 namespace duta.Controllers
 {
     [Authorize]
+    [SessionState(SessionStateBehavior.ReadOnly)]
     public class ServiceController : Controller
     {
+        private LoggerWrapper logger = new LoggerWrapper("SRV_CTRL");
+
         [HttpPost]
         [AllowAnonymous]
         public JsonResult Login(string login, string password)
         {
-            bool resp = UserManager.Login(login, password);
-            Session["last_sent_status_update"] = new DateTime(1970, 1, 1);
+            logger.LogActionEnter(Session.SessionID, "/Service/Login", "login: " + login);
 
+            bool resp = UserManager.Login(login, password);
             int user_id = resp ? UserManager.GetUser(login).user_id : 0;
+
+            Response.AppendCookie(new HttpCookie("last_sent_status_update", new DateTime(1970,1,1).ToBinary().ToString()));
+            logger.LogActionLeave(Session.SessionID, "/Service/Login", (resp ? "" : "not ") + "logged in");
             return Json(new LoginResponse(resp, user_id));
         }
 
         [HttpPost]
         public HttpStatusCodeResult Logout()
         {
+            logger.LogActionEnter(Session.SessionID, "/Service/Logout");
+
             UserManager.Logout();
+
+            logger.LogActionLeave(Session.SessionID, "/Service/Logout");
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
 
         [HttpPost]
         public JsonResult GetContactList()
         {
+            logger.LogActionEnter(Session.SessionID, "/Service/GetContactList");
+
             SortedSet<GetContactListResponse_User> list = new SortedSet<GetContactListResponse_User>();
             User user = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
 
@@ -53,6 +67,8 @@ namespace duta.Controllers
                     description = u.Value.descripton
                 });
             }
+
+            logger.LogActionLeave(Session.SessionID, "/Service/GetContactList", list.Count + " contacts sent");
             return Json(list.OrderBy(u => u.user_id));
         }
 
@@ -60,8 +76,20 @@ namespace duta.Controllers
         [AllowAnonymous]
         public async Task<JsonResult> GetStatusUpdate()
         {
-            List<User> updates = await UserManager.GetStatusUpdate(System.Web.HttpContext.Current.User.Identity.Name, (DateTime)Session["last_sent_status_update"]);
-            Session["last_sent_status_update"] = DateTime.Now;
+            logger.LogActionEnter(Session.SessionID, "/Service/GetStatusUpdate");
+
+            DateTime lastTime;
+            try
+            {
+                lastTime = DateTime.FromBinary(long.Parse(Request.Cookies["last_sent_status_update"].Value));
+            }
+            catch (Exception e)
+            {
+                lastTime = new DateTime(1970, 1, 1);
+            }
+
+            List<User> updates = await UserManager.GetStatusUpdate(System.Web.HttpContext.Current.User.Identity.Name, lastTime);
+            Response.AppendCookie(new HttpCookie("last_sent_status_update", DateTime.Now.ToBinary().ToString()));
 
             List<GetStatusUpdateResponse_User> list = new List<GetStatusUpdateResponse_User>();
             foreach (User u in updates)
@@ -73,12 +101,15 @@ namespace duta.Controllers
                     description = u.descripton
                 });
             }
+
+            logger.LogActionLeave(Session.SessionID, "/Service/GetStatusUpdate", list.Count + " statuses sent");
             return Json(list.OrderBy(u => u.user_id));
         }
 
         [HttpPost]
         public HttpStatusCodeResult SetStatus(int status, string description)
         {
+            logger.LogActionEnter(Session.SessionID, "/Service/SetStatus", "set status " + status + " and description: " + description);
             EUserStatus eStatus;
             try
             {
@@ -86,26 +117,32 @@ namespace duta.Controllers
             }
             catch (Exception)
             {
+                logger.LogActionLeave(Session.SessionID, "/Service/SetStatus", "500");
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
 
             UserManager.SetStatus(System.Web.HttpContext.Current.User.Identity.Name,
                 eStatus, description);
+            logger.LogActionLeave(Session.SessionID, "/Service/SetStatus", "200");
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
 
         [HttpPost]
         public ActionResult SendMessage(List<int> users, string message)
         {
+            logger.LogActionEnter(Session.SessionID, "/Service/SendMessage", users.Count + " users in conversation");
             try
             {
                 User user = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
                 DateTime sentTime = MessageManager.SendMessage(user.user_id, users, message);
                 TimeSpan t = sentTime - new DateTime(1970, 1, 1);
+
+                logger.LogActionLeave(Session.SessionID, "/Service/SendMessage", "200");
                 return Json(new SendMessageResponse((long)t.TotalMilliseconds));
             }
             catch (Exception)
             {
+                logger.LogActionLeave(Session.SessionID, "/Service/SendMessage", "500");
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }
@@ -113,6 +150,8 @@ namespace duta.Controllers
         [HttpPost]
         public async Task<JsonResult> GetMessage()
         {
+            logger.LogActionEnter(Session.SessionID, "/Service/GetMessage");
+
             User usr = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
             List<Message> messages = await MessageManager.GetMessageUpdate(usr.user_id, MessageManager.GetLastMessageUpdate(usr.user_id));
             MessageManager.SetLastMessageUpdate(usr.user_id, DateTime.Now);
@@ -132,6 +171,7 @@ namespace duta.Controllers
                 });
             }
 
+            logger.LogActionLeave(Session.SessionID, "/Service/GetMessage", response.Count + " messages");
             return Json(response.OrderBy(m => m.timestamp));
         }
     }
