@@ -15,6 +15,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.dutamobile.model.response.LoginResponse;
 import com.dutamobile.util.Helper;
 import com.dutamobile.util.NetClient;
 
@@ -197,10 +198,12 @@ public class LoginActivity extends ActionBarActivity
     private void PerformLogIn()
     {
         boolean success = false;
+        LoginResponse lr = null;
 
         try
         {
-            success = NetClient.GetInstance().Login(mUserId, mPassword);
+            lr = NetClient.GetInstance().Login(mUserId, mPassword);
+            success = (lr != null && lr.isLoggedIn() == 1);
         }
         catch (ExecutionException e)
         {
@@ -224,6 +227,9 @@ public class LoginActivity extends ActionBarActivity
             {
                 Intent i = new Intent(LoginActivity.this, MainActivity.class);
                 i.putExtra("USERID", mUserId);
+
+                Helper.MyID = lr.getUser_id();
+
                 startActivity(i);
                 finish();
 

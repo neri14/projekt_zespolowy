@@ -1,22 +1,20 @@
 package com.dutamobile.fragments;
 
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ListFragment;
 import android.support.v7.view.ActionMode;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.dutamobile.MainActivity;
 import com.dutamobile.R;
 import com.dutamobile.adapter.ChatAdapter;
 import com.dutamobile.model.Message;
@@ -34,6 +32,7 @@ public class ChatFragment extends ListFragment
     private EditText message_box;
     private ActionMode actionMode;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -43,15 +42,52 @@ public class ChatFragment extends ListFragment
 
         v.findViewById(R.id.imagebutton_1).setOnClickListener(new View.OnClickListener()
         {
+            Handler handler = new Handler();
+
             @Override
             public void onClick(View v)
             {
+                Log.v("CHAT", "Into click");
+
+
+                new Thread("SendingMessageThread")
+                {
+                    @Override
+                    public void run()
+                    {
+                        final String text = message_box.getText().toString();
+                        final int [] users = new int[] { 1, 2};
+                        Log.v("CHAT", "Getting timestamp");
+                        final long timestamp = NetClient.GetInstance().SendMessage(text, users);
+                        Log.v("CHAT", "Timestamp: " + timestamp);
+
+
+                        handler.post(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                Message msg = new Message(text, users);
+                                msg.setTimestamp(timestamp);
+                                ((ChatAdapter) getListAdapter()).addMessage(msg);
+                                message_box.setText(null);
+                                getListView().setSelection(getListAdapter().getCount() - 1);
+                            }
+                        }
+                        );
+
+                    }
+                }.start();
+
+                /*
                 new AsyncTask<Void, Void, Message>()
                 {
                     protected Message doInBackground(Void... params)
                     {
                         Message msg = new Message(message_box.getText().toString(), new int[] { 1, 2});
-                        long timestamp = NetClient.GetInstance().SendMessage(msg.getMessageText(), msg.getUsers());
+                        Log.v("CHAT", "Getting timestamp");
+                        long timestamp = 12; //NetClient.GetInstance().SendMessage(msg.getMessageText(), msg.getUsers());
+                        Log.v("CHAT", "Timestamp: " + timestamp);
                         msg.setTimestamp(timestamp);
 
                         return msg;
@@ -68,6 +104,7 @@ public class ChatFragment extends ListFragment
 
                     }
                 }.execute();
+                */
             }
         }
         );

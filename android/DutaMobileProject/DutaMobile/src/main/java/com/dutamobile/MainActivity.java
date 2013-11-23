@@ -6,11 +6,9 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,8 +31,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 public class MainActivity extends ActionBarActivity
 {
@@ -44,6 +40,7 @@ public class MainActivity extends ActionBarActivity
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ListView mActiveChatList;
+    private List<Contact> activeConversations;
     private ActionBarDrawerToggle mDrawerToggle;
 
 
@@ -155,8 +152,10 @@ public class MainActivity extends ActionBarActivity
 
     private void setup()
     {
+        activeConversations = new ArrayList<Contact>();
+
         ((DutaApplication) getApplication()).DownloadData(getSupportFragmentManager());
-        //((DutaApplication) getApplication()).StartReceiving();
+        ((DutaApplication) getApplication()).StartReceiving();
 
         myStatus = Status.valueOf(getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("status", "AVAILABLE"));
 
@@ -173,7 +172,7 @@ public class MainActivity extends ActionBarActivity
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, drawerItemsStrings));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-        rightAdapter = new ActiveConversationsAdapter(this, ((DutaApplication)getApplication()).getActiveConversationsList());
+        rightAdapter = new ActiveConversationsAdapter(this, activeConversations);
         mActiveChatList.setAdapter(rightAdapter);
         mActiveChatList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
         {
@@ -205,12 +204,12 @@ public class MainActivity extends ActionBarActivity
             {
                 if (mDrawerLayout.isDrawerOpen(mActiveChatList)) mDrawerLayout.closeDrawer(mActiveChatList);
 
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                //supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             public void onDrawerOpened(View drawerView)
             {
-                invalidateOptionsMenu();
+                //supportInvalidateOptionsMenu();
             }
         };
 
@@ -257,14 +256,14 @@ public class MainActivity extends ActionBarActivity
                         Random r = new Random();
                         for(int i = 0; i < 4 ; i++)
                         {
-                            int t_id = ((DutaApplication)getApplication()).getContactList().get(r.nextInt(4)).getId();
+                            int t_id = ((DutaApplication)getApplication()).getContactList().get(r.nextInt(2)).getId();
                             Message m = new Message("text" + i, new int[] { Helper.MyID , t_id});
                             m.setAuthor(m.getUsers().get(r.nextInt(1)));
                             m.setTimestamp(System.currentTimeMillis());
                             ml.add(m);
                         }
 
-                        int index = r.nextInt(4);
+                        int index = r.nextInt(3);
                         StatusUpdateResponse su_i = new StatusUpdateResponse();
                         su_i.setUser_id(index);
                         su_i.setDescription("TEST-" + r.nextInt(100));
@@ -294,7 +293,7 @@ public class MainActivity extends ActionBarActivity
             }
             else
             {
-                Contact contact = ((DutaApplication)getApplication()).getActiveConversationsList().get(position);
+                Contact contact = activeConversations.get(position);
 
                 if (getSupportFragmentManager().findFragmentByTag("Chat-" + contact.getName()) == null)
                 {

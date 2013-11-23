@@ -2,7 +2,6 @@ package com.dutamobile.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import com.dutamobile.R;
 import com.dutamobile.adapter.ContactListAdapter;
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Message;
-import com.dutamobile.model.Status;
 import com.dutamobile.util.Helper;
 
 import java.io.Serializable;
@@ -63,6 +61,7 @@ public class ContactListFragment extends ListFragment implements RefreshableFrag
         if(contacts == null)
             contacts = new ArrayList<Contact>(); //FIXME
 
+        /*
         for(Contact c : contacts)
         {
             counter = c.getId();
@@ -95,7 +94,7 @@ public class ContactListFragment extends ListFragment implements RefreshableFrag
         c.setStatus(Status.BUSY);
         c.setMessages(generateConversation(c.getName(), counter));
         contacts.add(c);
-
+*/
         return contacts;
     }
 

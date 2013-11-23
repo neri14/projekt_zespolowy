@@ -22,7 +22,6 @@ public class DutaApplication extends Application
 {
     private List<Contact> contactList;
     private List<Message> messageList;
-    private List<Contact> activeConversations;
     private FragmentManager _fragmentManager;
 
     private MessageReceiver messageReceiver;
@@ -34,8 +33,7 @@ public class DutaApplication extends Application
         super.onCreate();
 
         contactList = new ArrayList<Contact>();
-        activeConversations = new ArrayList<Contact>();
-        Helper.MyID = getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getInt("MyUserID", 1000);
+
     }
 
     private void MergeMessagesWithContacts()
@@ -79,11 +77,6 @@ public class DutaApplication extends Application
         return contactList;
     }
 
-    public List<Contact> getActiveConversationsList()
-    {
-        return activeConversations;
-    }
-
     public void DownloadData(FragmentManager fragmentManager)
     {
         if(this._fragmentManager == null && fragmentManager != null)
@@ -96,9 +89,10 @@ public class DutaApplication extends Application
             protected Void doInBackground(Void... params)
             {
                 contactList = NetClient.GetInstance().GetContactList();
-                // messageList = NetClient.GetInstance().GetMessage();
 
-                //MergeMessagesWithContacts();
+                if(contactList != null)
+                    for(Contact contact : contactList)
+                        if(contact.getMessages() == null) contact.setMessages(new ArrayList<Message>());
 
                 return null;
             }
@@ -153,7 +147,7 @@ public class DutaApplication extends Application
             {
                 List<StatusUpdateResponse> data =  NetClient.GetInstance().GetStatusUpdate();
 
-                UpdateContactStatuses(data);
+                if(data != null) UpdateContactStatuses(data);
             }
 
             return null;

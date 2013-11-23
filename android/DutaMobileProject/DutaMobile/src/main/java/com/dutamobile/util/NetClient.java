@@ -33,7 +33,7 @@ public class NetClient
 {
     private HttpClient Client;
    // private final String ServerAddress = "http://10.0.3.2:1404/Service";
-   private final String ServerAddress = "http://duta.somee.com";
+   private final String ServerAddress = "http://duta.somee.com/Service";
     public final long TIME_OUT = 10000;
 
     private NetClient()
@@ -52,14 +52,14 @@ public class NetClient
         return mInstance;
     }
 
-    public Boolean Login(final String login, final String password) throws InterruptedException, ExecutionException, TimeoutException
+    public LoginResponse Login(final String login, final String password) throws InterruptedException, ExecutionException, TimeoutException
     {
         final String endpoint = "/Login";
 
-       return new AsyncTask<Void, Void, Boolean>()
+       return new AsyncTask<Void, Void, LoginResponse>()
        {
            @Override
-           protected Boolean doInBackground(Void... params)
+           protected LoginResponse doInBackground(Void... params)
            {
                LoginResponse lr = null;
 
@@ -81,11 +81,9 @@ public class NetClient
                    e.printStackTrace();
                }
 
-               return lr != null && lr.isLoggedIn() == 1;
+               return lr;
            }
        }.execute().get(TIME_OUT, TimeUnit.MILLISECONDS);
-
-
     }
 
     public void Logout()
@@ -188,7 +186,7 @@ public class NetClient
         }.execute();
     }
 
-    public long SendMessage(final String message, final List<Integer> usersIds)
+    public long SendMessage(final String message, final int... usersIds)
     {
         final String endpoint = "/SendMessage";
 

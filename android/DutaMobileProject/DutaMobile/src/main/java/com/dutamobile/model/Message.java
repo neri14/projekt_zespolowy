@@ -5,11 +5,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by Bartosz on 13.10.13.
@@ -43,6 +40,15 @@ public class Message
             for(int i : contactList)
                 this.users.add(i);
         }
+
+        this.messageText = messageText;
+
+        this.author = Helper.MyID;
+    }
+
+    public Message(String messageText, ArrayList<Integer> contactList)
+    {
+        this.users = contactList;
 
         this.messageText = messageText;
 
