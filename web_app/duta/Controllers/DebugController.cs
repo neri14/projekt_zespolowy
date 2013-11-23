@@ -5,9 +5,11 @@ using System.Web;
 using System.Web.Mvc;
 using duta.Debug;
 using duta.ViewModels;
+using System.Web.SessionState;
 
 namespace duta.Controllers
 {
+    [SessionState(SessionStateBehavior.Disabled)]
     public class DebugController : Controller
     {
         //

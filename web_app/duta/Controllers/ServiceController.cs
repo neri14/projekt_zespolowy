@@ -12,10 +12,12 @@ using duta.Managers;
 using System.Web.Security;
 using duta.Storage.Entities;
 using duta.Debug;
+using System.Web.SessionState;
 
 namespace duta.Controllers
 {
     [Authorize]
+    [SessionState(SessionStateBehavior.ReadOnly)]
     public class ServiceController : Controller
     {
         private LoggerWrapper logger = new LoggerWrapper("SRV_CTRL");
@@ -27,10 +29,9 @@ namespace duta.Controllers
             logger.LogActionEnter(Session.SessionID, "/Service/Login", "login: " + login);
 
             bool resp = UserManager.Login(login, password);
-            Session["last_sent_status_update"] = new DateTime(1970, 1, 1);
-
             int user_id = resp ? UserManager.GetUser(login).user_id : 0;
 
+            Response.AppendCookie(new HttpCookie("last_sent_status_update", new DateTime(1970,1,1).ToBinary().ToString()));
             logger.LogActionLeave(Session.SessionID, "/Service/Login", (resp ? "" : "not ") + "logged in");
             return Json(new LoginResponse(resp, user_id));
         }
@@ -77,8 +78,18 @@ namespace duta.Controllers
         {
             logger.LogActionEnter(Session.SessionID, "/Service/GetStatusUpdate");
 
-            List<User> updates = await UserManager.GetStatusUpdate(System.Web.HttpContext.Current.User.Identity.Name, (DateTime)Session["last_sent_status_update"]);
-            Session["last_sent_status_update"] = DateTime.Now;
+            DateTime lastTime;
+            try
+            {
+                lastTime = DateTime.FromBinary(long.Parse(Request.Cookies["last_sent_status_update"].Value));
+            }
+            catch (Exception e)
+            {
+                lastTime = new DateTime(1970, 1, 1);
+            }
+
+            List<User> updates = await UserManager.GetStatusUpdate(System.Web.HttpContext.Current.User.Identity.Name, lastTime);
+            Response.AppendCookie(new HttpCookie("last_sent_status_update", DateTime.Now.ToBinary().ToString()));
 
             List<GetStatusUpdateResponse_User> list = new List<GetStatusUpdateResponse_User>();
             foreach (User u in updates)

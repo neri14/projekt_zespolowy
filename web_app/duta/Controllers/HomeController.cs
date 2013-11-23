@@ -4,14 +4,15 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using duta.Debug;
+using System.Web.SessionState;
 
 namespace duta.Controllers
 {
+    [SessionState(SessionStateBehavior.ReadOnly)]
     public class HomeController : Controller
     {
         public ActionResult Index()
         {
-            Logger.Log("HOME", "hello");
             ViewBag.Message = "Connecting people.";
 
             return View();
