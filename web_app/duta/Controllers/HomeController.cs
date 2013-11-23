@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using duta.Debug;
 
 namespace duta.Controllers
 {
@@ -10,6 +11,7 @@ namespace duta.Controllers
     {
         public ActionResult Index()
         {
+            Logger.Log("HOME", "hello");
             ViewBag.Message = "Connecting people.";
 
             return View();

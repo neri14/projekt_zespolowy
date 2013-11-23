@@ -164,6 +164,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\DebugController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ServiceController.cs" />
     <Compile Include="DatabaseModel\contact.cs">
@@ -199,6 +200,8 @@
     <Compile Include="Interface\GetStatusUpdateResponse.cs" />
     <Compile Include="Interface\LoginResponse.cs" />
     <Compile Include="Interface\SendMessageResponse.cs" />
+    <Compile Include="Debug\Logger.cs" />
+    <Compile Include="Debug\Event\LoggerEvent.cs" />
     <Compile Include="Managers\MessageManager.cs" />
     <Compile Include="Managers\UserManager.cs" />
     <Compile Include="Storage\DataStorage.cs" />
@@ -208,6 +211,7 @@
     <Compile Include="Storage\Entities\User.cs" />
     <Compile Include="Storage\ExternalDataStorage.cs" />
     <Compile Include="Storage\InternalDataStorage.cs" />
+    <Compile Include="ViewModels\DebugModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
@@ -287,6 +291,7 @@
       <DependentUpon>DataModel.edmx</DependentUpon>
       <LastGenOutput>DataModel.cs</LastGenOutput>
     </Content>
+    <Content Include="ClassDiagram1.cd" />
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
     <Content Include="Scripts\bootstrap\css\bootstrap-theme.css" />
     <Content Include="Scripts\bootstrap\css\bootstrap-theme.min.css" />
@@ -358,6 +363,7 @@
     <Content Include="Views\Home\messagesPanelView.cshtml" />
     <Content Include="Views\Home\conversationView.cshtml" />
     <Content Include="Views\Home\messageView.cshtml" />
+    <Content Include="Views\Debug\Logs.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
