@@ -15,22 +15,24 @@ namespace duta.Managers
         private static DataStorage data = DataStorageCreator.Get();
         private static Dictionary<int, TaskCompletionSource<bool>> awaitingMessageUpdates
             = new Dictionary<int, TaskCompletionSource<bool>>();
+        private static Dictionary<int, List<long>> sent = new Dictionary<int, List<long>>();
 
         private static Object locker = new Object();
 
         public static async Task<List<Message>> GetMessageUpdate(int user, DateTime lastUpdate)
         {
-            logger.Log(String.Format("User {0}: GetMessageUpdate enter for user {0} for messages since {1}", user, lastUpdate.ToLongTimeString()));
             lock (locker)
             {
                 awaitingMessageUpdates.Remove(user);
             }
+
+            List<Message> messages = data.GetMessagesSince(user, lastUpdate);
+            messages = RemoveRecentlySentMessages(messages, user);
+            if (messages.Count > 0)
             {
-                List<Message> changed = data.GetMessagesSince(user, lastUpdate);
-                if(changed.Count > 0)
-                    return changed;
+                sent[user] = messages.Select(m => m.message_id).ToList();
+                return messages;
             }
-            logger.Log(String.Format("User {0}: GetMessageUpdate no messages to send immidiatelly found", user));
 
             TaskCompletionSource<bool> task;
             lock (locker)
@@ -39,9 +41,7 @@ namespace duta.Managers
                 awaitingMessageUpdates.Add(user, task);
             }
 
-            logger.Log(String.Format("User {0}: GetMessageUpdate waiting begins", user));
             await task.Task;
-            logger.Log(String.Format("User {0}: GetMessageUpdate waiting ended", user));
 
             lock (locker)
             {
@@ -49,8 +49,34 @@ namespace duta.Managers
                 awaitingMessageUpdates.Remove(user);
             }
 
-            logger.Log(String.Format("User {0}: GetMessageUpdate messages ready to return", user));
-            return data.GetMessagesSince(user, lastUpdate);
+            messages = data.GetMessagesSince(user, lastUpdate);
+            messages = RemoveRecentlySentMessages(messages, user);
+            sent[user] = messages.Select(m => m.message_id).ToList();
+            return messages;
+        }
+
+        private static List<Message> RemoveRecentlySentMessages(List<Message> msgs, int user)
+        {
+            logger.Log(user + ": Messages to send " + ListOut(msgs.Select(m => m.message_id).ToList()));
+
+            List<Message> result = msgs;
+
+            if (sent.ContainsKey(user))
+            {
+                logger.Log(user + ": Already sent " + ListOut(sent[user]));
+                result = msgs.Where(m => !sent[user].Contains(m.message_id)).ToList();
+            }
+
+            logger.Log(user + ": After removing " + ListOut(result.Select(m => m.message_id).ToList()));
+            return result;
+        }
+
+        private static string ListOut(List<long> list)
+        {
+            string str = "";
+            foreach (long l in list)
+                str += l + ", ";
+            return str;
         }
 
         public static DateTime SendMessage(int sender, List<int> receivers, string message)
