@@ -24,6 +24,23 @@ namespace duta.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        public JsonResult Register(string login, string password)
+        {
+            logger.LogActionEnter(Session.SessionID, "/Service/Register");
+
+            int? uid = UserManager.CreateUser(login, password);
+
+            RegisterResponse response = new RegisterResponse
+            {
+                registered = uid == null ? 0 : 1,
+                user_id = uid == null ? 0 : uid.Value
+            };
+            logger.LogActionLeave(Session.SessionID, "/Service/Register");
+            return Json(response);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
         public JsonResult Login(string login, string password)
         {
             logger.LogActionEnter(Session.SessionID, "/Service/Login", "login: " + login);
@@ -173,6 +190,22 @@ namespace duta.Controllers
 
             logger.LogActionLeave(Session.SessionID, "/Service/GetMessage", response.Count + " messages");
             return Json(response.OrderBy(m => m.timestamp));
+        }
+
+        public JsonResult GetUserData(int uid)
+        {
+            logger.LogActionEnter(Session.SessionID, "/Service/GetUserData", "by uid");
+            User usr = UserManager.GetUser(uid);
+            logger.LogActionLeave(Session.SessionID, "/Service/GetUserData");
+            return Json(new UserDataResponse(usr));
+        }
+
+        public JsonResult GetUserData(string login)
+        {
+            logger.LogActionEnter(Session.SessionID, "/Service/GetUserData", "by login");
+            User usr = UserManager.GetUser(login);
+            logger.LogActionLeave(Session.SessionID, "/Service/GetUserData");
+            return Json(new UserDataResponse(usr));
         }
     }
 }
