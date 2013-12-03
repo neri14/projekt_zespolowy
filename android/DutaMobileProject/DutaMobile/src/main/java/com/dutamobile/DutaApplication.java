@@ -2,10 +2,7 @@ package com.dutamobile;
 
 import android.app.Application;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 
-import com.dutamobile.fragments.RefreshableFragment;
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Message;
 import com.dutamobile.model.response.StatusUpdateResponse;
@@ -22,7 +19,6 @@ public class DutaApplication extends Application
 {
     private List<Contact> contactList;
     private List<Message> messageList;
-    private FragmentManager _fragmentManager;
 
     private MessageReceiver messageReceiver;
     private StatusUpdater statusUpdater;
@@ -33,14 +29,17 @@ public class DutaApplication extends Application
         super.onCreate();
 
         contactList = new ArrayList<Contact>();
-
     }
 
-    private void MergeMessagesWithContacts()
+    private List<String> MergeMessagesWithContacts()
     {
-        if(contactList == null ) return;
+        ArrayList<String> chatNames;
 
-        if(messageList == null) return;
+        if(contactList == null ) return null;
+
+        if(messageList == null) return null;
+
+        chatNames = new ArrayList<String>();
 
         for(Message m : messageList)
         {
@@ -51,12 +50,22 @@ public class DutaApplication extends Application
                 for(Contact c : contactList)
                 {
                     if(c.getId() == id)
+                    {
                         c.addMessage(m);
+
+                        String chatName = "Chat-" + c.getName();
+
+                        if(!chatNames.contains(chatName))
+                            chatNames.add(chatName);
+                        break;
+                    }
                 }
             }
         }
 
         messageList.clear();
+
+        return chatNames;
     }
 
     private void UpdateContactStatuses(List<StatusUpdateResponse> update)
@@ -77,12 +86,8 @@ public class DutaApplication extends Application
         return contactList;
     }
 
-    public void DownloadData(FragmentManager fragmentManager)
+    public void DownloadData()
     {
-        if(this._fragmentManager == null && fragmentManager != null)
-            this._fragmentManager = fragmentManager;
-
-
         new AsyncTask<Void, Void, Void>()
         {
             @Override
@@ -90,9 +95,7 @@ public class DutaApplication extends Application
             {
                 contactList = NetClient.GetInstance().GetContactList();
 
-                if(contactList != null)
-                    for(Contact contact : contactList)
-                        if(contact.getMessages() == null) contact.setMessages(new ArrayList<Message>());
+                android.util.Log.v("ClientList", contactList.size() + "");
 
                 return null;
             }
@@ -101,7 +104,7 @@ public class DutaApplication extends Application
             protected void onPostExecute(Void aVoid)
             {
                 super.onPostExecute(aVoid);
-                RefreshView(Helper.CURRENT_FRAGMENT, true);
+                mainActivity.UpdateView(null, true);
 
             }
         }.execute();
@@ -122,9 +125,10 @@ public class DutaApplication extends Application
             while(Run)
             {
                 messageList = NetClient.GetInstance().GetMessage();
-                MergeMessagesWithContacts();
+                List<String> chatNames = MergeMessagesWithContacts();
 
-                RefreshView(Helper.CURRENT_FRAGMENT, false);
+                mainActivity.UpdateView(chatNames, false);
+
             }
 
             return null;
@@ -154,16 +158,9 @@ public class DutaApplication extends Application
         }
     }
 
-    private void RefreshView(String tag, Boolean newDataSet)
-    {
-        Fragment f = _fragmentManager.findFragmentByTag(tag);
-        if(f instanceof RefreshableFragment)
-            ((RefreshableFragment) f).RefreshView(newDataSet);
-    }
-
     public void StartReceiving()
     {
-        //FIXME poprawić odbieranie wiadomości i aktualizacje statusów
+        //FIXME Ogarnąć aktualizacje statusów
         if(messageReceiver == null)
         {
             messageReceiver = new MessageReceiver();
@@ -181,20 +178,12 @@ public class DutaApplication extends Application
     {
         if(statusUpdater != null) statusUpdater.stop();
         if(messageReceiver != null) messageReceiver.stop();
-
     }
 
-    public void MockUpdate(List<Message> messageList, List<StatusUpdateResponse> statusUpdate)
+    private MainActivity mainActivity;
+
+    public void SetMainActivity(MainActivity mainActivity)
     {
-        this.messageList = messageList;
-
-        MergeMessagesWithContacts();
-
-        if(statusUpdate != null)
-        {
-            UpdateContactStatuses(statusUpdate);
-            RefreshView(Helper.CURRENT_FRAGMENT, false);
-        }
+        this.mainActivity = mainActivity;
     }
-
 }

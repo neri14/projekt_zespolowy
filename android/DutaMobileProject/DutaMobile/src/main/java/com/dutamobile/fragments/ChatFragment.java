@@ -27,11 +27,11 @@ import java.util.List;
 /**
  * Created by Bartosz on 13.10.13.
  */
-public class ChatFragment extends ListFragment
+public class ChatFragment extends ListFragment implements Refreshable
 {
     private EditText message_box;
     private ActionMode actionMode;
-
+    private Handler handler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -39,72 +39,44 @@ public class ChatFragment extends ListFragment
         View v = inflater.inflate(R.layout.chat_fragment, container, false);
 
         message_box = (EditText) v.findViewById(R.id.edittext_1);
+        handler = new Handler();
 
         v.findViewById(R.id.imagebutton_1).setOnClickListener(new View.OnClickListener()
         {
-            Handler handler = new Handler();
-
             @Override
             public void onClick(View v)
             {
-                Log.v("CHAT", "Into click");
-
-
                 new Thread("SendingMessageThread")
                 {
                     @Override
                     public void run()
                     {
                         final String text = message_box.getText().toString();
-                        final int [] users = new int[] { 1, 2};
-                        Log.v("CHAT", "Getting timestamp");
-                        final long timestamp = NetClient.GetInstance().SendMessage(text, users);
-                        Log.v("CHAT", "Timestamp: " + timestamp);
 
-
-                        handler.post(new Runnable()
+                        if(text.length() > 0)// && !text.matches(<same białe znaki>))
                         {
-                            @Override
-                            public void run()
+                            final int [] users = new int[] { 1, 2};
+                            Log.v("CHAT", "Getting timestamp");
+                            final long timestamp = NetClient.GetInstance().SendMessage(text, users);
+                            Log.v("CHAT", "Timestamp: " + timestamp);
+
+                            handler.post(new Runnable()
                             {
-                                Message msg = new Message(text, users);
-                                msg.setTimestamp(timestamp);
-                                ((ChatAdapter) getListAdapter()).addMessage(msg);
-                                message_box.setText(null);
-                                getListView().setSelection(getListAdapter().getCount() - 1);
+                                @Override
+                                public void run()
+                                {
+                                    Message msg = new Message(text, users);
+                                    msg.setTimestamp(timestamp);
+                                    ((ChatAdapter) getListAdapter()).addMessage(msg);
+                                    message_box.setText(null);
+                                    getListView().setSelection(getListAdapter().getCount() - 1);
+                                }
                             }
+                            );
                         }
-                        );
 
                     }
                 }.start();
-
-                /*
-                new AsyncTask<Void, Void, Message>()
-                {
-                    protected Message doInBackground(Void... params)
-                    {
-                        Message msg = new Message(message_box.getText().toString(), new int[] { 1, 2});
-                        Log.v("CHAT", "Getting timestamp");
-                        long timestamp = 12; //NetClient.GetInstance().SendMessage(msg.getMessageText(), msg.getUsers());
-                        Log.v("CHAT", "Timestamp: " + timestamp);
-                        msg.setTimestamp(timestamp);
-
-                        return msg;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Message message)
-                    {
-                        super.onPostExecute(message);
-
-                        ((ChatAdapter) getListAdapter()).addMessage(message);
-                        message_box.setText(null);
-                        getListView().setSelection(getListAdapter().getCount() - 1);
-
-                    }
-                }.execute();
-                */
             }
         }
         );
@@ -193,4 +165,19 @@ public class ChatFragment extends ListFragment
             actionMode = null;
         }
     };
+
+    @Override
+    public void RefreshView()
+    {
+        handler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                ((ChatAdapter) getListAdapter()).notifyDataSetInvalidated();
+                getListView().setSelection(getListAdapter().getCount() - 1);
+            }
+        });
+
+    }
 }

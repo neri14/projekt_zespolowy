@@ -35,7 +35,9 @@
     </item>
     <item
         android:id="@+id/action_chats"
-        android:icon="@drawable/ic_drawer"
+        android:icon="@drawable/chat_drawer"
+        android:checkable="true"
+        android:checked="false"
         android:showAsAction="always"
         duta:showAsAction="always"/>
 </menu>

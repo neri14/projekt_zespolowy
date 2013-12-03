@@ -125,8 +125,4 @@ public class Helper
         String json = getJsonFromResponse(response);
         return getGsonInstance().fromJson(json, type);
     }
-
-
-
-
 }

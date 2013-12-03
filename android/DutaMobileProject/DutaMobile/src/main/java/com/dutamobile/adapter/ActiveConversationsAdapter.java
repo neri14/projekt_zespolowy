@@ -5,7 +5,7 @@ package com.dutamobile.adapter;
  */
 
 import android.content.Context;
-import android.support.v4.app.Fragment;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.dutamobile.R;
+import com.dutamobile.model.ActiveChat;
 import com.dutamobile.model.Contact;
 
 import java.util.List;
@@ -27,9 +28,9 @@ public class ActiveConversationsAdapter extends BaseAdapter
     }
 
     private final LayoutInflater inflater;
-    private List<Contact> data;
+    private List<ActiveChat> data;
 
-    public ActiveConversationsAdapter(Context context, List<Contact> activeConversations)
+    public ActiveConversationsAdapter(Context context, List<ActiveChat> activeConversations)
     {
         this.inflater = LayoutInflater.from(context);
         this.data = activeConversations;
@@ -45,7 +46,7 @@ public class ActiveConversationsAdapter extends BaseAdapter
     {
         if(!data.contains(contact))
         {
-            data.add(contact);
+            data.add(new ActiveChat(contact));
             notifyDataSetChanged();
         }
     }
@@ -86,8 +87,9 @@ public class ActiveConversationsAdapter extends BaseAdapter
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.text.setText(data.get(position).getName());
+        holder.text.setText(data.get(position).getChatDisplayName());
 
+        convertView.setBackgroundColor(data.get(position).isChecked() ? Color.argb(128, 200, 200, 200) : Color.TRANSPARENT);
 
         return convertView;
     }
