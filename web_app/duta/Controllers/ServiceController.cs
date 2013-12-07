@@ -90,7 +90,6 @@ namespace duta.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         public async Task<JsonResult> GetStatusUpdate()
         {
             logger.LogActionEnter(Session.SessionID, "/Service/GetStatusUpdate");
@@ -192,10 +191,10 @@ namespace duta.Controllers
             return Json(response.OrderBy(m => m.timestamp));
         }
 
-        public JsonResult GetUserData(int uid)
+        public JsonResult GetUserData(int user_id)
         {
             logger.LogActionEnter(Session.SessionID, "/Service/GetUserData", "by uid");
-            User usr = UserManager.GetUser(uid);
+            User usr = UserManager.GetUser(user_id);
             logger.LogActionLeave(Session.SessionID, "/Service/GetUserData");
             return Json(new UserDataResponse(usr));
         }
