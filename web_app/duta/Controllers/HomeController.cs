@@ -13,22 +13,11 @@ namespace duta.Controllers
     {
         public ActionResult Index()
         {
-            ViewBag.Message = "Connecting people.";
-
             return View();
         }
 
-        public ActionResult About()
+        public ActionResult Register()
         {
-            ViewBag.Message = "Your app description page.";
-
-            return View();
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
             return View();
         }
 

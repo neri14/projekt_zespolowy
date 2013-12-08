@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Zarejestruj";
+}
+
+<h2>Zarejestruj</h2>
+
+<table>
+    <tr>
+        <td>login</td>
+        <td><input id="register-login" style="width:200px" type="text" /></td>
+    </tr>
+    <tr>
+        <td>hasło</td>
+        <td><input id="register-pass1" style="width:200px" type="password" /></td>
+    </tr>
+    <tr>
+        <td>powtórz hasło</td>
+        <td><input id="register-pass2" style="width:200px" type="password" /></td>
+    </tr>
+    <tr><td></td><td><input id="register-button" type="button" value="zarejestruj"/></td></tr>
+</table>
+
+@section  scripts{
+    @Scripts.Render("~/Scripts/register.js");
+}

@@ -163,7 +163,6 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\DebugController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ServiceController.cs" />
@@ -199,9 +198,11 @@
     <Compile Include="Interface\GetMessageResponse.cs" />
     <Compile Include="Interface\GetStatusUpdateResponse.cs" />
     <Compile Include="Interface\LoginResponse.cs" />
+    <Compile Include="Interface\RegisterResponse.cs" />
     <Compile Include="Interface\SendMessageResponse.cs" />
     <Compile Include="Debug\Logger.cs" />
     <Compile Include="Debug\Event\LoggerEvent.cs" />
+    <Compile Include="Interface\UserDataResponse.cs" />
     <Compile Include="Managers\MessageManager.cs" />
     <Compile Include="Managers\UserManager.cs" />
     <Compile Include="Storage\DataStorage.cs" />
@@ -291,7 +292,7 @@
       <DependentUpon>DataModel.edmx</DependentUpon>
       <LastGenOutput>DataModel.cs</LastGenOutput>
     </Content>
-    <Content Include="ClassDiagram1.cd" />
+    <None Include="Properties\PublishProfiles\somee.pubxml" />
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
     <Content Include="Scripts\bootstrap\css\bootstrap-theme.css" />
     <Content Include="Scripts\bootstrap\css\bootstrap-theme.min.css" />
@@ -315,7 +316,9 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\knockout-2.1.0.debug.js" />
     <Content Include="Scripts\knockout-2.1.0.js" />
+    <Content Include="Scripts\login_partial.js" />
     <Content Include="Scripts\modernizr-2.5.3.js" />
+    <Content Include="Scripts\register.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -341,17 +344,6 @@
     <Content Include="Images\orderedList8.png" />
     <Content Include="Images\orderedList9.png" />
     <Content Include="Views\_ViewStart.cshtml" />
-    <Content Include="Views\Account\_ChangePasswordPartial.cshtml" />
-    <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
-    <Content Include="Views\Account\_RemoveExternalLoginsPartial.cshtml" />
-    <Content Include="Views\Account\_SetPasswordPartial.cshtml" />
-    <Content Include="Views\Account\Login.cshtml" />
-    <Content Include="Views\Account\Manage.cshtml" />
-    <Content Include="Views\Account\Register.cshtml" />
-    <Content Include="Views\Account\ExternalLoginFailure.cshtml" />
-    <Content Include="Views\Account\ExternalLoginConfirmation.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
@@ -364,6 +356,7 @@
     <Content Include="Views\Home\conversationView.cshtml" />
     <Content Include="Views\Home\messageView.cshtml" />
     <Content Include="Views\Debug\Logs.cshtml" />
+    <Content Include="Views\Home\Register.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
