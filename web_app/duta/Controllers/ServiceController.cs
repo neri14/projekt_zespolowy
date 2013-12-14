@@ -45,7 +45,7 @@ namespace duta.Controllers
         {
             logger.LogActionEnter(Session.SessionID, "/Service/Login", "login: " + login);
 
-            bool resp = UserManager.Login(login, password);
+            bool resp = UserManager.Login(login, password, Session.SessionID);
             int user_id = resp ? UserManager.GetUser(login).user_id : 0;
 
             Response.AppendCookie(new HttpCookie("last_sent_status_update", new DateTime(1970,1,1).ToBinary().ToString()));
@@ -58,15 +58,20 @@ namespace duta.Controllers
         {
             logger.LogActionEnter(Session.SessionID, "/Service/Logout");
 
-            UserManager.Logout();
+            UserManager.Logout(System.Web.HttpContext.Current.User.Identity.Name);
 
             logger.LogActionLeave(Session.SessionID, "/Service/Logout");
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
 
         [HttpPost]
-        public JsonResult GetContactList()
+        public ActionResult GetContactList()
         {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             logger.LogActionEnter(Session.SessionID, "/Service/GetContactList");
 
             SortedSet<GetContactListResponse_User> list = new SortedSet<GetContactListResponse_User>();
@@ -90,8 +95,13 @@ namespace duta.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetStatusUpdate()
+        public async Task<ActionResult> GetStatusUpdate()
         {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             logger.LogActionEnter(Session.SessionID, "/Service/GetStatusUpdate");
 
             DateTime lastTime;
@@ -123,8 +133,13 @@ namespace duta.Controllers
         }
 
         [HttpPost]
-        public HttpStatusCodeResult SetStatus(int status, string description)
+        public ActionResult SetStatus(int status, string description)
         {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             logger.LogActionEnter(Session.SessionID, "/Service/SetStatus", "set status " + status + " and description: " + description);
             EUserStatus eStatus;
             try
@@ -146,6 +161,11 @@ namespace duta.Controllers
         [HttpPost]
         public ActionResult SendMessage(List<int> users, string message)
         {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             logger.LogActionEnter(Session.SessionID, "/Service/SendMessage", users.Count + " users in conversation");
             try
             {
@@ -164,8 +184,13 @@ namespace duta.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetMessage()
+        public async Task<ActionResult> GetMessage()
         {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             logger.LogActionEnter(Session.SessionID, "/Service/GetMessage");
 
             User usr = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
@@ -191,20 +216,65 @@ namespace duta.Controllers
             return Json(response.OrderBy(m => m.timestamp));
         }
 
-        public JsonResult GetUserData(int user_id)
+        [HttpPost]
+        public ActionResult GetUserData(int user_id)
         {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             logger.LogActionEnter(Session.SessionID, "/Service/GetUserData", "by uid");
             User usr = UserManager.GetUser(user_id);
             logger.LogActionLeave(Session.SessionID, "/Service/GetUserData");
             return Json(new UserDataResponse(usr));
         }
 
-        public JsonResult GetUserData(string login)
+        [HttpPost]
+        public ActionResult GetUserData(string login)
         {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             logger.LogActionEnter(Session.SessionID, "/Service/GetUserData", "by login");
             User usr = UserManager.GetUser(login);
             logger.LogActionLeave(Session.SessionID, "/Service/GetUserData");
             return Json(new UserDataResponse(usr));
+        }
+
+        [HttpPost]
+        public HttpStatusCodeResult Ping()
+        {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
+            return new HttpStatusCodeResult(HttpStatusCode.OK);
+        }
+
+        [HttpPost]
+        public async Task<HttpStatusCodeResult> PingAsync()
+        {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
+            await Task.Delay(60 * 1000);
+            return new HttpStatusCodeResult(HttpStatusCode.OK);
+        }
+
+        private bool PingNotif()
+        {
+            if (!UserManager.Ping(System.Web.HttpContext.Current.User.Identity.Name, Session.SessionID))
+            {
+                UserManager.Logout(System.Web.HttpContext.Current.User.Identity.Name);
+                return false;
+            }
+            return true;
         }
     }
 }

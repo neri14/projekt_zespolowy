@@ -30,20 +30,27 @@ namespace duta.Managers
             return data.GetUser(user_id);
         }
 
-        public static bool Login(string login, string password)
+        public static bool Login(string login, string password, string session)
         {
             User u = data.GetUser(login);
 
             if (u != null && u.password == password)
             {
+                if (!Ping(login, session))
+                    return false;
+
                 FormsAuthentication.SetAuthCookie(login, true);
                 return true;
             }
             return false;
         }
 
-        public static void Logout()
+        public static void Logout(string login)
         {
+            lock (pingData)
+            {
+                pingData.RemoveAll(p => p.login == login);
+            }
             FormsAuthentication.SignOut();
         }
 
@@ -122,6 +129,42 @@ namespace duta.Managers
             }
             //List<User> changed = u.contact_list.Values.Where(c => c.last_status_update > lastUpdate).ToList();
             return changed;
+        }
+
+        private class UserPingData
+        {
+            public string login { get; set; }
+            public string session { get; set; }
+            public DateTime timestamp { get; set; }
+        };
+        private static List<UserPingData> pingData = new List<UserPingData>();
+        private static TimeSpan TIMEOUT = new TimeSpan(0,2,0);
+
+        public static bool Ping(string login, string session)
+        {
+            lock(pingData)
+            {
+                UserPingData ping = pingData.FirstOrDefault(p => p.login == login);
+
+                bool userLoggedIn = ping != null;
+                bool userSessionCorrect = ping != null && session == ping.session;
+                bool userTimedOut = ping != null && DateTime.Now - ping.timestamp > TIMEOUT;
+
+                if (userLoggedIn && !userSessionCorrect && !userTimedOut)
+                {
+                    return false;
+                }
+
+                pingData.RemoveAll(p => p.login == login);
+                pingData.Add(new UserPingData()
+                {
+                    login = login,
+                    session = session,
+                    timestamp = DateTime.Now
+                });
+            }
+
+            return true;
         }
     }
 }

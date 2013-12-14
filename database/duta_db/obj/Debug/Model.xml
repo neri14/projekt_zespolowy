@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DataSchemaModel FileFormatVersion="1.2" SchemaVersion="2.4" DspName="Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider" CollationLcid="1033" CollationCaseSensitive="False" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+<DataSchemaModel FileFormatVersion="1.2" SchemaVersion="2.4" DspName="Microsoft.Data.Tools.Schema.Sql.Sql90DatabaseSchemaProvider" CollationLcid="1033" CollationCaseSensitive="False" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
 	<Header>
 		<CustomData Category="AnsiNulls">
 			<Metadata Name="AnsiNulls" Value="True" />
@@ -8,7 +8,7 @@
 			<Metadata Name="QuotedIdentifier" Value="True" />
 		</CustomData>
 		<CustomData Category="CompatibilityMode">
-			<Metadata Name="CompatibilityMode" Value="110" />
+			<Metadata Name="CompatibilityMode" Value="90" />
 		</CustomData>
 		<CustomData Category="Reference" Type="Assembly">
 			<Metadata Name="LogicalName" Value="duta_db.dll" />
@@ -35,8 +35,6 @@
 			<Property Name="IsTornPageProtectionOn" Value="False" />
 			<Property Name="IsFullTextEnabled" Value="True" />
 			<Property Name="PageVerifyMode" Value="3" />
-			<Property Name="DefaultLanguage" Value="" />
-			<Property Name="DefaultFullTextLanguage" Value="" />
 			<Relationship Name="DefaultFilegroup">
 				<Entry>
 					<References ExternalSource="BuiltIns" Name="[PRIMARY]" />
@@ -69,7 +67,7 @@
 					<References Name="[dbo].[messages_users]" />
 				</Entry>
 			</Relationship>
-			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="3" />
+			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="2" />
 		</Element>
 		<Element Type="SqlPrimaryKeyConstraint">
 			<Relationship Name="ColumnSpecifications">
@@ -88,7 +86,7 @@
 					<References Name="[dbo].[messages]" />
 				</Entry>
 			</Relationship>
-			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="4" />
+			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="3" />
 		</Element>
 		<Element Type="SqlPrimaryKeyConstraint">
 			<Relationship Name="ColumnSpecifications">
@@ -107,7 +105,7 @@
 					<References Name="[dbo].[contacts]" />
 				</Entry>
 			</Relationship>
-			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="5" />
+			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="4" />
 		</Element>
 		<Element Type="SqlPrimaryKeyConstraint">
 			<Relationship Name="ColumnSpecifications">
@@ -126,7 +124,7 @@
 					<References Name="[dbo].[users]" />
 				</Entry>
 			</Relationship>
-			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="6" />
+			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="5" />
 		</Element>
 		<Element Type="SqlTable" Name="[dbo].[contacts]">
 			<Property Name="IsAnsiNullsOn" Value="True" />
@@ -146,7 +144,7 @@
 								</Element>
 							</Entry>
 						</Relationship>
-						<AttachedAnnotation Disambiguator="5" />
+						<AttachedAnnotation Disambiguator="4" />
 					</Element>
 				</Entry>
 				<Entry>
@@ -204,8 +202,8 @@
 					<References ExternalSource="BuiltIns" Name="[dbo]" />
 				</Entry>
 			</Relationship>
+			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="6" />
 			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="7" />
-			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="8" />
 		</Element>
 		<Element Type="SqlForeignKeyConstraint" Name="[dbo].[FK_contacts_contact]">
 			<Relationship Name="Columns">
@@ -228,7 +226,7 @@
 					<References Name="[dbo].[users]" />
 				</Entry>
 			</Relationship>
-			<AttachedAnnotation Disambiguator="8" />
+			<AttachedAnnotation Disambiguator="7" />
 		</Element>
 		<Element Type="SqlForeignKeyConstraint" Name="[dbo].[FK_contacts_user]">
 			<Relationship Name="Columns">
@@ -251,7 +249,7 @@
 					<References Name="[dbo].[users]" />
 				</Entry>
 			</Relationship>
-			<AttachedAnnotation Disambiguator="7" />
+			<AttachedAnnotation Disambiguator="6" />
 		</Element>
 		<Element Type="SqlForeignKeyConstraint" Name="[dbo].[FK_messages_author]">
 			<Relationship Name="Columns">
@@ -274,7 +272,7 @@
 					<References Name="[dbo].[users]" />
 				</Entry>
 			</Relationship>
-			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="9" />
+			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="8" />
 		</Element>
 		<Element Type="SqlForeignKeyConstraint" Name="[dbo].[FK_messages_users_message]">
 			<Relationship Name="Columns">
@@ -297,7 +295,7 @@
 					<References Name="[dbo].[messages]" />
 				</Entry>
 			</Relationship>
-			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="10" />
+			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="9" />
 		</Element>
 		<Element Type="SqlForeignKeyConstraint" Name="[dbo].[FK_messages_users_user]">
 			<Relationship Name="Columns">
@@ -320,7 +318,7 @@
 					<References Name="[dbo].[users]" />
 				</Entry>
 			</Relationship>
-			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="11" />
+			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="10" />
 		</Element>
 		<Element Type="SqlTable" Name="[dbo].[messages]">
 			<Property Name="IsAnsiNullsOn" Value="True" />
@@ -340,7 +338,7 @@
 								</Element>
 							</Entry>
 						</Relationship>
-						<AttachedAnnotation Disambiguator="4" />
+						<AttachedAnnotation Disambiguator="3" />
 					</Element>
 				</Entry>
 				<Entry>
@@ -398,7 +396,7 @@
 					<References ExternalSource="BuiltIns" Name="[dbo]" />
 				</Entry>
 			</Relationship>
-			<AttachedAnnotation Disambiguator="9" />
+			<AttachedAnnotation Disambiguator="8" />
 		</Element>
 		<Element Type="SqlTable" Name="[dbo].[messages_users]">
 			<Property Name="IsAnsiNullsOn" Value="True" />
@@ -441,9 +439,9 @@
 					<References ExternalSource="BuiltIns" Name="[dbo]" />
 				</Entry>
 			</Relationship>
-			<AttachedAnnotation Disambiguator="3" />
-			<AttachedAnnotation Disambiguator="11" />
+			<AttachedAnnotation Disambiguator="2" />
 			<AttachedAnnotation Disambiguator="10" />
+			<AttachedAnnotation Disambiguator="9" />
 		</Element>
 		<Element Type="SqlUniqueConstraint" Name="[dbo].[PK_users_login]">
 			<Relationship Name="ColumnSpecifications">
@@ -462,7 +460,7 @@
 					<References Name="[dbo].[users]" />
 				</Entry>
 			</Relationship>
-			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="12" />
+			<Annotation Type="SqlInlineConstraintAnnotation" Disambiguator="11" />
 		</Element>
 		<Element Type="SqlTable" Name="[dbo].[users]">
 			<Property Name="IsAnsiNullsOn" Value="True" />
@@ -589,8 +587,8 @@
 					<References ExternalSource="BuiltIns" Name="[dbo]" />
 				</Entry>
 			</Relationship>
-			<AttachedAnnotation Disambiguator="6" />
-			<AttachedAnnotation Disambiguator="12" />
+			<AttachedAnnotation Disambiguator="5" />
+			<AttachedAnnotation Disambiguator="11" />
 		</Element>
 	</Model>
 </DataSchemaModel>

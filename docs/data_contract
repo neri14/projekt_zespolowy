@@ -122,3 +122,15 @@
 		string description
 	}
 }
+
+~/Service/Ping
+{
+	in {}
+	out {}
+}
+
+~/Service/PingAsync async (will return after 60s)
+{
+	in {}
+	out {}
+}
