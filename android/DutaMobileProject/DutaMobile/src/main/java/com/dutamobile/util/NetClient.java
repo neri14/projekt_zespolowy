@@ -28,8 +28,8 @@ import static com.dutamobile.util.Helper.getObjectFromJson;
 public class NetClient
 {
     private HttpClient Client;
-    private final String ServerAddress = "http://10.0.3.2:1404/Service";
-   // private final String ServerAddress = "http://duta.somee.com/Service";
+   // private final String ServerAddress = "http://10.0.3.2:1404/Service";
+    private final String ServerAddress = "http://duta.somee.com/Service";
 
     private NetClient()
     {

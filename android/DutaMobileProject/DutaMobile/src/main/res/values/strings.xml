@@ -17,6 +17,7 @@
     <string-array name="drawer_items">
         <item>Test</item>
         <item>Zmień opis</item>
+        <item>Odśwież listę kontaktów</item>
         <item>Wyloguj</item>
     </string-array>
 

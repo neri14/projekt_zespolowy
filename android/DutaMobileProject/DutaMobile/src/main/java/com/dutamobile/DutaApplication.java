@@ -81,9 +81,15 @@ public class DutaApplication extends Application
         }
     }
 
-    public List<Contact> getContactList()
+    public List<Contact> GetContactList()
     {
         return contactList;
+    }
+
+    public void ClearContactList()
+    {
+        if(contactList != null && contactList.size() > 0)
+            contactList.clear();
     }
 
     public Contact getContactByName(String chatName)
@@ -99,7 +105,7 @@ public class DutaApplication extends Application
         return null;
     }
 
-    public void DownloadData()
+    public void DownloadContactList()
     {
         new AsyncTask<Void, Void, Void>()
         {
@@ -112,7 +118,7 @@ public class DutaApplication extends Application
                 {
                     try
                     {
-                        wait(10000);
+                        Thread.sleep(10000);
                         contactList = NetClient.GetInstance().GetContactList();
                     }
                     catch (InterruptedException e)

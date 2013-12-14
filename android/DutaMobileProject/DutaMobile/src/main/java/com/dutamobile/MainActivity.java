@@ -165,7 +165,7 @@ public class MainActivity extends ActionBarActivity
         activeConversations = new ArrayList<ActiveChat>();
 
         ((DutaApplication) getApplication()).SetMainActivity(this);
-        ((DutaApplication) getApplication()).DownloadData();
+        ((DutaApplication) getApplication()).DownloadContactList();
         ((DutaApplication) getApplication()).StartReceiving();
 
         myStatus = Status.valueOf(getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("status", "AVAILABLE"));
@@ -211,16 +211,11 @@ public class MainActivity extends ActionBarActivity
                 R.string.app_name       /* "close drawer" description for accessibility */
         )
         {
-            public void onDrawerClosed(View view)
+            @Override
+            public void onDrawerStateChanged(int newState)
             {
-                if (mDrawerLayout.isDrawerOpen(mActiveChatList)) mDrawerLayout.closeDrawer(mActiveChatList);
-
-                //supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-
-            public void onDrawerOpened(View drawerView)
-            {
-                //supportInvalidateOptionsMenu();
+                if (mDrawerLayout.isDrawerOpen(mDrawerList) && mDrawerLayout.isDrawerOpen(mActiveChatList))
+                    mDrawerLayout.closeDrawer(mActiveChatList);
             }
         };
 
@@ -269,13 +264,19 @@ public class MainActivity extends ActionBarActivity
                     {
                         Toast.makeText(getApplication(), "Tu się będzie ustawiało opis.", Toast.LENGTH_SHORT).show(); break;
                     }
-                    case 2:
+                    case 3:
                     {
                         ((DutaApplication)getApplication()).StopReceiving();
                         NetClient.GetInstance().Logout();
                         startActivity(new Intent(MainActivity.this, LoginActivity.class));
                         finish();
                         break;
+                    }
+                    case 2:
+                    {
+                        ((DutaApplication)getApplication()).DownloadContactList();
+                        Toast.makeText(getApplication(), "Odświeżono.", Toast.LENGTH_SHORT).show(); break;
+
                     }
                     default: break;
                 }
@@ -318,7 +319,7 @@ public class MainActivity extends ActionBarActivity
     {
         super.onStop();
         Log.v("Main Activity", "STOP");
-        ((DutaApplication)getApplication()).getContactList().clear();
+        ((DutaApplication)getApplication()).ClearContactList();
         ((DutaApplication) getApplication()).SetMainActivity(null);
     }
 

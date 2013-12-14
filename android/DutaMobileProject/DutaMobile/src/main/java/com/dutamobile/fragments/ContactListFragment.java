@@ -30,7 +30,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         if(getListAdapter() == null)
-            setListAdapter(new ContactListAdapter(getActivity(), ((DutaApplication)getActivity().getApplication()).getContactList()));
+            setListAdapter(new ContactListAdapter(getActivity(), ((DutaApplication)getActivity().getApplication()).GetContactList()));
 
         Helper.getSupportActionBar(getActivity()).setTitle(getString(R.string.app_name));
 
@@ -55,7 +55,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
     {
         int counter = -1;
 
-        List<Contact> contacts = ((DutaApplication)getActivity().getApplication()).getContactList();
+        List<Contact> contacts = ((DutaApplication)getActivity().getApplication()).GetContactList();
 
         if(contacts == null)
             contacts = new ArrayList<Contact>(); //FIXME
@@ -70,7 +70,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
                 @Override
                 public void run()
                 {
-                    ((ContactListAdapter)getListAdapter()).setData(((DutaApplication)getActivity().getApplication()).getContactList());
+                    ((ContactListAdapter)getListAdapter()).setData(((DutaApplication)getActivity().getApplication()).GetContactList());
                     ((ContactListAdapter)getListAdapter()).notifyDataSetInvalidated();
                 }
             });

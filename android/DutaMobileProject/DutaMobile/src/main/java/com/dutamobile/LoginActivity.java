@@ -21,8 +21,6 @@ import com.dutamobile.util.Helper;
 import com.dutamobile.util.NetClient;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -48,7 +46,11 @@ public class LoginActivity extends ActionBarActivity
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
-        mUserId = getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("Login", "");
+        //mUserId = getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("Login", "");
+
+        //FIXME usuń w finalnej wersji
+        mUserId = "b_nowak";
+
         mUserIdView = (EditText) findViewById(R.id.email);
         mUserIdView.setText(mUserId);
 
@@ -66,6 +68,9 @@ public class LoginActivity extends ActionBarActivity
                 return false;
             }
         });
+
+        //FIXME usuń w finalnej wersji
+        mPasswordView.setText(mUserId);
 
         mLoginFormView = findViewById(R.id.login_form);
         mLoginStatusView = findViewById(R.id.login_status);
