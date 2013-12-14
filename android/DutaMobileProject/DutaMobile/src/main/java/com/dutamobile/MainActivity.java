@@ -43,6 +43,7 @@ public class MainActivity extends ActionBarActivity
     private List<ActiveChat> activeConversations;
     private ActionBarDrawerToggle mDrawerToggle;
 
+    private Handler handler;
 
     public ActiveConversationsAdapter rightAdapter;
     private MenuItem chatItem;
@@ -54,6 +55,8 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         setup();
+
+        handler = new Handler();
 
         if (savedInstanceState != null)
         {
@@ -88,6 +91,10 @@ public class MainActivity extends ActionBarActivity
                         mDrawerLayout.closeDrawer(mActiveChatList);
                     else
                         mDrawerLayout.openDrawer(mActiveChatList);
+
+                    UpdateChatItemIcon(rightAdapter.isAnyItemsChecked());
+
+                    android.util.Log.v("CHAT ITEM", "SELECTED: " + rightAdapter.isAnyItemsChecked());
 
                     return false;
                 }
@@ -232,10 +239,11 @@ public class MainActivity extends ActionBarActivity
         {
            mDrawerLayout.closeDrawer(mActiveChatList);
         }
-        else
+
+        if(!Helper.CURRENT_FRAGMENT.equals(ContactListFragment.TAG))
         {
             super.onBackPressed();
-            Helper.CURRENT_FRAGMENT = "ContactList";
+            Helper.CURRENT_FRAGMENT = ContactListFragment.TAG;
         }
 
 
@@ -243,8 +251,6 @@ public class MainActivity extends ActionBarActivity
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener
     {
-        boolean test = false;
-
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id)
         {
@@ -256,11 +262,7 @@ public class MainActivity extends ActionBarActivity
                 {
                     case 0:
                     {
-                        test = !chatItem.isChecked();
-                        chatItem.setChecked(test);
-                        chatItem.setCheckable(test);
-
-                        Toast.makeText(getApplication(), "Nuuuuda! " + test, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplication(), "Nuuuuda! ", Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case 1:
@@ -296,7 +298,15 @@ public class MainActivity extends ActionBarActivity
 
                     Helper.fragmentReplacement(getSupportFragmentManager(), ChatFragment.class, true, activeChat.getChatName(), args);
                 }
+
+                if(activeChat.isChecked())
+                {
+                    activeChat.setChecked(false);
+                    rightAdapter.notifyDataSetChanged();
+                }
             }
+
+            UpdateChatItemIcon(rightAdapter.isAnyItemsChecked());
 
             mDrawerLayout.closeDrawer(parent);
         }
@@ -327,43 +337,61 @@ public class MainActivity extends ActionBarActivity
             if(chatNames.size() == 1)
             {
                 String name = chatNames.get(0);
-                if(Helper.CURRENT_FRAGMENT.equals(name))
-                {
-                    f = (Refreshable) getSupportFragmentManager().findFragmentByTag(name);
-                    notification = false;
-                }
+
+                f = UpdateActiveChatList(name);
+
+                notification = ( f==null);
             }
             else
             {
                 for(String name : chatNames)
                 {
-                    if(Helper.CURRENT_FRAGMENT.equals(name))
-                        f = (Refreshable) getSupportFragmentManager().findFragmentByTag(name);
-
-                    for(ActiveChat ac : activeConversations)
-                    {
-                        if(name.equals(ac.getChatName()))
-                            ac.setChecked(true);
-                    }
-
-                    //FiXme zmienić typ listy aktywnych konwersacji na coś nowego
+                    f = UpdateActiveChatList(name);
                 }
-
-                rightAdapter.notifyDataSetChanged();
             }
 
             final boolean b = notification;
-            new Handler().post(new Runnable()
+            handler.post(new Runnable()
             {
                 @Override
                 public void run()
                 {
-                    chatItem.setIcon(b ? R.drawable.ic_new_message : R.drawable.ic_no_message);
+                    UpdateChatItemIcon(b);
+                    rightAdapter.notifyDataSetChanged();
                 }
             });
 
         }
+        else return;
 
         if(f != null) f.RefreshView();
+    }
+
+    private Refreshable UpdateActiveChatList(String name)
+    {
+        boolean performAdd = true;
+
+        for(ActiveChat ac : activeConversations)
+             if(name.equals(ac.getChatName()))
+             {
+                ac.setChecked(true);
+                performAdd = false;
+             }
+
+            if(performAdd)
+            {
+                ActiveChat activeChat = new ActiveChat(((DutaApplication)getApplication()).getContactByName(name));
+                activeChat.setChecked(true);
+                activeConversations.add(activeChat);
+            }
+
+        if(Helper.CURRENT_FRAGMENT.equals(name))
+            return (Refreshable) getSupportFragmentManager().findFragmentByTag(name);
+        return null;
+    }
+
+    private void UpdateChatItemIcon(boolean b)
+    {
+        chatItem.setIcon(b ? R.drawable.ic_new_message : R.drawable.ic_no_message);
     }
 }

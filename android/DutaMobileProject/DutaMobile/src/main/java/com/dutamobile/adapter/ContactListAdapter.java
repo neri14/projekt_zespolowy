@@ -34,7 +34,7 @@ public class ContactListAdapter extends BaseAdapter
     @Override
     public int getCount()
     {
-        return data.size();
+        return data != null ? data.size() : 0;
     }
 
     @Override

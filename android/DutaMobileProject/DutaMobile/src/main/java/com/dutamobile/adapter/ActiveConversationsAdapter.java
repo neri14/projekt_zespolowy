@@ -22,6 +22,13 @@ import java.util.List;
  */
 public class ActiveConversationsAdapter extends BaseAdapter
 {
+    public boolean isAnyItemsChecked()
+    {
+        return itemsChecked > 0;
+    }
+
+    private int itemsChecked;
+
     static class ViewHolder
     {
         TextView text;
@@ -44,17 +51,21 @@ public class ActiveConversationsAdapter extends BaseAdapter
 
     public void addItem(Contact contact)
     {
-        if(!data.contains(contact))
-        {
-            data.add(new ActiveChat(contact));
-            notifyDataSetChanged();
-        }
+        String name = contact.getName();
+
+        for(ActiveChat ac : data )
+            if(ac.getChatDisplayName().equals(name)) return;
+
+        data.add(new ActiveChat(contact));
+        notifyDataSetChanged();
     }
 
     public void deleteItem(int position)
     {
-            data.remove(position);
-            notifyDataSetChanged();
+        if(data.get(position).isChecked()) itemsChecked--;
+
+        data.remove(position);
+        notifyDataSetChanged();
     }
 
 
@@ -89,8 +100,25 @@ public class ActiveConversationsAdapter extends BaseAdapter
 
         holder.text.setText(data.get(position).getChatDisplayName());
 
-        convertView.setBackgroundColor(data.get(position).isChecked() ? Color.argb(128, 200, 200, 200) : Color.TRANSPARENT);
+        boolean checked = data.get(position).isChecked();
+        convertView.setBackgroundColor(checked ? Color.argb(128, 200, 200, 200) : Color.TRANSPARENT);
+
+        if(checked) itemsChecked++;
 
         return convertView;
+    }
+
+    @Override
+    public void notifyDataSetInvalidated()
+    {
+        super.notifyDataSetInvalidated();
+        itemsChecked = 0;
+    }
+
+    @Override
+    public void notifyDataSetChanged()
+    {
+        super.notifyDataSetChanged();
+        itemsChecked = 0;
     }
 }

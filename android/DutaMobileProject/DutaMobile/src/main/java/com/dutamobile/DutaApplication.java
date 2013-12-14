@@ -86,6 +86,19 @@ public class DutaApplication extends Application
         return contactList;
     }
 
+    public Contact getContactByName(String chatName)
+    {
+        String name = chatName.substring(chatName.indexOf('-') + 1);
+
+        for(Contact c : contactList)
+            if(c.getName().equals(name))
+            {
+                return c;
+            }
+
+        return null;
+    }
+
     public void DownloadData()
     {
         new AsyncTask<Void, Void, Void>()
@@ -95,7 +108,21 @@ public class DutaApplication extends Application
             {
                 contactList = NetClient.GetInstance().GetContactList();
 
-                android.util.Log.v("ClientList", contactList.size() + "");
+                if(contactList == null)
+                {
+                    try
+                    {
+                        wait(10000);
+                        contactList = NetClient.GetInstance().GetContactList();
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                }
+
+                android.util.Log.v("ClientList", contactList != null ? contactList.size() + "" : "null");
 
                 return null;
             }
@@ -166,12 +193,13 @@ public class DutaApplication extends Application
             messageReceiver = new MessageReceiver();
             messageReceiver.execute();
         }
-
+        /*
         if(statusUpdater == null)
         {
             statusUpdater = new StatusUpdater();
             statusUpdater.execute();
         }
+        */
     }
 
     public void StopReceiving()

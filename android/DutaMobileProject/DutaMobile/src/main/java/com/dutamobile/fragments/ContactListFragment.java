@@ -30,7 +30,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         if(getListAdapter() == null)
-            setListAdapter(new ContactListAdapter(getActivity(), GetContacts()));
+            setListAdapter(new ContactListAdapter(getActivity(), ((DutaApplication)getActivity().getApplication()).getContactList()));
 
         Helper.getSupportActionBar(getActivity()).setTitle(getString(R.string.app_name));
 

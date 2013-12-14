@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -19,6 +20,7 @@ import com.dutamobile.model.response.LoginResponse;
 import com.dutamobile.util.Helper;
 import com.dutamobile.util.NetClient;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -197,49 +199,46 @@ public class LoginActivity extends ActionBarActivity
 
     private void PerformLogIn()
     {
-        boolean success = false;
-        LoginResponse lr = null;
-
-        try
+        new AsyncTask<Void, Void, LoginResponse>()
         {
-            lr = NetClient.GetInstance().Login(mUserId, mPassword);
-            success = (lr != null && lr.isLoggedIn() == 1);
-        }
-        catch (ExecutionException e)
-        {
-            e.printStackTrace();
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-        catch (TimeoutException e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            android.util.Log.v("Logowanie", mUserId + " :  " + mPassword + " = " + success);
-
-            showProgress(false);
-
-            if (success)
+            @Override
+            protected LoginResponse doInBackground(Void... params)
             {
-                Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                i.putExtra("USERID", mUserId);
+                try
+                {
+                    return NetClient.GetInstance().Login(mUserId, mPassword);
+                }
+                catch (IOException e) { }
 
-                Helper.MyID = lr.getUser_id();
-
-                startActivity(i);
-                finish();
-
-            } else
-            {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                return null;
             }
-        }
 
+            @Override
+            protected void onPostExecute(LoginResponse loginResponse)
+            {
+                boolean success = (loginResponse != null && loginResponse.isLoggedIn() == 1);
+
+                android.util.Log.v("Logowanie", String.format("%s :  %s = %s", mUserId, mPassword, success));
+
+                showProgress(false);
+
+                if (success)
+                {
+                    Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                    i.putExtra("USERID", mUserId);
+
+                    Helper.MyID = loginResponse.getUser_id();
+
+                    startActivity(i);
+                    finish();
+
+                } else
+                {
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                }
+            }
+        }.execute();
     }
 
 }
