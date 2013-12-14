@@ -231,5 +231,55 @@ public class NetClient
 
         return data;
     }
+
+    public void Ping()
+    {
+        final String endpoint = "/Ping";
+
+        new AsyncTask<Void, Void, Void>()
+        {
+            @Override
+            protected Void doInBackground(Void... params)
+            {
+                try
+                {
+                    HttpPost post = new HttpPost(ServerAddress + endpoint);
+                    Client.execute(post);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
+        }.execute();
+    }
+
+    public void PingAsync()
+    {
+        final String endpoint = "/PingAsync";
+
+        new AsyncTask<Void, Void, Void>()
+        {
+            @Override
+            protected Void doInBackground(Void... params)
+            {
+                try
+                {
+                    HttpPost post = new HttpPost(ServerAddress + endpoint);
+                    Client.execute(post);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
+        }.execute();
+    }
+
+
 }
 
