@@ -292,11 +292,7 @@
       <DependentUpon>DataModel.edmx</DependentUpon>
       <LastGenOutput>DataModel.cs</LastGenOutput>
     </Content>
-<<<<<<< HEAD
-    <None Include="Properties\PublishProfiles\somee.pubxml" />
-=======
     <None Include="Properties\PublishProfiles\duta.somee.com.pubxml" />
->>>>>>> origin/v1_release_candidate
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
     <Content Include="Scripts\bootstrap\css\bootstrap-theme.css" />
     <Content Include="Scripts\bootstrap\css\bootstrap-theme.min.css" />
