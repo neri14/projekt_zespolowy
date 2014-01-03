@@ -131,6 +131,24 @@ namespace duta.Storage
             }
         }
 
+        public override List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames)
+        {
+            using (DataEntities ctx = new DataEntities())
+            {
+                List<int> userids = ctx.users.Where(u => usernames.Contains(u.login)).Select(u2 => u2.user_id).ToList();
+
+                List<Message> msgs = new List<Message>();
+                foreach (message msg in ctx.messages.Where(m =>
+                                                              m.time >= from &&
+                                                              m.time <= to &&
+                                                              userids.TrueForAll(i => m.users.FirstOrDefault(u => u.user_id == i) != null)))
+                {
+                    msgs.Add(Convert(msg));
+                }
+                return msgs;
+            }
+        }
+
         private User Convert(user u)
         {
             User entity = new User(u.user_id, u.login, u.password)

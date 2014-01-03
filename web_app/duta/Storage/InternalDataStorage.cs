@@ -148,5 +148,10 @@ namespace duta.Storage
                 user.last_messages_download = time;
             }
         }
+
+        public override List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames)
+        {
+            return new List<Message>();
+        }
     }
 }

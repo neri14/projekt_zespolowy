@@ -267,6 +267,50 @@ namespace duta.Controllers
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
 
+        [HttpPost]
+        public ActionResult GetArchive(DateTime from, DateTime to)
+        {
+            List<string> usernames = new List<string>();
+            usernames.Add(System.Web.HttpContext.Current.User.Identity.Name);
+            return Json(GenerateArchiveResponse(MessageManager.GetArchive(from, to, usernames)));
+        }
+
+        [HttpPost]
+        public ActionResult GetArchiveFilteredByUserName(DateTime from, DateTime to, string username)
+        {
+            List<string> usernames = new List<string>();
+            usernames.Add(System.Web.HttpContext.Current.User.Identity.Name);
+            usernames.Add(username);
+            return Json(GenerateArchiveResponse(MessageManager.GetArchive(from, to, usernames)));
+        }
+
+        [HttpPost]
+        public ActionResult GetArchiveFilteredByUserId(DateTime from, DateTime to, int userid)
+        {
+            List<string> usernames = new List<string>();
+            usernames.Add(System.Web.HttpContext.Current.User.Identity.Name);
+            usernames.Add(UserManager.GetUser(userid).login);
+            return Json(GenerateArchiveResponse(MessageManager.GetArchive(from, to, usernames)));
+        }
+
+        private List<GetArchiveResponse_Message> GenerateArchiveResponse(List<Message> msgs)
+        {
+            List<GetArchiveResponse_Message> response = new List<GetArchiveResponse_Message>();
+            foreach (Message msg in msgs)
+            {
+                TimeSpan t = msg.time - new DateTime(1970, 1, 1);
+
+                response.Add(new GetArchiveResponse_Message
+                {
+                    users = msg.users.OrderBy(u => u).ToList(),
+                    author = msg.author,
+                    timestamp = (long)t.TotalMilliseconds,
+                    message = msg.message
+                });
+            }
+            return response;
+        }
+
         private bool PingNotif()
         {
             if (!UserManager.Ping(System.Web.HttpContext.Current.User.Identity.Name, Session.SessionID))

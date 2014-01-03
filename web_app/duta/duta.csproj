@@ -194,6 +194,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Interface\GetArchiveResponse.cs" />
     <Compile Include="Interface\GetContactListResponse.cs" />
     <Compile Include="Interface\GetMessageResponse.cs" />
     <Compile Include="Interface\GetStatusUpdateResponse.cs" />
@@ -293,6 +294,7 @@
       <LastGenOutput>DataModel.cs</LastGenOutput>
     </Content>
     <None Include="Properties\PublishProfiles\duta.somee.com.pubxml" />
+    <None Include="Properties\PublishProfiles\MS.pubxml" />
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
     <Content Include="Scripts\bootstrap\css\bootstrap-theme.css" />
     <Content Include="Scripts\bootstrap\css\bootstrap-theme.min.css" />
