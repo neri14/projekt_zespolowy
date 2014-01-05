@@ -47,6 +47,35 @@
 	}
 }
 
+~/Service/AddContact
+{
+	in
+	{
+		string login
+		string nickname
+	}
+	out {}
+}
+
+~/Service/RemoveContact
+{
+	in
+	{
+		string login
+	}
+	out {}
+}
+
+~/Service/UpdateContact
+{
+	in
+	{
+		string login
+		string nickname
+	}
+	out {}
+}
+
 ~/Service/GetStatusUpdate async
 {
 	in {}
@@ -132,5 +161,37 @@
 ~/Service/PingAsync async (will return after 60s)
 {
 	in {}
+	out {}
+}
+
+~/Service/GetArchive
+{
+	in
+	{
+		long from
+		long to
+	}
+	out {}
+}
+
+~/Service/GetArchiveFilteredByUserName
+{
+	in
+	{
+		long from
+		long to
+		string username
+	}
+	out {}
+}
+
+~/Service/GetArchiveFilteredByUserId
+{
+	in
+	{
+		long from
+		long to
+		int userid
+	}
 	out {}
 }

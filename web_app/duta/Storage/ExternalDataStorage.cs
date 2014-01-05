@@ -149,6 +149,74 @@ namespace duta.Storage
             }
         }
 
+        public override bool AddContact(string login, string contact_login, string contact_nickname)
+        {
+            using (DataEntities ctx = new DataEntities())
+            {
+                user usr = ctx.users.FirstOrDefault(u => u.login == login);
+                user usr_ct = ctx.users.FirstOrDefault(u => u.login == contact_login);
+
+                if (usr == null || usr_ct == null)
+                    return false;
+
+                if (ctx.contacts.FirstOrDefault(u => u.user_id == usr.user_id && u.contact_id == usr.user_id) != null)
+                    return false;
+
+                contact ct = new contact()
+                {
+                    user_id = usr.user_id,
+                    contact_id = usr_ct.user_id,
+                    name = contact_nickname
+                };
+
+                ctx.contacts.Add(ct);
+                ctx.SaveChanges();
+                return true;
+            }
+        }
+
+        public override bool RemoveContact(string login, string contact_login)
+        {
+            using (DataEntities ctx = new DataEntities())
+            {
+                user usr = ctx.users.FirstOrDefault(u => u.login == login);
+                user usr_ct = ctx.users.FirstOrDefault(u => u.login == contact_login);
+
+                if (usr == null || usr_ct == null)
+                    return false;
+
+                contact ct = ctx.contacts.FirstOrDefault(u => u.user_id == usr.user_id && u.contact_id == usr.user_id);
+
+                if (ct == null)
+                    return false;
+
+                ctx.contacts.Remove(ct);
+                ctx.SaveChanges();
+                return true;
+            }
+        }
+
+        public override bool UpdateContact(string login, string contact_login, string contact_nickname)
+        {
+            using (DataEntities ctx = new DataEntities())
+            {
+                user usr = ctx.users.FirstOrDefault(u => u.login == login);
+                user usr_ct = ctx.users.FirstOrDefault(u => u.login == contact_login);
+
+                if (usr == null || usr_ct == null)
+                    return false;
+
+                contact ct = ctx.contacts.FirstOrDefault(u => u.user_id == usr.user_id && u.contact_id == usr.user_id);
+
+                if (ct == null)
+                    return false;
+
+                ct.name = contact_nickname;
+                ctx.SaveChanges();
+                return true;
+            }
+        }
+
         private User Convert(user u)
         {
             User entity = new User(u.user_id, u.login, u.password)

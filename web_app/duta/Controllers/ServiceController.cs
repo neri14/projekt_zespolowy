@@ -94,6 +94,30 @@ namespace duta.Controllers
             return Json(list.OrderBy(u => u.user_id));
         }
 
+        public ActionResult AddContact(string login, string nickname)
+        {
+            if (UserManager.AddContact(System.Web.HttpContext.Current.User.Identity.Name, login, nickname))
+                return new HttpStatusCodeResult(HttpStatusCode.OK);
+            else
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
+        }
+
+        public ActionResult RemoveContact(string login)
+        {
+            if (UserManager.RemoveContact(System.Web.HttpContext.Current.User.Identity.Name, login))
+                return new HttpStatusCodeResult(HttpStatusCode.OK);
+            else
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
+        }
+
+        public ActionResult UpdateContact(string login, string nickname)
+        {
+            if (UserManager.UpdateContact(System.Web.HttpContext.Current.User.Identity.Name, login, nickname))
+                return new HttpStatusCodeResult(HttpStatusCode.OK);
+            else
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
+        }
+
         [HttpPost]
         public async Task<ActionResult> GetStatusUpdate()
         {
@@ -276,21 +300,21 @@ namespace duta.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetArchiveFilteredByUserName(DateTime from, DateTime to, string username)
+        public ActionResult GetArchiveFilteredByUserName(long from, long to, string username)
         {
             List<string> usernames = new List<string>();
             usernames.Add(System.Web.HttpContext.Current.User.Identity.Name);
             usernames.Add(username);
-            return Json(GenerateArchiveResponse(MessageManager.GetArchive(from, to, usernames)));
+            return Json(GenerateArchiveResponse(MessageManager.GetArchive(TimeStampToDateTime(from), TimeStampToDateTime(to), usernames)));
         }
 
         [HttpPost]
-        public ActionResult GetArchiveFilteredByUserId(DateTime from, DateTime to, int userid)
+        public ActionResult GetArchiveFilteredByUserId(long from, long to, int userid)
         {
             List<string> usernames = new List<string>();
             usernames.Add(System.Web.HttpContext.Current.User.Identity.Name);
             usernames.Add(UserManager.GetUser(userid).login);
-            return Json(GenerateArchiveResponse(MessageManager.GetArchive(from, to, usernames)));
+            return Json(GenerateArchiveResponse(MessageManager.GetArchive(TimeStampToDateTime(from), TimeStampToDateTime(to), usernames)));
         }
 
         private List<GetArchiveResponse_Message> GenerateArchiveResponse(List<Message> msgs)
@@ -319,6 +343,13 @@ namespace duta.Controllers
                 return false;
             }
             return true;
+        }
+
+        private DateTime TimeStampToDateTime(long timestamp)
+        {
+            DateTime dt = new DateTime(1970,1,1,0,0,0,0);
+            dt = dt.AddMilliseconds(timestamp);
+            return dt;
         }
     }
 }

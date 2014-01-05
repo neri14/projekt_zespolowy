@@ -20,6 +20,10 @@ namespace duta.Storage
         public abstract void SetLastMessageUpdate(int user_id, DateTime time);
 
         public abstract List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames);
+
+        public abstract bool AddContact(string login, string contact_login, string contact_nickname);
+        public abstract bool RemoveContact(string login, string contact_login);
+        public abstract bool UpdateContact(string login, string contact_login, string contact_nickname);
     }
 
     public static class DataStorageCreator

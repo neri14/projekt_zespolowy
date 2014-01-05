@@ -153,5 +153,20 @@ namespace duta.Storage
         {
             return new List<Message>();
         }
+
+        public override bool AddContact(string login, string contact_login, string contact_nickname)
+        {
+            return false;
+        }
+
+        public override bool RemoveContact(string login, string contact_login)
+        {
+            return false;
+        }
+
+        public override bool UpdateContact(string login, string contact_login, string contact_nickname)
+        {
+            return false;
+        }
     }
 }

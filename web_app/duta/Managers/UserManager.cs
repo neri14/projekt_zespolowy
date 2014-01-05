@@ -114,6 +114,21 @@ namespace duta.Managers
             return contact_list;
         }
 
+        public static bool AddContact(string login, string contact_login, string contact_nickname)
+        {
+            return data.AddContact(login, contact_login, contact_nickname);
+        }
+
+        public static bool RemoveContact(string login, string contact_login)
+        {
+            return data.RemoveContact(login, contact_login);
+        }
+
+        public static bool UpdateContact(string login, string contact_login, string contact_nickname)
+        {
+            return data.UpdateContact(login, contact_login, contact_nickname);
+        }
+
         private static List<User> GetChangedStatuses(string login, DateTime lastUpdate)
         {
             User u = data.GetUser(login);
