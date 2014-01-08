@@ -200,9 +200,16 @@ namespace duta.Controllers
                 logger.LogActionLeave(Session.SessionID, "/Service/SendMessage", "200");
                 return Json(new SendMessageResponse((long)t.TotalMilliseconds));
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 logger.LogActionLeave(Session.SessionID, "/Service/SendMessage", "500");
+
+                Exception ex = e;
+                while (ex != null)
+                {
+                    logger.Log(ex.Message);
+                    ex = ex.InnerException;
+                }
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }
@@ -271,11 +278,14 @@ namespace duta.Controllers
         [HttpPost]
         public HttpStatusCodeResult Ping()
         {
+            logger.LogActionEnter(Session.SessionID, "/Service/Ping");
             if (!PingNotif())
             {
+                logger.LogActionLeave(Session.SessionID, "/Service/Ping", "failure");
                 return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
             }
 
+            logger.LogActionLeave(Session.SessionID, "/Service/Ping", "success");
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
 

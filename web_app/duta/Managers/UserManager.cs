@@ -1,4 +1,5 @@
-﻿using duta.Storage;
+﻿using duta.Debug;
+using duta.Storage;
 using duta.Storage.Entities;
 using System;
 using System.Collections.Generic;
@@ -157,6 +158,9 @@ namespace duta.Managers
 
         public static bool Ping(string login, string session)
         {
+            //return true;
+            LoggerWrapper logger = new LoggerWrapper("USR_MNGR");
+
             lock(pingData)
             {
                 UserPingData ping = pingData.FirstOrDefault(p => p.login == login);
@@ -165,8 +169,15 @@ namespace duta.Managers
                 bool userSessionCorrect = ping != null && session == ping.session;
                 bool userTimedOut = ping != null && DateTime.Now - ping.timestamp > TIMEOUT;
 
+                logger.Log("userLoggedIn " + (userLoggedIn ? "T" : "F"));
+                logger.Log("userSessionCorrect " + (userSessionCorrect ? "T" : "F"));
+                logger.Log("userTimedOut " + (userTimedOut ? "T" : "F"));
+
+                logger.Log("if statement " + ((userLoggedIn && !userSessionCorrect && !userTimedOut) ? "T" : "F"));
+
                 if (userLoggedIn && !userSessionCorrect && !userTimedOut)
                 {
+                    logger.Log("UserManager.Ping returns false");
                     return false;
                 }
 
@@ -179,6 +190,7 @@ namespace duta.Managers
                 });
             }
 
+            logger.Log("UserManager.Ping returns true");
             return true;
         }
     }
