@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Duta Mobile</string>
+    <string name="title_activity_main">Duta Mobile</string>
+    <string name="action_settings">Ustawienia</string>
+    <string name="action_test">MENU</string>
+    <string name="contentDesc">content</string>
+    <string name="drawer_open">Menu</string>
+
+    <string name="conversation_closed">Zamknięto konwersację.</string>
+    <string name="setting_desc">Ustawianie statusu</string>
+
+    <string-array name="drawer_items">
+        <item>Test</item>
+        <item>Zmień opis</item>
+        <item>Odśwież listę kontaktów</item>
+        <item>Wyloguj</item>
+    </string-array>
+
+    <string-array name="status_items">
+        <item>Dostępny</item>
+        <item>Zaraz wracam</item>
+        <item>Niedostepny</item>
+    </string-array>
+
+</resources>
