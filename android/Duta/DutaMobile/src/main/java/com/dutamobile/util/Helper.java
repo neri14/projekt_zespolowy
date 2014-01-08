@@ -18,6 +18,7 @@ import org.apache.http.HttpResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 
@@ -105,9 +106,9 @@ public class Helper
     }
 
 
-    private static String getJsonFromResponse(HttpResponse response)  throws IOException
+    private static String getJsonFromResponse(InputStream content)  throws IOException
     {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(content, "UTF-8"));
         StringBuilder builder = new StringBuilder();
         for (String line; (line = reader.readLine()) != null;) builder.append(line).append("\n");
 
@@ -116,13 +117,13 @@ public class Helper
 
     public static <T> T getObjectFromJson(HttpResponse response, Class<T> classOfT) throws IOException
     {
-        String json = getJsonFromResponse(response);
+        String json = getJsonFromResponse(response.getEntity().getContent());
         return getGsonInstance().fromJson(json, classOfT);
     }
 
     public static <T> T getObjectFromJson(HttpResponse response, Type type) throws IOException
     {
-        String json = getJsonFromResponse(response);
+        String json = getJsonFromResponse(response.getEntity().getContent());
         return getGsonInstance().fromJson(json, type);
     }
 }

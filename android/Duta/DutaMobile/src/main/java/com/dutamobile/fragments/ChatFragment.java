@@ -32,6 +32,7 @@ public class ChatFragment extends ListFragment implements Refreshable
     private EditText message_box;
     private ActionMode actionMode;
     private Handler handler;
+    private int contactId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -55,7 +56,7 @@ public class ChatFragment extends ListFragment implements Refreshable
 
                         if(text.length() > 0)// && !text.matches(<same białe znaki>))
                         {
-                            final int [] users = new int[] { 1, 2};
+                            final int [] users = new int[] { Helper.MyID, contactId};
                             Log.v("CHAT", "Getting timestamp");
                             final long timestamp = NetClient.GetInstance().SendMessage(text, users);
                             Log.v("CHAT", "Timestamp: " + timestamp);
@@ -81,10 +82,12 @@ public class ChatFragment extends ListFragment implements Refreshable
         }
         );
 
+        contactId = getArguments().getInt("ContactID");
+
         if(getListAdapter() == null)
         {
             HashMap<Integer, String> usernames = new HashMap<Integer, String>();
-            usernames.put(getArguments().getInt("ContactID"), getArguments().getString("ContactName"));
+            usernames.put(contactId, getArguments().getString("ContactName"));
 
             setListAdapter(new ChatAdapter(getActivity(), (List<Message>) getArguments().get("Messages"), usernames));
         }

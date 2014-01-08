@@ -15,8 +15,6 @@ import com.dutamobile.model.Contact;
 import com.dutamobile.util.Helper;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Bartosz on 12.10.13.
@@ -49,18 +47,6 @@ public class ContactListFragment extends ListFragment implements Refreshable
         args.putInt("ContactID", c.getId());
         Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + c.getName(), args);
         ((MainActivity)getActivity()).rightAdapter.addItem(c);
-    }
-
-    private List<Contact> GetContacts()
-    {
-        int counter = -1;
-
-        List<Contact> contacts = ((DutaApplication)getActivity().getApplication()).GetContactList();
-
-        if(contacts == null)
-            contacts = new ArrayList<Contact>(); //FIXME
-
-        return contacts;
     }
 
     public void RefreshView()

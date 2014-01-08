@@ -6,8 +6,8 @@ import android.os.AsyncTask;
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Message;
 import com.dutamobile.model.response.StatusUpdateResponse;
-import com.dutamobile.util.Helper;
 import com.dutamobile.net.NetClient;
+import com.dutamobile.util.Helper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class DutaApplication extends Application
 {
+    private MainActivity mainActivity;
+
     private List<Contact> contactList;
     private List<Message> messageList;
 
@@ -182,7 +184,7 @@ public class DutaApplication extends Application
         if(messageReceiver == null)
         {
             messageReceiver = new MessageReceiver();
-           // messageReceiver.execute();
+            messageReceiver.execute();
         }
         /*
         if(statusUpdater == null)
@@ -198,8 +200,6 @@ public class DutaApplication extends Application
         if(statusUpdater != null) statusUpdater.stop();
         if(messageReceiver != null) messageReceiver.stop();
     }
-
-    private MainActivity mainActivity;
 
     public void SetMainActivity(MainActivity mainActivity)
     {
