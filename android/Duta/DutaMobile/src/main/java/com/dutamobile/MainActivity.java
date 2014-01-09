@@ -143,6 +143,7 @@ public class MainActivity extends ActionBarActivity
         activeConversations = new ArrayList<ActiveChat>();
 
         ((DutaApplication) getApplication()).SetMainActivity(this);
+        NetClient.GetInstance().Ping(false);
         ((DutaApplication) getApplication()).DownloadContactList();
         ((DutaApplication) getApplication()).StartReceiving();
 

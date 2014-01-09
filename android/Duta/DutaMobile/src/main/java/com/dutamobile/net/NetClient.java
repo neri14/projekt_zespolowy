@@ -1,40 +1,41 @@
 package com.dutamobile.net;
 
 import android.os.AsyncTask;
-import android.util.Log;
+import android.webkit.CookieManager;
 
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Message;
+import com.dutamobile.model.NoCookieException;
 import com.dutamobile.model.Status;
 import com.dutamobile.model.response.LoginResponse;
 import com.dutamobile.model.response.StatusUpdateResponse;
 import com.dutamobile.util.Helper;
 import com.google.gson.reflect.TypeToken;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.dutamobile.util.Helper.getObjectFromJson;
-
 public class NetClient
 {
-    private HttpClient Client;
+    private HttpURLConnection Client;
     private final String ServerAddress = "http://10.0.3.2:1404/Service";
     //private final String ServerAddress = "http://duta.somee.com/Service";
 
     private NetClient()
     {
-        Client = new DefaultHttpClient();
+        //Client = new DefaultHttpClient();
     }
 
     private static NetClient mInstance = null;
@@ -50,7 +51,7 @@ public class NetClient
 
     private void CloseConnection()
     {
-        Client.getConnectionManager().shutdown();
+        Client.disconnect();
         Client = null;
         mInstance = null;
     }
@@ -60,23 +61,33 @@ public class NetClient
         final String endpoint = "/Login";
         LoginResponse loginResponse = null;
 
-        List<NameValuePair> data = new ArrayList<NameValuePair>();
-        data.add(new BasicNameValuePair("login", login));
-        data.add(new BasicNameValuePair("password", password));
+        Client = (HttpURLConnection) new URL(ServerAddress + endpoint).openConnection();
+        Client.setRequestMethod("POST");
+        Client.setDoInput(true);
+        Client.setDoOutput(true);
 
-        HttpPost post = new HttpPost(ServerAddress + endpoint);
-        post.setEntity(new UrlEncodedFormEntity(data));
+        // write our POST fields
+        PrintWriter writer = new PrintWriter(Client.getOutputStream());
+        writer.println("login=" + login + "&password=" + password + "&action=session_auth&https=1");
+        writer.close();
 
-        HttpResponse response = Client.execute(post);
+        loginResponse = Helper.getObjectFromJson(Client.getInputStream(), LoginResponse.class);
 
-        if(response.getStatusLine().getStatusCode() == 200)
-        {
-            loginResponse = getObjectFromJson(response, LoginResponse.class);
-        }
-
-        response.getEntity().consumeContent();
+        GetSessionCookie();
 
         return loginResponse;
+    }
+
+    private synchronized void GetSessionCookie()
+    {
+        List<String> cookieList = Client.getHeaderFields().get("Set-Cookie");
+        if (cookieList != null)
+        {
+            for (String cookieTemp : cookieList)
+            {
+                CookieManager.getInstance().setCookie(Client.getURL().toString(), cookieTemp);
+            }
+        }
     }
 
     public void Logout()
@@ -91,7 +102,7 @@ public class NetClient
                 try
                 {
                     HttpPost post = new HttpPost(ServerAddress + endpoint);
-                    Client.execute(post).getEntity().consumeContent();
+                   // Client.execute(post).getEntity().consumeContent();
                 }
                 catch (Exception e)
                 {
@@ -113,27 +124,46 @@ public class NetClient
 
         try
         {
-            HttpPost post = new HttpPost(ServerAddress + endpoint);
-            HttpResponse response = Client.execute(post);
+            Client = (HttpURLConnection) new URL(ServerAddress + endpoint).openConnection();
+            Client.setRequestMethod("POST");
+            Client.setDoInput(true);
+            Client.setDoOutput(true);
 
-            android.util.Log.v("ContactList", "Response: " + response.getStatusLine().getStatusCode());
-
-            if(response.getStatusLine().getStatusCode() == 200)
+            String cookie = CookieManager.getInstance().getCookie(Client.getURL().toString());
+            if (cookie != null)
             {
-                Type type = new TypeToken<List<Contact>>(){}.getType();
-                data = getObjectFromJson(response, type);
+                Client.setRequestProperty("Cookie", cookie);
+            }
+            else
+            {
+                throw new NoCookieException(ServerAddress + endpoint);
             }
 
-            response.getEntity().consumeContent();
+            Type type = new TypeToken<List<Contact>>(){}.getType();
+            data = Helper.getObjectFromJson(Client.getInputStream(), type);
+        }
+        catch (MalformedURLException e)
+        {
+            e.printStackTrace();
+        }
+        catch (ProtocolException e)
+        {
+            e.printStackTrace();
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+        catch (NoCookieException e)
+        {
+            e.printStackTrace();
+        }
+
+        Client.disconnect();
 
         return data;
-}
-
+    }
+/*
     public void PutContact(final String login, final String nickname, final boolean update )
     {
         final String endpointAdd = "/AddContact";
@@ -192,7 +222,7 @@ public class NetClient
             }
         }.execute();
     }
-
+*/
     public List<StatusUpdateResponse> GetStatusUpdate()
     {
         final String endpoint = "/GetStatusUpdate";
@@ -200,7 +230,7 @@ public class NetClient
         List<StatusUpdateResponse> statusUpdates = null;
 
         try
-        {
+        {/*
             HttpPost post = new HttpPost(ServerAddress + endpoint);
             HttpResponse response = Client.execute(post);
 
@@ -210,7 +240,7 @@ public class NetClient
                 statusUpdates = Helper.getObjectFromJson(response, type);
             }
 
-            response.getEntity().consumeContent();
+            response.getEntity().consumeContent();*/
         }
         catch (Exception e)
         {
@@ -239,7 +269,7 @@ public class NetClient
                     HttpPost post = new HttpPost(ServerAddress + endpoint);
                     post.setEntity(new UrlEncodedFormEntity(data));
 
-                    Client.execute(post).getEntity().consumeContent();
+                    //Client.execute(post).getEntity().consumeContent();
                 }
                 catch (Exception e)
                 {
@@ -259,6 +289,7 @@ public class NetClient
 
         try
         {
+            /*
             List<NameValuePair> data = new ArrayList<NameValuePair>();
             data.add(new BasicNameValuePair("message", message));
             for (int id : usersIds)
@@ -272,6 +303,7 @@ public class NetClient
                 timestamp = getObjectFromJson(response, long.class);
 
             response.getEntity().consumeContent();
+            */
         }
         catch (Exception e)
         {
@@ -286,7 +318,7 @@ public class NetClient
         final String endpoint = "/GetMessage";
 
         List<Message> data = null;
-
+/*
         try
         {
             HttpPost post = new HttpPost(ServerAddress + endpoint);
@@ -304,10 +336,10 @@ public class NetClient
         {
             e.printStackTrace();
         }
-
+*/
         return data;
     }
-
+/*
     public Contact GetUserData(final int userId)
     {
         //FIXME
@@ -359,6 +391,7 @@ public class NetClient
 
         try
         {
+
             List<NameValuePair> data = new ArrayList<NameValuePair>();
             data.add(new BasicNameValuePair("login", "" + login));
 
@@ -380,7 +413,7 @@ public class NetClient
         return user;
 
     }
-
+*/
     public void Ping(final boolean asyncPing)
     {
         final String endpoint = "/Ping";
@@ -391,33 +424,48 @@ public class NetClient
             @Override
             public void run()
             {
-                HttpResponse response = null;
                 try
                 {
-                    HttpPost post = new HttpPost(ServerAddress + (asyncPing ? endpointAsync : endpoint));
-                    Log.v("PING", asyncPing + " - " + post.getURI().toString());
-                    response = Client.execute(post);
+                    Client = (HttpURLConnection) new URL(ServerAddress + (asyncPing ? endpointAsync : endpoint)).openConnection();
+                    Client.setRequestMethod("POST");
+                    Client.setDoInput(true);
+                    Client.setDoOutput(true);
+
+                    String cookie = CookieManager.getInstance().getCookie(Client.getURL().toString());
+                    if (cookie != null)
+                    {
+                        Client.setRequestProperty("Cookie", cookie);
+                    }
+                    else
+                    {
+                        throw new NoCookieException(ServerAddress + endpoint);
+                    }
+                    Client.connect();
+
+                    GetSessionCookie();
+                    Client.getContent();
+
                 }
-                catch (Exception e)
+                catch (MalformedURLException e)
                 {
                     e.printStackTrace();
                 }
-                finally
+                catch (ProtocolException e)
                 {
-                    if(response != null)
-                        try
-                        {
-                            response.getEntity().consumeContent();
-                        }
-                        catch (IOException e)
-                        {
-                            e.printStackTrace();
-                        }
+                    e.printStackTrace();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+                catch (NoCookieException e)
+                {
+                    e.printStackTrace();
                 }
             }
         }).start();
     }
-
+/*
     public Object GetArchive(final long fromDate, final long toDate)
     {
         final String endpoint = "/GetArchive";
@@ -509,6 +557,6 @@ public class NetClient
 
         return archive;
     }
-
+*/
 }
 
