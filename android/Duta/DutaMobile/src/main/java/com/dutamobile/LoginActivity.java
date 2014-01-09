@@ -223,23 +223,10 @@ public class LoginActivity extends ActionBarActivity
             {
                 boolean success = (loginResponse != null && loginResponse.isLoggedIn() == 1);
 
-                android.util.Log.v("Logowanie", String.format("%s :  %s = %s", mUserId, mPassword, success));
-
                 showProgress(false);
 
                 if (success)
                 {
-                    NetClient.GetInstance().Ping(false);
-
-                    try
-                    {
-                        Thread.sleep(100);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-
                     Intent i = new Intent(LoginActivity.this, MainActivity.class);
                     i.putExtra("USERID", mUserId);
 

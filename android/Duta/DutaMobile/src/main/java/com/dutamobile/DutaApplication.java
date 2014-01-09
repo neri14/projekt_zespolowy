@@ -2,6 +2,7 @@ package com.dutamobile;
 
 import android.app.Application;
 import android.os.AsyncTask;
+import android.webkit.CookieSyncManager;
 
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Message;
@@ -31,6 +32,8 @@ public class DutaApplication extends Application
         super.onCreate();
 
         contactList = new ArrayList<Contact>();
+
+        CookieSyncManager.createInstance(this);
     }
 
     private List<String> MergeMessagesWithContacts()

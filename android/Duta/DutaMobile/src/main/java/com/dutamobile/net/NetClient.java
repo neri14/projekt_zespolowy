@@ -1,12 +1,12 @@
 package com.dutamobile.net;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Message;
 import com.dutamobile.model.Status;
 import com.dutamobile.model.response.LoginResponse;
-import com.dutamobile.model.response.MessageResponse;
 import com.dutamobile.model.response.StatusUpdateResponse;
 import com.dutamobile.util.Helper;
 import com.google.gson.reflect.TypeToken;
@@ -50,11 +50,8 @@ public class NetClient
 
     private void CloseConnection()
     {
-        if(Client != null)
-        {
-            Client.getConnectionManager().shutdown();
-            Client = null;
-        }
+        Client.getConnectionManager().shutdown();
+        Client = null;
         mInstance = null;
     }
 
@@ -86,7 +83,6 @@ public class NetClient
     {
         final String endpoint = "/Logout";
 
-        if(Client != null)
         new AsyncTask<Void, Void, Void>()
         {
             @Override
@@ -100,20 +96,13 @@ public class NetClient
                 catch (Exception e)
                 {
                     e.printStackTrace();
-                    android.util.Log.v("Logout", "Failed");
                 }
 
                 return null;
             }
-
-            @Override
-            protected void onPostExecute(Void aVoid)
-            {
-                super.onPostExecute(aVoid);
-
-                CloseConnection();
-            }
         }.execute();
+
+        CloseConnection();
     }
 
     public List<Contact> GetContactList()
@@ -266,7 +255,7 @@ public class NetClient
     {
         final String endpoint = "/SendMessage";
 
-        MessageResponse timestampResponse = null;
+        long timestamp = -1;
 
         try
         {
@@ -280,7 +269,7 @@ public class NetClient
             HttpResponse response = Client.execute(post);
 
             if(response.getStatusLine().getStatusCode() == 200)
-                timestampResponse = getObjectFromJson(response, MessageResponse.class);
+                timestamp = getObjectFromJson(response, long.class);
 
             response.getEntity().consumeContent();
         }
@@ -289,7 +278,7 @@ public class NetClient
             e.printStackTrace();
         }
 
-        return timestampResponse == null ? -1 : timestampResponse.getTimestamp();
+        return timestamp; // == null ? -1 : timestamp.getTimestamp();
     }
 
     public List<Message> GetMessage()
@@ -406,6 +395,7 @@ public class NetClient
                 try
                 {
                     HttpPost post = new HttpPost(ServerAddress + (asyncPing ? endpointAsync : endpoint));
+                    Log.v("PING", asyncPing + " - " + post.getURI().toString());
                     response = Client.execute(post);
                 }
                 catch (Exception e)
