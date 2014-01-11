@@ -217,6 +217,24 @@ namespace duta.Storage
             }
         }
 
+        public override bool SetStatus(string login, EUserStatus status, string description)
+        {
+            using (DataEntities ctx = new DataEntities())
+            {
+                user usr = ctx.users.FirstOrDefault(u => u.login == login);
+
+                if (usr == null)
+                    return false;
+
+                usr.status = (int)status;
+                usr.description = description;
+                usr.last_status_update = DateTime.Now;
+
+                ctx.SaveChanges();
+                return true;
+            }
+        }
+
         private User Convert(user u)
         {
             User entity = new User(u.user_id, u.login, u.password)

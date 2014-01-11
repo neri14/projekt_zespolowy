@@ -32,7 +32,7 @@ namespace duta.Storage.Entities
     public enum EUserStatus
     {
         EUserStatus_OnLine,
-        EUserStatus_Offline,
-        EUserStatus_Away
+        EUserStatus_Away,
+        EUserStatus_Offline
     }
 }

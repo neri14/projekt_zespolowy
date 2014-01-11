@@ -88,10 +88,11 @@ namespace duta.Managers
 
         public static void SetStatus(string login, EUserStatus status, string description)
         {
-            User u = GetUser(login);
-            u.status = status;
-            u.descripton = description;
-            u.last_status_update = DateTime.Now;
+            //User u = GetUser(login);
+            //u.status = status;
+            //u.descripton = description;
+            //u.last_status_update = DateTime.Now;
+            data.SetStatus(login, status, description);
 
             lock (awaitingStatusUpdates)
             {
