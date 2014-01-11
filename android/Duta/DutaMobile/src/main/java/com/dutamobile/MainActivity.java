@@ -24,7 +24,6 @@ import com.dutamobile.fragments.ContactListFragment;
 import com.dutamobile.fragments.Refreshable;
 import com.dutamobile.fragments.StatusDialog;
 import com.dutamobile.model.ActiveChat;
-import com.dutamobile.model.Status;
 import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
 
@@ -34,9 +33,6 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity
 {
-
-    private MenuItem status_item;
-    private Status myStatus;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ListView mActiveChatList;
@@ -44,6 +40,7 @@ public class MainActivity extends ActionBarActivity
     private ActionBarDrawerToggle mDrawerToggle;
 
     private Handler handler;
+    private Thread.UncaughtExceptionHandler uncaughtExceptionHandler;
 
     public ActiveConversationsAdapter rightAdapter;
     private MenuItem chatItem;
@@ -66,7 +63,7 @@ public class MainActivity extends ActionBarActivity
             return;
         }
 
-        Helper.fragmentReplacement(getSupportFragmentManager(), ContactListFragment.class, false, ContactListFragment.TAG , null);
+        Helper.fragmentReplacement(getSupportFragmentManager(), ContactListFragment.class, false, ContactListFragment.TAG, null);
     }
 
     @Override
@@ -130,13 +127,22 @@ public class MainActivity extends ActionBarActivity
 
     private void setup()
     {
+        uncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
+        {
+            @Override
+            public void uncaughtException(Thread thread, Throwable ex)
+            {
+                NetClient.GetInstance().Logout();
+                uncaughtExceptionHandler.uncaughtException(thread, ex);
+            }
+        });
+
         activeConversations = new ArrayList<ActiveChat>();
 
         ((DutaApplication) getApplication()).SetMainActivity(this);
         ((DutaApplication) getApplication()).DownloadContactList();
         ((DutaApplication) getApplication()).StartReceiving();
-
-        myStatus = Status.valueOf(getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("status", "AVAILABLE"));
 
         String[] drawerItemsStrings = getResources().getStringArray(R.array.drawer_items);
 
@@ -158,10 +164,10 @@ public class MainActivity extends ActionBarActivity
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
             {
-                String name = ((ActiveChat)rightAdapter.getItem(position)).getChatName();
+                String name = ((ActiveChat) rightAdapter.getItem(position)).getChatName();
                 rightAdapter.deleteItem(position);
 
-                if(Helper.CURRENT_FRAGMENT.equals(name)) onBackPressed();
+                if (Helper.CURRENT_FRAGMENT.equals(name)) onBackPressed();
 
                 Toast.makeText(getApplication(), R.string.conversation_closed, Toast.LENGTH_SHORT).show();
 
@@ -189,7 +195,7 @@ public class MainActivity extends ActionBarActivity
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         //mActiveChatList.setFocusableInTouchMode(true);
-       // mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mActiveChatList);
+        // mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mActiveChatList);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -200,10 +206,10 @@ public class MainActivity extends ActionBarActivity
     {
         if (mDrawerLayout.isDrawerOpen(mActiveChatList))
         {
-           mDrawerLayout.closeDrawer(mActiveChatList);
+            mDrawerLayout.closeDrawer(mActiveChatList);
         }
 
-        if(!Helper.CURRENT_FRAGMENT.equals(ContactListFragment.TAG))
+        if (!Helper.CURRENT_FRAGMENT.equals(ContactListFragment.TAG))
         {
             super.onBackPressed();
             Helper.CURRENT_FRAGMENT = ContactListFragment.TAG;
@@ -233,7 +239,7 @@ public class MainActivity extends ActionBarActivity
                     }
                     case 3:
                     {
-                        ((DutaApplication)getApplication()).StopReceiving();
+                        ((DutaApplication) getApplication()).StopReceiving();
                         NetClient.GetInstance().Logout();
                         startActivity(new Intent(MainActivity.this, LoginActivity.class));
                         finish();
@@ -241,14 +247,14 @@ public class MainActivity extends ActionBarActivity
                     }
                     case 2:
                     {
-                        ((DutaApplication)getApplication()).DownloadContactList();
+                        ((DutaApplication) getApplication()).DownloadContactList();
                         Toast.makeText(getApplication(), "Odświeżono.", Toast.LENGTH_SHORT).show();
                         break;
                     }
-                    default: break;
+                    default:
+                        break;
                 }
-            }
-            else
+            } else
             {
                 ActiveChat activeChat = activeConversations.get(position);
 
@@ -267,7 +273,7 @@ public class MainActivity extends ActionBarActivity
                     Helper.fragmentReplacement(getSupportFragmentManager(), ChatFragment.class, true, activeChat.getChatName(), args);
                 }
 
-                if(activeChat.isChecked())
+                if (activeChat.isChecked())
                 {
                     activeChat.setChecked(false);
                     rightAdapter.notifyDataSetChanged();
@@ -280,39 +286,51 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-
     @Override
     protected void onStop()
     {
-        super.onStop();
         Log.v("Main Activity", "STOP");
-        ((DutaApplication)getApplication()).ClearContactList();
+        ((DutaApplication) getApplication()).ClearContactList();
         ((DutaApplication) getApplication()).SetMainActivity(null);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        Log.v("Main Activity", "DESTROY");
+        NetClient.GetInstance().Logout();
+        super.onDestroy();
+    }
+
+    @Override
+    public void finish()
+    {
+        Log.v("Main Activity", "FINISH");
+        NetClient.GetInstance().Logout();
+        super.finish();
     }
 
     public void UpdateView(List<String> chatNames, boolean contactList)
     {
         Refreshable f = null;
 
-        if(contactList)
+        if (contactList)
         {
             f = (Refreshable) getSupportFragmentManager().findFragmentByTag(ContactListFragment.TAG);
-        }
-        else if(chatNames != null)
+        } else if (chatNames != null)
         {
             boolean notification = true;
 
-            if(chatNames.size() == 1)
+            if (chatNames.size() == 1)
             {
                 String name = chatNames.get(0);
 
                 f = UpdateActiveChatList(name);
 
-                notification = ( f==null);
-            }
-            else
+                notification = (f == null);
+            } else
             {
-                for(String name : chatNames)
+                for (String name : chatNames)
                 {
                     f = UpdateActiveChatList(name);
                 }
@@ -329,31 +347,30 @@ public class MainActivity extends ActionBarActivity
                 }
             });
 
-        }
-        else return;
+        } else return;
 
-        if(f != null) f.RefreshView();
+        if (f != null) f.RefreshView();
     }
 
     private Refreshable UpdateActiveChatList(String name)
     {
         boolean performAdd = true;
 
-        for(ActiveChat ac : activeConversations)
-             if(name.equals(ac.getChatName()))
-             {
+        for (ActiveChat ac : activeConversations)
+            if (name.equals(ac.getChatName()))
+            {
                 ac.setChecked(true);
                 performAdd = false;
-             }
-
-            if(performAdd)
-            {
-                ActiveChat activeChat = new ActiveChat(((DutaApplication)getApplication()).getContactByName(name));
-                activeChat.setChecked(true);
-                activeConversations.add(activeChat);
             }
 
-        if(Helper.CURRENT_FRAGMENT.equals(name))
+        if (performAdd)
+        {
+            ActiveChat activeChat = new ActiveChat(((DutaApplication) getApplication()).getContactByName(name));
+            activeChat.setChecked(true);
+            activeConversations.add(activeChat);
+        }
+
+        if (Helper.CURRENT_FRAGMENT.equals(name))
             return (Refreshable) getSupportFragmentManager().findFragmentByTag(name);
         return null;
     }
