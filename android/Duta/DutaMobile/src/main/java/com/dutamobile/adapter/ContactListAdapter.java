@@ -1,6 +1,8 @@
 package com.dutamobile.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,14 +24,15 @@ public class ContactListAdapter extends BaseAdapter
     private final LayoutInflater inflater;
     private List<Contact> data;
     private Context context;
+    private SparseBooleanArray mSelectedItemsIds;
 
     public ContactListAdapter(Context context, List<Contact> data)
     {
         this.inflater = LayoutInflater.from(context);
         this.context = context;
         this.data = data;
+        mSelectedItemsIds = new SparseBooleanArray();
     }
-
 
     @Override
     public int getCount()
@@ -55,37 +58,73 @@ public class ContactListAdapter extends BaseAdapter
         notifyDataSetChanged();
     }
 
+    public boolean removeItem(Contact contact)
+    {
+        return data.remove(contact);
+    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {
         ViewHolder holder;
 
-        if(convertView == null)
+        if (convertView == null)
         {
-            convertView = inflater.inflate(R.layout.contact_list_item, null); //FIXME
+            convertView = inflater.inflate(R.layout.contact_list_item, null);
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.text_1);
             holder.status = (ImageView) convertView.findViewById(R.id.image_1);
             holder.desc = (TextView) convertView.findViewById(R.id.text_2);
             convertView.setTag(holder);
-        }
-        else
+        } else
         {
             holder = (ViewHolder) convertView.getTag();
         }
 
         Contact c = data.get(position);
 
-        if(c != null)
+        if (c != null)
         {
             holder.name.setText(c.getName());
             holder.status.setImageDrawable(Helper.getStatusIndicator(context, c.getStatus()));
             holder.desc.setText(c.getDescription());
+
+            convertView.setBackgroundColor(mSelectedItemsIds.get(position) ? 0x8834B5E4 : Color.TRANSPARENT);
         }
-
-
         return convertView;
+    }
+
+
+    //CAB Method
+    public void toggleSelection(int position)
+    {
+        selectView(position, !mSelectedItemsIds.get(position));
+    }
+
+    public void removeSelection()
+    {
+        mSelectedItemsIds = new SparseBooleanArray();
+        notifyDataSetChanged();
+    }
+
+    public void selectView(int position, boolean value)
+    {
+        if (value)
+            mSelectedItemsIds.put(position, value);
+        else
+            mSelectedItemsIds.delete(position);
+
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedCount()
+    {
+        return mSelectedItemsIds.size();
+    }
+
+    public SparseBooleanArray getSelectedIds()
+    {
+        return mSelectedItemsIds;
     }
 
     static class ViewHolder
@@ -94,5 +133,4 @@ public class ContactListAdapter extends BaseAdapter
         TextView desc;
         ImageView status;
     }
-
 }

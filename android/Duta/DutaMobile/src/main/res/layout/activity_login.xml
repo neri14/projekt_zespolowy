@@ -44,8 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:hint="@string/prompt_user_id"
-                android:text="user_"/>
+                android:hint="@string/prompt_user_id"/>
 
             <EditText
                 android:id="@+id/password"
@@ -57,8 +56,7 @@
                 android:inputType="textPassword"
                 android:imeActionLabel="@string/action_sign_in_short"
                 android:imeActionId="@+id/login"
-                android:imeOptions="actionUnspecified"
-                android:text="pass"/>
+                android:imeOptions="actionUnspecified"/>
 
             <Button android:id="@+id/sign_in_button"
                 android:layout_width="wrap_content"
@@ -70,6 +68,5 @@
                 android:layout_gravity="right" />
 
         </LinearLayout>
-
     </ScrollView>
 </merge>

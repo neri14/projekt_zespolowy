@@ -2,6 +2,7 @@ package com.dutamobile;
 
 import android.app.Application;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.webkit.CookieSyncManager;
 
 import com.dutamobile.model.Contact;
@@ -18,6 +19,7 @@ import java.util.List;
  */
 public class DutaApplication extends Application
 {
+    private MainActivity mainActivity;
     private List<Contact> contactList;
     private List<Message> messageList;
 
@@ -117,7 +119,12 @@ public class DutaApplication extends Application
             {
                 contactList = NetClient.GetInstance().GetContactList();
 
+                String s = "Statuses:\n";
+                for(Contact c : contactList)
+                    s += c.getDescription() + "\n";
+
                 android.util.Log.v("Contact List", contactList != null ? contactList.size() + "" : "null");
+                android.util.Log.v("Contact List", s);
 
                 return null;
             }
@@ -181,28 +188,41 @@ public class DutaApplication extends Application
 
     public void StartReceiving()
     {
-        //FIXME Ogarnąć aktualizacje statusów
         if(messageReceiver == null)
         {
             messageReceiver = new MessageReceiver();
-           // messageReceiver.execute();
+            startTask(messageReceiver);
         }
-        /*
+
         if(statusUpdater == null)
         {
             statusUpdater = new StatusUpdater();
-            statusUpdater.execute();
+            startTask(statusUpdater);
         }
-        */
     }
 
     public void StopReceiving()
     {
-        if(statusUpdater != null) statusUpdater.stop();
-        if(messageReceiver != null) messageReceiver.stop();
+        if(statusUpdater != null)
+        {
+            statusUpdater.stop();
+            statusUpdater.cancel(true);
+        }
+
+        if(messageReceiver != null)
+        {
+            messageReceiver.stop();
+            messageReceiver.cancel(true);
+        }
     }
 
-    private MainActivity mainActivity;
+    public void startTask(AsyncTask<?,?,?> asyncTask)
+    {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        else
+            asyncTask.execute();
+    }
 
     public void SetMainActivity(MainActivity mainActivity)
     {

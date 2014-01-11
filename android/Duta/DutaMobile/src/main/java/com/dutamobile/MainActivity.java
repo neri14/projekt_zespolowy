@@ -73,8 +73,6 @@ public class MainActivity extends ActionBarActivity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         getMenuInflater().inflate(R.menu.main, menu);
-//        status_item = menu.findItem(R.id.action_status_indicator);
-//        status_item.setIcon(Helper.getStatusIndicator(this, myStatus));
         chatItem = menu.findItem(R.id.action_chats);
 
         if (chatItem != null)
@@ -94,8 +92,6 @@ public class MainActivity extends ActionBarActivity
 
                     UpdateChatItemIcon(rightAdapter.isAnyItemsChecked());
 
-                    android.util.Log.v("CHAT ITEM", "SELECTED: " + rightAdapter.isAnyItemsChecked());
-
                     return false;
                 }
             });
@@ -107,11 +103,6 @@ public class MainActivity extends ActionBarActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-            //editor.putString("status", status.toString()).commit();
-            //Toast.makeText(this, item.getTitle().toString(), Toast.LENGTH_SHORT).show();
-            //NetClient.GetInstance().SetStatus(status, "Mój opis" );
-       // }
-
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
@@ -120,7 +111,6 @@ public class MainActivity extends ActionBarActivity
     {
         super.onPostCreate(savedInstanceState);
         mDrawerToggle.syncState();
-
     }
 
     @Override
@@ -143,7 +133,6 @@ public class MainActivity extends ActionBarActivity
         activeConversations = new ArrayList<ActiveChat>();
 
         ((DutaApplication) getApplication()).SetMainActivity(this);
-        NetClient.GetInstance().Ping(false);
         ((DutaApplication) getApplication()).DownloadContactList();
         ((DutaApplication) getApplication()).StartReceiving();
 

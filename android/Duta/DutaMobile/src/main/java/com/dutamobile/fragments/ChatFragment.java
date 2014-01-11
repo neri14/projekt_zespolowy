@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ListFragment;
 import android.support.v7.view.ActionMode;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,8 +17,8 @@ import android.widget.Toast;
 import com.dutamobile.R;
 import com.dutamobile.adapter.ChatAdapter;
 import com.dutamobile.model.Message;
-import com.dutamobile.util.Helper;
 import com.dutamobile.net.NetClient;
+import com.dutamobile.util.Helper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,11 +32,14 @@ public class ChatFragment extends ListFragment implements Refreshable
     private ActionMode actionMode;
     private Handler handler;
 
+    private int contactId;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View v = inflater.inflate(R.layout.chat_fragment, container, false);
 
+        contactId = getArguments().getInt(ContactListFragment.ARG_CONTACT_ID);
         message_box = (EditText) v.findViewById(R.id.edittext_1);
         handler = new Handler();
 
@@ -55,10 +57,8 @@ public class ChatFragment extends ListFragment implements Refreshable
 
                         if(text.length() > 0)// && !text.matches(<same białe znaki>))
                         {
-                            final int [] users = new int[] { 1, 2};
-                            Log.v("CHAT", "Getting timestamp");
+                            final int [] users = new int[] { Helper.MyID, contactId};
                             final long timestamp = NetClient.GetInstance().SendMessage(text, users);
-                            Log.v("CHAT", "Timestamp: " + timestamp);
 
                             handler.post(new Runnable()
                             {
@@ -84,12 +84,12 @@ public class ChatFragment extends ListFragment implements Refreshable
         if(getListAdapter() == null)
         {
             HashMap<Integer, String> usernames = new HashMap<Integer, String>();
-            usernames.put(getArguments().getInt("ContactID"), getArguments().getString("ContactName"));
+            usernames.put(contactId, getArguments().getString(ContactListFragment.ARG_CONTACT_NAME));
 
-            setListAdapter(new ChatAdapter(getActivity(), (List<Message>) getArguments().get("Messages"), usernames));
+            setListAdapter(new ChatAdapter(getActivity(), (List<Message>) getArguments().get(ContactListFragment.ARG_MESSAGES), usernames));
         }
 
-        Helper.getSupportActionBar(getActivity()).setTitle(getArguments().getString("ContactName"));
+        Helper.getSupportActionBar(getActivity()).setTitle(getArguments().getString(ContactListFragment.ARG_CONTACT_NAME));
 
         return v;
     }

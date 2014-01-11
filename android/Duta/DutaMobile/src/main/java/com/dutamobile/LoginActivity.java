@@ -85,7 +85,7 @@ public class LoginActivity extends ActionBarActivity
             }
         });
 
-        getSupportActionBar().setTitle("Sign In");
+        getSupportActionBar().setTitle(getString(R.string.app_name));
     }
 
     @Override
@@ -204,8 +204,7 @@ public class LoginActivity extends ActionBarActivity
 
     private void PerformLogIn()
     {
-        new AsyncTask<Void, Void, LoginResponse>()
-        {
+        ((DutaApplication)getApplication()).startTask(new AsyncTask<Void, Void, LoginResponse>(){
             @Override
             protected LoginResponse doInBackground(Void... params)
             {
@@ -213,7 +212,7 @@ public class LoginActivity extends ActionBarActivity
                 {
                     return NetClient.GetInstance().Login(mUserId, mPassword);
                 }
-                catch (IOException e) { }
+                catch (IOException e) { android.util.Log.e("LoginActivity", "Login failed"); }
 
                 return null;
             }
@@ -227,12 +226,9 @@ public class LoginActivity extends ActionBarActivity
 
                 if (success)
                 {
-                    Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                    i.putExtra("USERID", mUserId);
-
                     Helper.MyID = loginResponse.getUser_id();
 
-                    startActivity(i);
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
 
                 } else
@@ -241,7 +237,7 @@ public class LoginActivity extends ActionBarActivity
                     mPasswordView.requestFocus();
                 }
             }
-        }.execute();
+        });
     }
 
 }

@@ -8,14 +8,10 @@ import com.dutamobile.model.Message;
 import com.dutamobile.model.NoCookieException;
 import com.dutamobile.model.Status;
 import com.dutamobile.model.response.LoginResponse;
+import com.dutamobile.model.response.MessageResponse;
 import com.dutamobile.model.response.StatusUpdateResponse;
 import com.dutamobile.util.Helper;
 import com.google.gson.reflect.TypeToken;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,21 +20,18 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class NetClient
 {
-    private HttpURLConnection Client;
+    private static NetClient mInstance = null;
     private final String ServerAddress = "http://10.0.3.2:1404/Service";
     //private final String ServerAddress = "http://duta.somee.com/Service";
 
-    private NetClient()
-    {
-        //Client = new DefaultHttpClient();
-    }
-
-    private static NetClient mInstance = null;
+    private NetClient() {}
 
     public static synchronized NetClient GetInstance()
     {
@@ -49,11 +42,48 @@ public class NetClient
         return mInstance;
     }
 
-    private void CloseConnection()
+    private synchronized HttpURLConnection CreatePostRequest(String endpoint, String postData, boolean addCookie) throws IOException
     {
-        Client.disconnect();
-        Client = null;
-        mInstance = null;
+        HttpURLConnection client = (HttpURLConnection) new URL(ServerAddress + endpoint).openConnection();
+        client.setRequestMethod("POST");
+        client.setDoInput(true);
+        client.setDoOutput(true);
+
+        if (addCookie)
+        {
+            String cookie = CookieManager.getInstance().getCookie(client.getURL().toString());
+            if (cookie != null)
+            {
+                client.setRequestProperty("Cookie", cookie);
+            } else
+            {
+                new NoCookieException(ServerAddress + endpoint).printStackTrace();
+            }
+        }
+
+        // write our POST fields
+        if (postData != null)
+        {
+            PrintWriter writer = new PrintWriter(client.getOutputStream());
+            writer.println(postData + "&action=session_auth&https=1");
+            writer.close();
+        }
+
+        return client;
+    }
+
+    private synchronized void GetSessionCookie(HttpURLConnection client)
+    {
+        List<String> cookieList = client.getHeaderFields().get("Set-Cookie");
+        if (cookieList != null)
+        {
+            for (String cookieTemp : cookieList)
+            {
+                CookieManager.getInstance().setCookie(client.getURL().toString(), cookieTemp);
+            }
+        }
+
+        CookieManager.getInstance().removeExpiredCookie();
     }
 
     public LoginResponse Login(final String login, final String password) throws IOException
@@ -61,59 +91,44 @@ public class NetClient
         final String endpoint = "/Login";
         LoginResponse loginResponse = null;
 
-        Client = (HttpURLConnection) new URL(ServerAddress + endpoint).openConnection();
-        Client.setRequestMethod("POST");
-        Client.setDoInput(true);
-        Client.setDoOutput(true);
+        String postData = String.format("login=%s&password=%s", login, password);
+        HttpURLConnection client = CreatePostRequest(endpoint, postData, false);
 
-        // write our POST fields
-        PrintWriter writer = new PrintWriter(Client.getOutputStream());
-        writer.println("login=" + login + "&password=" + password + "&action=session_auth&https=1");
-        writer.close();
+        loginResponse = Helper.getObjectFromJson(client.getInputStream(), LoginResponse.class);
 
-        loginResponse = Helper.getObjectFromJson(Client.getInputStream(), LoginResponse.class);
-
-        GetSessionCookie();
+        GetSessionCookie(client);
 
         return loginResponse;
-    }
-
-    private synchronized void GetSessionCookie()
-    {
-        List<String> cookieList = Client.getHeaderFields().get("Set-Cookie");
-        if (cookieList != null)
-        {
-            for (String cookieTemp : cookieList)
-            {
-                CookieManager.getInstance().setCookie(Client.getURL().toString(), cookieTemp);
-            }
-        }
     }
 
     public void Logout()
     {
         final String endpoint = "/Logout";
 
-        new AsyncTask<Void, Void, Void>()
-        {
+        new Thread(new Runnable()
+            {
             @Override
-            protected Void doInBackground(Void... params)
+            public void run()
             {
                 try
                 {
-                    HttpPost post = new HttpPost(ServerAddress + endpoint);
-                   // Client.execute(post).getEntity().consumeContent();
+                    HttpURLConnection client = CreatePostRequest(endpoint, null, true);
+                    client.connect();
+
+                    if(client.getResponseCode() == 200)
+                    {
+                        CookieManager.getInstance().removeSessionCookie();
+                        CookieManager.getInstance().removeExpiredCookie();
+                    }
+
+                    client.disconnect();
                 }
-                catch (Exception e)
+                catch(Exception e)
                 {
                     e.printStackTrace();
                 }
-
-                return null;
             }
-        }.execute();
-
-        CloseConnection();
+        }, "LogoutThread").start();
     }
 
     public List<Contact> GetContactList()
@@ -124,51 +139,33 @@ public class NetClient
 
         try
         {
-            Client = (HttpURLConnection) new URL(ServerAddress + endpoint).openConnection();
-            Client.setRequestMethod("POST");
-            Client.setDoInput(true);
-            Client.setDoOutput(true);
+            HttpURLConnection client = CreatePostRequest(endpoint, null, true);
 
-            String cookie = CookieManager.getInstance().getCookie(Client.getURL().toString());
-            if (cookie != null)
-            {
-                Client.setRequestProperty("Cookie", cookie);
-            }
-            else
-            {
-                throw new NoCookieException(ServerAddress + endpoint);
-            }
+            Type type = new TypeToken<List<Contact>>() {}.getType();
+            data = Helper.getObjectFromJson(client.getInputStream(), type);
 
-            Type type = new TypeToken<List<Contact>>(){}.getType();
-            data = Helper.getObjectFromJson(Client.getInputStream(), type);
+            client.disconnect();
         }
-        catch (MalformedURLException e)
+        catch(MalformedURLException e)
         {
             e.printStackTrace();
         }
-        catch (ProtocolException e)
+        catch(ProtocolException e)
         {
             e.printStackTrace();
         }
-        catch (IOException e)
+        catch(IOException e)
         {
             e.printStackTrace();
         }
-        catch (NoCookieException e)
-        {
-            e.printStackTrace();
-        }
-
-        Client.disconnect();
 
         return data;
     }
-/*
-    public void PutContact(final String login, final String nickname, final boolean update )
+
+    public void PutContact(final String login, final String nickname, final boolean update)
     {
         final String endpointAdd = "/AddContact";
         final String endpointUpdate = "/UpdateContact";
-
 
         new Thread(new Runnable()
         {
@@ -177,16 +174,15 @@ public class NetClient
             {
                 try
                 {
-                    List<NameValuePair> data = new ArrayList<NameValuePair>();
-                    data.add(new BasicNameValuePair("login", login));
-                    data.add(new BasicNameValuePair("nickname", nickname));
+                    HttpURLConnection client = CreatePostRequest(update ? endpointUpdate : endpointAdd,
+                            "login=" + login + "&nickname=" + nickname,
+                            true);
 
-                    HttpPost post = new HttpPost(ServerAddress + (update ? endpointUpdate : endpointAdd));
-                    post.setEntity(new UrlEncodedFormEntity(data));
-
-                    Client.execute(post).getEntity().consumeContent();
+                    client.connect();
+                    client.getResponseCode();
+                    client.disconnect();
                 }
-                catch (Exception e)
+                catch(Exception e)
                 {
                     e.printStackTrace();
                 }
@@ -205,15 +201,11 @@ public class NetClient
             {
                 try
                 {
-                    List<NameValuePair> data = new ArrayList<NameValuePair>();
-                    data.add(new BasicNameValuePair("login", login));
-
-                    HttpPost post = new HttpPost(ServerAddress + endpoint);
-                    post.setEntity(new UrlEncodedFormEntity(data));
-
-                    Client.execute(post).getEntity().consumeContent();
+                    HttpURLConnection client = CreatePostRequest(endpoint, "login=" + login, true);
+                    client.getResponseCode();
+                    client.disconnect();
                 }
-                catch (Exception e)
+                catch(Exception e)
                 {
                     e.printStackTrace();
                 }
@@ -222,27 +214,26 @@ public class NetClient
             }
         }.execute();
     }
-*/
+
     public List<StatusUpdateResponse> GetStatusUpdate()
     {
+        //TODO przeprowadzić testy
         final String endpoint = "/GetStatusUpdate";
 
         List<StatusUpdateResponse> statusUpdates = null;
 
         try
-        {/*
-            HttpPost post = new HttpPost(ServerAddress + endpoint);
-            HttpResponse response = Client.execute(post);
-
-            if(response.getStatusLine().getStatusCode() == 200)
+        {
+            HttpURLConnection client = CreatePostRequest(endpoint, null, true);
+            if(client.getResponseCode() == 200)
             {
-                Type type = new TypeToken<List<StatusUpdateResponse>>(){}.getType();
-                statusUpdates = Helper.getObjectFromJson(response, type);
+                Type type = new TypeToken<List<StatusUpdateResponse>>() {}.getType();
+                statusUpdates = Helper.getObjectFromJson(client.getInputStream(), type);
             }
 
-            response.getEntity().consumeContent();*/
+            client.disconnect();
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
@@ -252,65 +243,55 @@ public class NetClient
 
     public void SetStatus(final Status status, final String description)
     {
-        //TODO ogarnąć czy działa
         final String endpoint = "/SetStatus";
 
-        new AsyncTask<Void, Void, Void>()
+        new Thread(new Runnable()
         {
             @Override
-            protected Void doInBackground(Void... params)
+            public void run()
             {
                 try
                 {
-                    List<NameValuePair> data = new ArrayList<NameValuePair>();
-                    data.add(new BasicNameValuePair("status", "" + status.ordinal()));
-                    data.add(new BasicNameValuePair("description", description));
+                    String postData = String.format("status=%d&description=%s", status.ordinal(), description);
 
-                    HttpPost post = new HttpPost(ServerAddress + endpoint);
-                    post.setEntity(new UrlEncodedFormEntity(data));
+                    HttpURLConnection client = CreatePostRequest(endpoint, postData, true);
+                    client.disconnect();
 
-                    //Client.execute(post).getEntity().consumeContent();
+                    postData = null;
                 }
-                catch (Exception e)
+                catch(IOException e)
                 {
                     e.printStackTrace();
                 }
-
-                return null;
             }
-        }.execute();
+        }).start();
     }
 
     public long SendMessage(final String message, final int... usersIds)
     {
         final String endpoint = "/SendMessage";
 
-        long timestamp = -1;
+        MessageResponse timestamp = null;
 
         try
         {
-            /*
-            List<NameValuePair> data = new ArrayList<NameValuePair>();
-            data.add(new BasicNameValuePair("message", message));
+            StringBuilder postData = new StringBuilder();
+            postData.append("message=" + message);
+
             for (int id : usersIds)
-                data.add(new BasicNameValuePair("users", "" + id));
+                postData.append("&users=" + id);
 
-            HttpPost post = new HttpPost(ServerAddress + endpoint);
-            post.setEntity(new UrlEncodedFormEntity(data));
-            HttpResponse response = Client.execute(post);
+            HttpURLConnection client = CreatePostRequest(endpoint, postData.toString(), true);
 
-            if(response.getStatusLine().getStatusCode() == 200)
-                timestamp = getObjectFromJson(response, long.class);
-
-            response.getEntity().consumeContent();
-            */
+            if (client.getResponseCode() == 200)
+                timestamp = Helper.getObjectFromJson(client.getInputStream(), MessageResponse.class);
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
 
-        return timestamp; // == null ? -1 : timestamp.getTimestamp();
+        return timestamp == null ? -1 : timestamp.getTimestamp();
     }
 
     public List<Message> GetMessage()
@@ -318,102 +299,93 @@ public class NetClient
         final String endpoint = "/GetMessage";
 
         List<Message> data = null;
-/*
+
         try
         {
-            HttpPost post = new HttpPost(ServerAddress + endpoint);
-            HttpResponse response = Client.execute(post);
+            HttpURLConnection client = CreatePostRequest(endpoint, null, true);
 
-            if(response.getStatusLine().getStatusCode() == 200)
+            if (client.getResponseCode() == 200)
             {
-                Type type = new TypeToken<List<Message>>(){}.getType();
-                data = getObjectFromJson(response, type);
+                Type type = new TypeToken<List<Message>>() {}.getType();
+                data = Helper.getObjectFromJson(client.getInputStream(), type);
             }
 
-            response.getEntity().consumeContent();
+            client.disconnect();
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
-*/
+
         return data;
     }
-/*
-    public Contact GetUserData(final int userId)
-    {
-        //FIXME
 
+    public Contact GetUserData(final int userId) { return GetUserData(userId, null); }
+
+    public Contact GetUserData(final String login) { return GetUserData(-1, login); }
+
+    private Contact GetUserData(final int userId, final String login)
+    {
         final String endpoint = "/GetUserData";
 
         Contact user = null;
+        String postData;
 
-        AsyncTask <Void, Void, Contact> task = new AsyncTask<Void, Void, Contact>()
+        if (userId == -1 && login == null)
+            throw new IllegalArgumentException("You can use ONLY ONE of parameter: userId OR login");
+
+        if (login == null)
+            postData = "user_id=" + userId;
+        else
+            postData = "login=" + login;
+
+
+        AsyncTask<String, Void, Contact> task = new AsyncTask<String, Void, Contact>()
         {
             @Override
-            protected Contact doInBackground(Void... params)
+            protected Contact doInBackground(String... params)
             {
-                Contact user = null;
 
                 try
                 {
-                    List<NameValuePair> data = new ArrayList<NameValuePair>();
-                    data.add(new BasicNameValuePair("user_id", "" + userId));
+                    HttpURLConnection client = CreatePostRequest(endpoint, params[0], true);
 
-                    HttpPost post = new HttpPost(ServerAddress + endpoint);
-                    HttpResponse response = Client.execute(post);
-
-                    if(response.getStatusLine().getStatusCode() == 200)
+                    if (client.getResponseCode() == 200)
                     {
-                        user = Helper.getObjectFromJson(response, Contact.class);
+                        return Helper.getObjectFromJson(client.getInputStream(), Contact.class);
                     }
-
-                    response.getEntity().consumeContent();
                 }
-                catch (Exception e)
+                catch(IOException e)
                 {
                     e.printStackTrace();
                 }
 
-                return user;
+                return null;
             }
         };
 
-        return user;
-
-    }
-
-    public Contact GetUserData(final String login)
-    {
-        final String endpoint = "/GetUserData";
-
-        Contact user = null;
+        task.execute(postData);
 
         try
         {
-
-            List<NameValuePair> data = new ArrayList<NameValuePair>();
-            data.add(new BasicNameValuePair("login", "" + login));
-
-            HttpPost post = new HttpPost(ServerAddress + endpoint);
-            HttpResponse response = Client.execute(post);
-
-            if(response.getStatusLine().getStatusCode() == 200)
-            {
-                user = Helper.getObjectFromJson(response, Contact.class);
-            }
-
-            response.getEntity().consumeContent();
+            user = task.get(10, TimeUnit.SECONDS);
         }
-        catch (Exception e)
+        catch(InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+        catch(ExecutionException e)
+        {
+            e.printStackTrace();
+        }
+        catch(TimeoutException e)
         {
             e.printStackTrace();
         }
 
         return user;
-
     }
-*/
+
     public void Ping(final boolean asyncPing)
     {
         final String endpoint = "/Ping";
@@ -426,67 +398,44 @@ public class NetClient
             {
                 try
                 {
-                    Client = (HttpURLConnection) new URL(ServerAddress + (asyncPing ? endpointAsync : endpoint)).openConnection();
-                    Client.setRequestMethod("POST");
-                    Client.setDoInput(true);
-                    Client.setDoOutput(true);
-
-                    String cookie = CookieManager.getInstance().getCookie(Client.getURL().toString());
-                    if (cookie != null)
-                    {
-                        Client.setRequestProperty("Cookie", cookie);
-                    }
-                    else
-                    {
-                        throw new NoCookieException(ServerAddress + endpoint);
-                    }
-                    Client.connect();
-
-                    GetSessionCookie();
-                    Client.getContent();
-
+                    HttpURLConnection client = CreatePostRequest((asyncPing ? endpointAsync : endpoint), null, true);
+                    android.util.Log.v("NetClient", "Ping: " + client.getResponseCode());
+                    GetSessionCookie(client);
+                    client.disconnect();
                 }
-                catch (MalformedURLException e)
+                catch(MalformedURLException e)
                 {
                     e.printStackTrace();
                 }
-                catch (ProtocolException e)
+                catch(ProtocolException e)
                 {
                     e.printStackTrace();
                 }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-                catch (NoCookieException e)
+                catch(IOException e)
                 {
                     e.printStackTrace();
                 }
             }
         }).start();
     }
-/*
-    public Object GetArchive(final long fromDate, final long toDate)
+
+    public List<Message> GetArchive(final long fromDate, final long toDate)
     {
         final String endpoint = "/GetArchive";
 
-        Object archive = null;
+        List<Message> archive = null;
 
         try
         {
-            List<NameValuePair> data = new ArrayList<NameValuePair>();
-            data.add(new BasicNameValuePair("from", "" + fromDate));
-            data.add(new BasicNameValuePair("to", "" + toDate));
+            String postData = String.format("from=%d&to=%d", fromDate, toDate);
 
-            HttpPost post = new HttpPost(ServerAddress + endpoint);
-            HttpResponse response = Client.execute(post);
+            HttpURLConnection client = CreatePostRequest(endpoint, postData, true);
 
-            if(response.getStatusLine().getStatusCode() == 200)
+            if (client.getResponseCode() == 200)
             {
-                archive = Helper.getObjectFromJson(response, Object.class);
+                Type type = new TypeToken<List<Message>>(){}.getType();
+                archive = Helper.getObjectFromJson(client.getInputStream(), type);
             }
-
-            response.getEntity().consumeContent();
         }
         catch (Exception e)
         {
@@ -496,28 +445,23 @@ public class NetClient
         return archive;
     }
 
-    public Object GetArchiveFilteredByUserName(final long fromDate, final long toDate, final String username)
+    public List<Message> GetArchiveFilteredByUserName(final long fromDate, final long toDate, final String username)
     {
         final String endpoint = "/GetArchiveFilteredByUserName";
 
-        Object archive = null;
+        List<Message> archive = null;
 
         try
         {
-            List<NameValuePair> data = new ArrayList<NameValuePair>();
-            data.add(new BasicNameValuePair("from", "" + fromDate));
-            data.add(new BasicNameValuePair("to", "" + toDate));
-            data.add(new BasicNameValuePair("username", username));
+            String postData = String.format("from=%d&to=%d&username=%s", fromDate, toDate, username);
 
-            HttpPost post = new HttpPost(ServerAddress + endpoint);
-            HttpResponse response = Client.execute(post);
+            HttpURLConnection client = CreatePostRequest(endpoint, postData, true);
 
-            if(response.getStatusLine().getStatusCode() == 200)
+            if (client.getResponseCode() == 200)
             {
-                archive = Helper.getObjectFromJson(response, Object.class);
+                Type type = new TypeToken<List<Message>>(){}.getType();
+                archive = Helper.getObjectFromJson(client.getInputStream(), type);
             }
-
-            response.getEntity().consumeContent();
         }
         catch (Exception e)
         {
@@ -527,28 +471,23 @@ public class NetClient
         return archive;
     }
 
-    public Object GetArchiveFilteredByUserId(final long fromDate, final long toDate, final int userId)
+    public List<Message> GetArchiveFilteredByUserId(final long fromDate, final long toDate, final int userId)
     {
         final String endpoint = "/GetArchiveFilteredByUserId";
 
-        Object archive = null;
+        List<Message> archive = null;
 
         try
         {
-            List<NameValuePair> data = new ArrayList<NameValuePair>();
-            data.add(new BasicNameValuePair("from", "" + fromDate));
-            data.add(new BasicNameValuePair("to", "" + toDate));
-            data.add(new BasicNameValuePair("userid", userId + ""));
+            String postData = String.format("from=%d&to=%d&userid=%d", fromDate, toDate, userId);
 
-            HttpPost post = new HttpPost(ServerAddress + endpoint);
-            HttpResponse response = Client.execute(post);
+            HttpURLConnection client = CreatePostRequest(endpoint, postData, true);
 
-            if(response.getStatusLine().getStatusCode() == 200)
+            if (client.getResponseCode() == 200)
             {
-                archive = Helper.getObjectFromJson(response, Object.class);
+                Type type = new TypeToken<List<Message>>(){}.getType();
+                archive = Helper.getObjectFromJson(client.getInputStream(), type);
             }
-
-            response.getEntity().consumeContent();
         }
         catch (Exception e)
         {
@@ -557,6 +496,5 @@ public class NetClient
 
         return archive;
     }
-*/
 }
 

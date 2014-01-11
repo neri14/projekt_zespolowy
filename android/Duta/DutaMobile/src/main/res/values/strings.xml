@@ -10,11 +10,17 @@
 
     <string name="conversation_closed">Zamknięto konwersację.</string>
     <string name="setting_desc">Ustawianie statusu</string>
+    <string name="editting_contact">Edycja kontaktu</string>
+    <string name="edit">Edytuj</string>
+    <string name="group_conversation">Konwersacja grupowa</string>
+    <string name="delete">Usuń</string>
+    <string name="nickname">Nazwa wyświetlana</string>
+    <string name="login_name">Login kontaktu</string>
 
     <string-array name="drawer_items">
         <item>Test</item>
         <item>Zmień opis</item>
-        <item>Odśwież listę kontaktów</item>
+        <item>Zarządzaj listą kontaktów</item>
         <item>Wyloguj</item>
     </string-array>
 

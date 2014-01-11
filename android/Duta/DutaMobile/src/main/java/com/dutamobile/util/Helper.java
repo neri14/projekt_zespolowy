@@ -14,8 +14,6 @@ import com.dutamobile.R;
 import com.dutamobile.model.Status;
 import com.google.gson.Gson;
 
-import org.apache.http.HttpResponse;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -113,18 +111,6 @@ public class Helper
         for (String line; (line = reader.readLine()) != null;) builder.append(line).append("\n");
 
         return builder.toString();
-    }
-
-    public static <T> T getObjectFromJson(HttpResponse response, Class<T> classOfT) throws IOException
-    {
-        String json = getJsonFromResponse(response.getEntity().getContent());
-        return getGsonInstance().fromJson(json, classOfT);
-    }
-
-    public static <T> T getObjectFromJson(HttpResponse response, Type type) throws IOException
-    {
-        String json = getJsonFromResponse(response.getEntity().getContent());
-        return getGsonInstance().fromJson(json, type);
     }
 
     public static <T> T getObjectFromJson(InputStream response, Type type) throws IOException
