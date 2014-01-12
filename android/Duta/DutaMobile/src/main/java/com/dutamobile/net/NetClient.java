@@ -28,8 +28,8 @@ import java.util.concurrent.TimeoutException;
 public class NetClient
 {
     private static NetClient mInstance = null;
-    private final String ServerAddress = "http://10.0.3.2:1404/Service";
-    //private final String ServerAddress = "http://duta.somee.com/Service";
+    //private final String ServerAddress = "http://10.0.3.2:1404/Service";
+    private final String ServerAddress = "http://duta.somee.com/Service";
 
     private NetClient() {}
 
@@ -55,7 +55,8 @@ public class NetClient
             if (cookie != null)
             {
                 client.setRequestProperty("Cookie", cookie);
-            } else
+            }
+            else
             {
                 new NoCookieException(ServerAddress + endpoint).printStackTrace();
             }
@@ -106,7 +107,7 @@ public class NetClient
         final String endpoint = "/Logout";
 
         new Thread(new Runnable()
-            {
+        {
             @Override
             public void run()
             {
@@ -114,13 +115,11 @@ public class NetClient
                 {
                     HttpURLConnection client = CreatePostRequest(endpoint, null, true);
                     client.connect();
-
-                    if(client.getResponseCode() == 200)
+                    if (client.getResponseCode() == 200)
                     {
                         CookieManager.getInstance().removeSessionCookie();
                         CookieManager.getInstance().removeExpiredCookie();
                     }
-
                     client.disconnect();
                 }
                 catch(Exception e)
@@ -140,9 +139,13 @@ public class NetClient
         try
         {
             HttpURLConnection client = CreatePostRequest(endpoint, null, true);
+            client.setFixedLengthStreamingMode(0);
 
-            Type type = new TypeToken<List<Contact>>() {}.getType();
-            data = Helper.getObjectFromJson(client.getInputStream(), type);
+            if (client.getResponseCode() == 200)
+            {
+                Type type = new TypeToken<List<Contact>>() {}.getType();
+                data = Helper.getObjectFromJson(client.getInputStream(), type);
+            }
 
             client.disconnect();
         }
@@ -162,7 +165,7 @@ public class NetClient
         return data;
     }
 
-    public void PutContact(final String login, final String nickname, final boolean update)
+    public synchronized void PutContact(final String login, final String nickname, final boolean update)
     {
         final String endpointAdd = "/AddContact";
         final String endpointUpdate = "/UpdateContact";
@@ -190,18 +193,18 @@ public class NetClient
         }).start();
     }
 
-    public void RemoveContact(final String login)
+    public synchronized void RemoveContact(final Contact contact)
     {
         final String endpoint = "/RemoveContact";
 
-        new AsyncTask<Void, Void, Void>()
+        new Thread(new Runnable()
         {
             @Override
-            protected Void doInBackground(Void... params)
+            public void run()
             {
                 try
                 {
-                    HttpURLConnection client = CreatePostRequest(endpoint, "login=" + login, true);
+                    HttpURLConnection client = CreatePostRequest(endpoint, "login=" + contact.getLogin(), true);
                     client.getResponseCode();
                     client.disconnect();
                 }
@@ -209,10 +212,8 @@ public class NetClient
                 {
                     e.printStackTrace();
                 }
-
-                return null;
             }
-        }.execute();
+        }, "RemoveContactThread").start();
     }
 
     public List<StatusUpdateResponse> GetStatusUpdate()
@@ -225,7 +226,7 @@ public class NetClient
         try
         {
             HttpURLConnection client = CreatePostRequest(endpoint, null, true);
-            if(client.getResponseCode() == 200)
+            if (client.getResponseCode() == 200)
             {
                 Type type = new TypeToken<List<StatusUpdateResponse>>() {}.getType();
                 statusUpdates = Helper.getObjectFromJson(client.getInputStream(), type);
@@ -255,6 +256,7 @@ public class NetClient
                     String postData = String.format("status=%d&description=%s", status.ordinal(), description);
 
                     HttpURLConnection client = CreatePostRequest(endpoint, postData, true);
+                    client.getResponseCode();
                     client.disconnect();
 
                     postData = null;
@@ -267,7 +269,7 @@ public class NetClient
         }).start();
     }
 
-    public long SendMessage(final String message, final int... usersIds)
+    public synchronized long SendMessage(final String message, final int... usersIds)
     {
         final String endpoint = "/SendMessage";
 
@@ -433,11 +435,11 @@ public class NetClient
 
             if (client.getResponseCode() == 200)
             {
-                Type type = new TypeToken<List<Message>>(){}.getType();
+                Type type = new TypeToken<List<Message>>() {}.getType();
                 archive = Helper.getObjectFromJson(client.getInputStream(), type);
             }
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
@@ -459,11 +461,11 @@ public class NetClient
 
             if (client.getResponseCode() == 200)
             {
-                Type type = new TypeToken<List<Message>>(){}.getType();
+                Type type = new TypeToken<List<Message>>() {}.getType();
                 archive = Helper.getObjectFromJson(client.getInputStream(), type);
             }
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
@@ -485,11 +487,11 @@ public class NetClient
 
             if (client.getResponseCode() == 200)
             {
-                Type type = new TypeToken<List<Message>>(){}.getType();
+                Type type = new TypeToken<List<Message>>() {}.getType();
                 archive = Helper.getObjectFromJson(client.getInputStream(), type);
             }
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }

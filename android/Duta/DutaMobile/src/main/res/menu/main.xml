@@ -3,8 +3,8 @@
     <item
         android:id="@+id/action_chats"
         android:icon="@drawable/chat_drawer"
-        android:checkable="true"
-        android:checked="false"
         android:showAsAction="always"
-        duta:showAsAction="always"/>
+        duta:showAsAction="always"
+        android:orderInCategory="10"
+        />
 </menu>

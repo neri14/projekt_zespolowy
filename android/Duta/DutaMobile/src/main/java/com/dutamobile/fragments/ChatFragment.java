@@ -55,7 +55,17 @@ public class ChatFragment extends ListFragment implements Refreshable
                     {
                         final String text = message_box.getText().toString();
 
-                        if(text.length() > 0)// && !text.matches(<same białe znaki>))
+                        handler.post(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                message_box.setText(null);
+                            }
+                        });
+
+                        //if text longer than 0 and doesn't contain only whitespace chars
+                        if (text.length() > 0 && !text.matches("^\\s*$")) ;
                         {
                             final int [] users = new int[] { Helper.MyID, contactId};
                             final long timestamp = NetClient.GetInstance().SendMessage(text, users);
@@ -68,7 +78,6 @@ public class ChatFragment extends ListFragment implements Refreshable
                                     Message msg = new Message(text, users);
                                     msg.setTimestamp(timestamp);
                                     ((ChatAdapter) getListAdapter()).addMessage(msg);
-                                    message_box.setText(null);
                                     getListView().setSelection(getListAdapter().getCount() - 1);
                                 }
                             }

@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,14 +12,15 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.dutamobile.model.response.LoginResponse;
-import com.dutamobile.util.Helper;
 import com.dutamobile.net.NetClient;
+import com.dutamobile.util.Helper;
 
 import java.io.IOException;
 
@@ -96,6 +98,16 @@ public class LoginActivity extends ActionBarActivity
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.action_forgot_password)
+        {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.registry_address))));
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
@@ -120,7 +132,8 @@ public class LoginActivity extends ActionBarActivity
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
-        } else if (mPassword.length() < 4)
+        }
+        else if (mPassword.length() < 4)
         {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
@@ -140,7 +153,8 @@ public class LoginActivity extends ActionBarActivity
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
-        } else
+        }
+        else
         {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
@@ -188,7 +202,8 @@ public class LoginActivity extends ActionBarActivity
                             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
                         }
                     });
-        } else
+        }
+        else
         {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
@@ -204,7 +219,8 @@ public class LoginActivity extends ActionBarActivity
 
     private void PerformLogIn()
     {
-        ((DutaApplication)getApplication()).startTask(new AsyncTask<Void, Void, LoginResponse>(){
+        Helper.startTask(new AsyncTask<Void, Void, LoginResponse>()
+        {
             @Override
             protected LoginResponse doInBackground(Void... params)
             {
@@ -212,7 +228,10 @@ public class LoginActivity extends ActionBarActivity
                 {
                     return NetClient.GetInstance().Login(mUserId, mPassword);
                 }
-                catch (IOException e) { android.util.Log.e("LoginActivity", "Login failed"); }
+                catch(IOException e)
+                {
+                    android.util.Log.e("LoginActivity", "Login failed");
+                }
 
                 return null;
             }
@@ -231,7 +250,8 @@ public class LoginActivity extends ActionBarActivity
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
 
-                } else
+                }
+                else
                 {
                     mPasswordView.setError(getString(R.string.error_incorrect_password));
                     mPasswordView.requestFocus();

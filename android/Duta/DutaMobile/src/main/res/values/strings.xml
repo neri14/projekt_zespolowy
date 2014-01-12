@@ -4,7 +4,7 @@
     <string name="app_name">Duta Mobile</string>
     <string name="title_activity_main">Duta Mobile</string>
     <string name="action_settings">Ustawienia</string>
-    <string name="action_test">MENU</string>
+    <string name="action_test">Rejestracja</string>
     <string name="contentDesc">content</string>
     <string name="drawer_open">Menu</string>
 
@@ -16,11 +16,14 @@
     <string name="delete">Usuń</string>
     <string name="nickname">Nazwa wyświetlana</string>
     <string name="login_name">Login kontaktu</string>
+    <string name="adding_contact">Dodawanie kontaktu</string>
+
+    <string name="registry_address">http://duta.somee.com/Home/Register</string>
 
     <string-array name="drawer_items">
         <item>Test</item>
         <item>Zmień opis</item>
-        <item>Zarządzaj listą kontaktów</item>
+        <item>Odśwież listę kontaktów</item>
         <item>Wyloguj</item>
     </string-array>
 

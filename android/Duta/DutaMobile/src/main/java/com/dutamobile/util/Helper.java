@@ -3,12 +3,15 @@ package com.dutamobile.util;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.view.MenuItem;
 
 import com.dutamobile.R;
 import com.dutamobile.model.Status;
@@ -30,6 +33,7 @@ public class Helper
     public static String CURRENT_FRAGMENT;
     private static ActionBar actionBar = null;
     private static Gson gson = null;
+    private static MenuItem ChatItem;
     private static final int [] statusIcons = new int[]
             {
                     R.drawable.status_available,
@@ -89,11 +93,29 @@ public class Helper
         return actionBar;
     }
 
+    public static void SetChatItem(MenuItem chatItem)
+    {
+        ChatItem = chatItem;
+    }
+
+    public static void UpdateChatItemIcon(boolean b)
+    {
+        ChatItem.setIcon(b ? R.drawable.ic_new_message : R.drawable.ic_no_message);
+    }
+
+
     public static Drawable getStatusIndicator(Context context, Status status)
     {
         return context.getResources().getDrawable(statusIcons[status.ordinal()]);
     }
 
+    public static <T> void startTask(AsyncTask<T, ?, ?> asyncTask, T... params)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
+        else
+            asyncTask.execute(params);
+    }
 
     //JSON
     public synchronized static Gson getGsonInstance()

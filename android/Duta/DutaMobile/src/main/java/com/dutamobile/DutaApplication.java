@@ -2,7 +2,6 @@ package com.dutamobile;
 
 import android.app.Application;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.webkit.CookieSyncManager;
 
 import com.dutamobile.model.Contact;
@@ -30,9 +29,7 @@ public class DutaApplication extends Application
     public void onCreate()
     {
         super.onCreate();
-
         contactList = new ArrayList<Contact>();
-
         CookieSyncManager.createInstance(this);
     }
 
@@ -112,19 +109,14 @@ public class DutaApplication extends Application
 
     public void DownloadContactList()
     {
-        new AsyncTask<Void, Void, Void>()
+        Helper.startTask(new AsyncTask<Void, Void, Void>()
         {
             @Override
             protected Void doInBackground(Void... params)
             {
                 contactList = NetClient.GetInstance().GetContactList();
 
-                String s = "Statuses:\n";
-                for(Contact c : contactList)
-                    s += c.getDescription() + "\n";
-
                 android.util.Log.v("Contact List", contactList != null ? contactList.size() + "" : "null");
-                android.util.Log.v("Contact List", s);
 
                 return null;
             }
@@ -135,7 +127,7 @@ public class DutaApplication extends Application
                 super.onPostExecute(aVoid);
                 mainActivity.UpdateView(null, true);
             }
-        }.execute();
+        });
     }
 
     public class MessageReceiver extends AsyncTask<Void, Void, Void>
@@ -181,6 +173,7 @@ public class DutaApplication extends Application
 
                 if(data != null) UpdateContactStatuses(data);
             }
+            mainActivity.UpdateView(null, true);
 
             return null;
         }
@@ -191,13 +184,13 @@ public class DutaApplication extends Application
         if(messageReceiver == null)
         {
             messageReceiver = new MessageReceiver();
-            startTask(messageReceiver);
+            Helper.startTask(messageReceiver);
         }
 
         if(statusUpdater == null)
         {
             statusUpdater = new StatusUpdater();
-            startTask(statusUpdater);
+            Helper.startTask(statusUpdater);
         }
     }
 
@@ -214,14 +207,6 @@ public class DutaApplication extends Application
             messageReceiver.stop();
             messageReceiver.cancel(true);
         }
-    }
-
-    public void startTask(AsyncTask<?,?,?> asyncTask)
-    {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
-        else
-            asyncTask.execute();
     }
 
     public void SetMainActivity(MainActivity mainActivity)
