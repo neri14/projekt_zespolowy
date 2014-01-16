@@ -126,6 +126,7 @@ namespace duta.Controllers
                 response.Add(new GetMessageResponse_Message
                 {
                     users = msg.users.OrderBy(u => u).ToList(),
+                    author = msg.author,
                     timestamp = (long)t.TotalMilliseconds,
                     message = msg.message
                 });

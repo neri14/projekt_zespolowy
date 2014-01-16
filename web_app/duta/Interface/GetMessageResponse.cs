@@ -8,6 +8,7 @@ namespace duta.Interface
     public class GetMessageResponse_Message
     {
         public List<int> users { get; set; }
+        public int author { get; set; }
         public long timestamp { get; set; }
         public string message { get; set; }
     }

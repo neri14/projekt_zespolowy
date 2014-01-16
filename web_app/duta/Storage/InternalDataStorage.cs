@@ -79,19 +79,26 @@ namespace duta.Storage
             }
         }
 
-        public override void AddMessage(DateTime time, List<int> msg_users, string message)
+        public override void AddMessage(DateTime time, List<int> msg_users, int author, string message)
         {
             lock (messages)
             {
-                foreach (int id in msg_users)
+                lock (users)
                 {
-                    if (users.FirstOrDefault(u => u.user_id == id) == null)
+                    if (users.FirstOrDefault(u => u.user_id == author) == null)
                     {
                         throw new UserNotExistingException();
                     }
+                    foreach (int id in msg_users)
+                    {
+                        if (users.FirstOrDefault(u => u.user_id == id) == null)
+                        {
+                            throw new UserNotExistingException();
+                        }
+                    }
                 }
 
-                messages.Add(new Message(++last_message_id, time, msg_users, message));
+                messages.Add(new Message(++last_message_id, time, msg_users, author, message));
             }
         }
     }
