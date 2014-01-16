@@ -15,6 +15,17 @@ namespace duta.Storage
 
         public abstract List<Message> GetMessagesSince(int user, DateTime time);
         public abstract void AddMessage(DateTime time, List<int> users, int author, string message);
+
+        public abstract DateTime GetLastMessageUpdate(int user_id);
+        public abstract void SetLastMessageUpdate(int user_id, DateTime time);
+
+        public abstract List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames);
+
+        public abstract bool SetStatus(string login, EUserStatus status, string description);
+
+        public abstract bool AddContact(string login, string contact_login, string contact_nickname);
+        public abstract bool RemoveContact(string login, string contact_login);
+        public abstract bool UpdateContact(string login, string contact_login, string contact_nickname);
     }
 
     public static class DataStorageCreator
@@ -31,7 +42,8 @@ namespace duta.Storage
         {
             if (instance == null)
             {
-                return Create<InternalDataStorage>();
+                //return Create<InternalDataStorage>();
+                return Create<ExternalDataStorage>();
             }
             return instance;
         }

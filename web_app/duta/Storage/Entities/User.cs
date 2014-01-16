@@ -14,8 +14,9 @@ namespace duta.Storage.Entities
             this.password = password;
             this.status = EUserStatus.EUserStatus_Offline;
             this.descripton = "";
-            this.contact_list = new Dictionary<string, User>();
+            this.contact_list = new Dictionary<string, int>();
             this.last_status_update = DateTime.Now;
+            this.last_messages_download = DateTime.Now;
         }
 
         public int user_id { get; set; }
@@ -23,14 +24,15 @@ namespace duta.Storage.Entities
         public string password { get; set; }
         public EUserStatus status { get; set; }
         public string descripton { get; set; }
-        public Dictionary<string,User> contact_list { get; set; }
+        public Dictionary<string,int> contact_list { get; set; }
         public DateTime last_status_update { get; set; }
+        public DateTime last_messages_download { get; set; }
     }
 
     public enum EUserStatus
     {
         EUserStatus_OnLine,
-        EUserStatus_Offline,
-        EUserStatus_Away
+        EUserStatus_Away,
+        EUserStatus_Offline
     }
 }

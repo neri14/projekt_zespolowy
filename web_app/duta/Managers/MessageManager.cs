@@ -1,4 +1,5 @@
-﻿using duta.Storage;
+﻿using duta.Debug;
+using duta.Storage;
 using duta.Storage.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,25 +11,31 @@ namespace duta.Managers
 {
     public static class MessageManager
     {
+        private static LoggerWrapper logger = new LoggerWrapper("MSG_MNGR");
         private static DataStorage data = DataStorageCreator.Get();
-
         private static Dictionary<int, TaskCompletionSource<bool>> awaitingMessageUpdates
             = new Dictionary<int, TaskCompletionSource<bool>>();
+        private static Dictionary<int, List<long>> sent = new Dictionary<int, List<long>>();
+
+        private static Object locker = new Object();
 
         public static async Task<List<Message>> GetMessageUpdate(int user, DateTime lastUpdate)
         {
-            lock (awaitingMessageUpdates)
+            lock (locker)
             {
                 awaitingMessageUpdates.Remove(user);
             }
+
+            List<Message> messages = data.GetMessagesSince(user, lastUpdate);
+            messages = RemoveRecentlySentMessages(messages, user);
+            if (messages.Count > 0)
             {
-                List<Message> changed = data.GetMessagesSince(user, lastUpdate);
-                if(changed.Count > 0)
-                    return changed;
+                sent[user] = messages.Select(m => m.message_id).ToList();
+                return messages;
             }
 
             TaskCompletionSource<bool> task;
-            lock(awaitingMessageUpdates)
+            lock (locker)
             {
                 task = new TaskCompletionSource<bool>();
                 awaitingMessageUpdates.Add(user, task);
@@ -36,12 +43,40 @@ namespace duta.Managers
 
             await task.Task;
 
-            lock (awaitingMessageUpdates)
+            lock (locker)
             {
                 task = null;
                 awaitingMessageUpdates.Remove(user);
             }
-            return data.GetMessagesSince(user, lastUpdate);
+
+            messages = data.GetMessagesSince(user, lastUpdate);
+            messages = RemoveRecentlySentMessages(messages, user);
+            sent[user] = messages.Select(m => m.message_id).ToList();
+            return messages;
+        }
+
+        private static List<Message> RemoveRecentlySentMessages(List<Message> msgs, int user)
+        {
+            logger.Log(user + ": Messages to send " + ListOut(msgs.Select(m => m.message_id).ToList()));
+
+            List<Message> result = msgs;
+
+            if (sent.ContainsKey(user))
+            {
+                logger.Log(user + ": Already sent " + ListOut(sent[user]));
+                result = msgs.Where(m => !sent[user].Contains(m.message_id)).ToList();
+            }
+
+            logger.Log(user + ": After removing " + ListOut(result.Select(m => m.message_id).ToList()));
+            return result;
+        }
+
+        private static string ListOut(List<long> list)
+        {
+            string str = "";
+            foreach (long l in list)
+                str += l + ", ";
+            return str;
         }
 
         public static DateTime SendMessage(int sender, List<int> receivers, string message)
@@ -49,7 +84,7 @@ namespace duta.Managers
             DateTime time = DateTime.Now;
             data.AddMessage(time, receivers, sender, message);
 
-            lock (awaitingMessageUpdates)
+            lock (locker)
             {
                 foreach (int u in receivers.Where(r => r != sender))
                 {
@@ -60,6 +95,21 @@ namespace duta.Managers
                 }
             }
             return time;
+        }
+
+        public static DateTime GetLastMessageUpdate(int user_id)
+        {
+            return data.GetLastMessageUpdate(user_id);
+        }
+
+        public static void SetLastMessageUpdate(int user_id, DateTime time)
+        {
+            data.SetLastMessageUpdate(user_id, time);
+        }
+
+        public static List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames)
+        {
+            return data.GetArchive(from, to, usernames);
         }
     }
 }

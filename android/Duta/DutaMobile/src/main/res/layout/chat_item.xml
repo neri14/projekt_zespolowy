@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="4dp"
+    >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/chat_container">
+
+        <TextView
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:layout_below="@+id/text_3"
+            android:id="@+id/text_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:paddingBottom="2dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_3"
+            android:layout_marginLeft="12dp"
+            android:textStyle="bold"
+            android:textColor="#000"
+            android:paddingTop="2dp"
+            android:layout_marginRight="12dp"
+            android:layout_alignLeft="@id/text_1"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_2"
+            android:textSize="12sp"
+            android:textColor="#888"
+            android:layout_below="@+id/text_1"
+            android:singleLine="true"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="4dp"
+            />
+    </RelativeLayout>
+</RelativeLayout>

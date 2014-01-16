@@ -1,0 +1,31 @@
+﻿@model duta.ViewModels.DebugModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Debug</title>
+    <script type="text/javascript">
+        <!--
+        function timedRefresh(timeoutPeriod) {
+            setTimeout("location.reload(true);", timeoutPeriod*1000);
+        }
+        //-->
+    </script>
+</head>
+<body onload="javascript:timedRefresh(@Model.Timeout)">
+    <div id="logs">
+        <pre style="line-height:7px">
+        @foreach (string log in Model.Logs)
+        {
+            @log<br />
+        }
+        </pre>
+    </div>
+</body>
+</html>

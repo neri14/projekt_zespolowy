@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="DataModel" Alias="Self" p1:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:p1="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityContainer Name="DataEntities" p1:LazyLoadingEnabled="true">
+    <EntitySet Name="contacts" EntityType="DataModel.contact" />
+    <EntitySet Name="messages" EntityType="DataModel.message" />
+    <EntitySet Name="users" EntityType="DataModel.user" />
+    <AssociationSet Name="FK_contacts_contact" Association="DataModel.FK_contacts_contact">
+      <End Role="user_contact" EntitySet="users" />
+      <End Role="others_contact" EntitySet="contacts" />
+    </AssociationSet>
+    <AssociationSet Name="FK_contacts_user" Association="DataModel.FK_contacts_user">
+      <End Role="user" EntitySet="users" />
+      <End Role="contacts" EntitySet="contacts" />
+    </AssociationSet>
+    <AssociationSet Name="FK_messages_author" Association="DataModel.FK_messages_author">
+      <End Role="author" EntitySet="users" />
+      <End Role="sent_messages" EntitySet="messages" />
+    </AssociationSet>
+    <AssociationSet Name="messages_users" Association="DataModel.messages_users">
+      <End Role="messages" EntitySet="messages" />
+      <End Role="users" EntitySet="users" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="contact">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="Int32" Nullable="false" p1:StoreGeneratedPattern="Identity" />
+    <Property Name="name" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+    <Property Name="user_id" Type="Int32" Nullable="false" />
+    <Property Name="contact_id" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="user_contact" Relationship="DataModel.FK_contacts_contact" FromRole="others_contact" ToRole="user_contact" />
+    <NavigationProperty Name="user" Relationship="DataModel.FK_contacts_user" FromRole="contacts" ToRole="user" />
+  </EntityType>
+  <EntityType Name="message">
+    <Key>
+      <PropertyRef Name="message_id" />
+    </Key>
+    <Property Name="message_id" Type="Int32" Nullable="false" p1:StoreGeneratedPattern="Identity" />
+    <Property Name="time" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="author_id" Type="Int32" Nullable="false" />
+    <Property Name="message1" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+    <NavigationProperty Name="author" Relationship="DataModel.FK_messages_author" FromRole="sent_messages" ToRole="author" />
+    <NavigationProperty Name="users" Relationship="DataModel.messages_users" FromRole="messages" ToRole="users" />
+  </EntityType>
+  <EntityType Name="user">
+    <Key>
+      <PropertyRef Name="user_id" />
+    </Key>
+    <Property Name="user_id" Type="Int32" Nullable="false" p1:StoreGeneratedPattern="Identity" />
+    <Property Name="login" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+    <Property Name="password" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+    <Property Name="status" Type="Int32" Nullable="false" />
+    <Property Name="description" Type="String" Nullable="false" MaxLength="128" Unicode="true" FixedLength="false" />
+    <Property Name="last_status_update" Type="DateTime" Nullable="false" Precision="3" />
+    <NavigationProperty Name="others_contacts" Relationship="DataModel.FK_contacts_contact" FromRole="user_contact" ToRole="others_contact" />
+    <NavigationProperty Name="contacts" Relationship="DataModel.FK_contacts_user" FromRole="user" ToRole="contacts" />
+    <NavigationProperty Name="sent_messages" Relationship="DataModel.FK_messages_author" FromRole="author" ToRole="sent_messages" />
+    <NavigationProperty Name="messages" Relationship="DataModel.messages_users" FromRole="users" ToRole="messages" />
+  </EntityType>
+  <Association Name="FK_contacts_contact">
+    <End Role="user_contact" Type="DataModel.user" Multiplicity="1" />
+    <End Role="others_contact" Type="DataModel.contact" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="user_contact">
+        <PropertyRef Name="user_id" />
+      </Principal>
+      <Dependent Role="others_contact">
+        <PropertyRef Name="contact_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_contacts_user">
+    <End Role="user" Type="DataModel.user" Multiplicity="1" />
+    <End Role="contacts" Type="DataModel.contact" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="user">
+        <PropertyRef Name="user_id" />
+      </Principal>
+      <Dependent Role="contacts">
+        <PropertyRef Name="user_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_messages_author">
+    <End Role="author" Type="DataModel.user" Multiplicity="1" />
+    <End Role="sent_messages" Type="DataModel.message" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="author">
+        <PropertyRef Name="user_id" />
+      </Principal>
+      <Dependent Role="sent_messages">
+        <PropertyRef Name="author_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="messages_users">
+    <End Role="messages" Type="DataModel.message" Multiplicity="*" />
+    <End Role="users" Type="DataModel.user" Multiplicity="*" />
+  </Association>
+</Schema>

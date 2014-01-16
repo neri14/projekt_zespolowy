@@ -3,30 +3,52 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using duta.Debug;
+using System.Web.SessionState;
 
 namespace duta.Controllers
 {
+    [SessionState(SessionStateBehavior.ReadOnly)]
     public class HomeController : Controller
     {
         public ActionResult Index()
         {
-            ViewBag.Message = "Modify this template to jump-start your ASP.NET MVC application.";
+            return View();
+        }
+
+        public ActionResult Register()
+        {
+            return View();
+        }
+
+        public ActionResult komunikator()
+        {
+            ViewBag.Message = "Duta";
 
             return View();
         }
 
-        public ActionResult About()
+        public ActionResult contactView()
         {
-            ViewBag.Message = "Your app description page.";
-
-            return View();
+            return PartialView();
         }
 
-        public ActionResult Contact()
+        public ActionResult tabListItemView()
         {
-            ViewBag.Message = "Your contact page.";
+            return PartialView();
+        }
+        public ActionResult messagesPanelView()
+        {
+            return PartialView();
+        }
+        public ActionResult conversationView()
+        {
+            return PartialView();
+        }
 
-            return View();
+        public ActionResult messageView()
+        {
+            return PartialView();
         }
     }
 }

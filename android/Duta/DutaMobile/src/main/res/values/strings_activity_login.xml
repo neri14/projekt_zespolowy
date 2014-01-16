@@ -1,0 +1,14 @@
+<resources>
+    <!-- Strings related to login -->
+    <string name="prompt_user_id">ID użytkownika</string>
+    <string name="prompt_password">Hasło</string>
+
+    <string name="action_sign_in_short">Zaloguj</string>
+
+    <string name="login_progress_signing_in">Logowanie&#8230;</string>
+
+    <string name="error_invalid_user_id">This user ID  is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+</resources>

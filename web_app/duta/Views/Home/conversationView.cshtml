@@ -1,0 +1,27 @@
+﻿<div class="tab-pane active conversation" id="{{users}}">
+	<div class="tabMenu">
+		<div class="btn-group">
+			<button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown">
+				Menu <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu pull-right" role="menu">
+				<li><a href="#">Zapros</a></li>
+				<li><a href="#">Poprzednie rozmowy</a></li>
+				<li><a href="#">Something else here</a></li>
+				<li class="divider"></li>
+				<li><a href="#" onClick="duta.closeConversation('{{users}}')">Zakończ</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="tabMessages">
+						
+	</div>
+	<div class="tabMyMessage">
+		<textarea rows="4" style="width: inherit" class="messageToSend"></textarea>
+	</div>
+	<div class="tabBottomMenu">
+		<button type="button" class="btn btn-sm" onClick="duta.sendMessage('{{users}}')">
+			Wyślij
+		</button>
+	</div>
+</div>
