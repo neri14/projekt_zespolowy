@@ -43,10 +43,29 @@ function getRadio(){
 var duta = function () { 
 	var messagesPanelExists = false;
 	var dutaModel = {};
-	window.onload = function () {
-	//    login();
-	    
-	};
+
+	$(document).ready(function () {
+	    var loginName = $('#dutaContainer #application #userName').html();
+	    getUserData(login);
+	    dutaModel.myLogin = loginName;
+	    dutaModel.myStatus = 'available';
+	    dutaModel.myDescription = '';
+	    getContactList();
+	});
+
+	function getUserData(login){
+	    ajaxHelper.post(constants.urls.getUserData, {login: login},
+			function (result) {
+			    /*
+                public int user_id { get; set; }
+                public string login { get; set; }
+                public int status { get; set; }
+                public string description { get; set; }
+                */
+			    dutaModel.myId = result.user_id;
+			}
+		);
+	}
 	
 	function getActualContact(id) {
 	    var cont = {};
@@ -56,55 +75,6 @@ var duta = function () {
 			}
 		});
 		return cont;
-	}
-	
-	function login() {
-	    var url = window.location.origin + "/Service/Login";
-		$.ajax({
-			type: "post",
-			url: url,
-			data: {login: "user_a", password: "pass"},
-			dataType : "json",
-			success: function (response) {
-			    if (response.logged_in == 1) {
-			        $('#dutaContainer #application #userName').html(response.user_id);
-			        dutaModel.myId = response.user_id;
-			        getContactList();
-			    }
-			}
-		});
-	}
-
-	function login2() {
-	    $.ajax({
-	        type: "post",
-	        url: window.location.origin + "/Service/Login",
-	        data: { login: "user_b", password: "pass" },
-	        dataType: "json",
-	        success: function (response) {
-	            if (response.logged_in == 1) {
-	                $('#dutaContainer #application #userName').html(response.user_id);
-	                dutaModel.myId = response.user_id;
-	                getContactList();
-	            }
-	        }
-	    });
-	}
-	
-	function logout(){
-		$.ajax({
-			type: "post",
-			url: window.location.origin + "/Service/logout",
-			dataType : "json",
-			success: function(response) {
-				alert(response);
-			}
-		});
-	}
-	
-	function afterLogin(response){
-		alert('jest!!');
-
 	}
 	
 	
@@ -169,12 +139,22 @@ var duta = function () {
 	
 	
 	function getContactList(){
-		//jakis post a w jego callback:
 		ajaxHelper.post(constants.urls.getContactList,{},
-			function(result){
+			function (result) {
+			    /*
+                public int user_id { get; set; }
+                public string login { get; set; }
+                public string nickname { get; set; }
+                public int status { get; set; }
+                public string description { get; set; }
+                */
+			    $.each(result, function (index, value) {
+			        value.status = statusToString(value.status);
+			    });
 				dutaModel.contacts = result;
 				renderContactList(dutaModel.contacts);
 				getMessages();
+				getStatusUpdate();
 			}
 		);
 		var contacts = [
@@ -216,8 +196,58 @@ var duta = function () {
 	function renderContactList(contacts){
 		$.each(contacts, function( index, value ) {
 			renderContact(value);
-		});
-		
+		});	
+	}
+
+	function setMyStatus(status) {
+	    var oldStatus = dutaModel.myStatus;
+	    dutaModel.myStatus = status;
+	    var stNr = statusToNumber(dutaModel.myStatus)
+	    ajaxHelper.post(constants.urls.setStatus,
+            {
+                status: stNr,
+                description: dutaModel.myDescription
+            },
+            function () {
+                var userStatus = $('#userStatus');
+                $(userStatus).removeClass(oldStatus);
+                $(userStatus).addClass(dutaModel.myStatus);
+                
+            }
+        );
+	}
+
+	function getStatusUpdate() {
+	    ajaxHelper.poll(constants.urls.getStatusUpdate, {},getStatusUpdate,
+			function (result) {
+			    $.each(result, function (index, value) {
+			        updateStatus(value);
+			    });
+			    
+			}
+		);
+	}
+
+	function updateStatus(model) {
+	    /*model
+			    public int user_id { get; set; }
+			    public int status { get; set; }
+			    public string description { get; set; }
+                */
+	    var oldModel;
+	    $.each(dutaModel.contacts, function (index, value) {
+	        if (value.user_id == model.user_id) {
+	            oldModel = value;
+	        }
+	    }); 
+	    var desc = $('#application #contacts #' + model.user_id + ' .description');
+	    desc.html(model.description);
+	    oldModel.description = model.description;
+	    var stat = $('#application #contacts #' + model.user_id + ' .status');
+	    $(stat).removeClass(oldModel.status);
+	    $(stat).addClass(statusToString(model.status));
+	    oldModel.status = statusToString(model.status);
+
 	}
 	
 	function startConversation(identificator){
@@ -246,16 +276,37 @@ var duta = function () {
 		$('#messagesPanel .nav-tabs a:last').tab('show');
 		return rendered;
 	}
-	
+
+	function statusToString(nr) {
+	    if (nr == 0) {
+	        return 'available';
+	    }
+	    if (nr == 1) {
+	        return 'brb';
+	    }
+	    if (nr == 2) {
+	        return 'inaccessible';
+	    }
+	}
+
+	function statusToNumber(str) {
+	    if (str === 'available') {
+	        return 0;
+	    }
+	    if (str === 'brb') {
+	        return 1;
+	    }
+	    if (str === 'inaccessible') {
+	        return 2;
+	    }
+	}
 
 	return{
 		renderMessage : renderMessage,
 		startConversation : startConversation,
 		getContactList : getContactList,
-		sendMessage : sendMessage,
-		login: login,
-		login2: login2,
-		logout: logout
+		sendMessage: sendMessage,
+		setMyStatus: setMyStatus
 	
 	};
 
@@ -339,7 +390,10 @@ var constants = function () {
 		getStatus : "",
 		login : contextRoot+"Service/Login",
 		logout : contextRoot+"Service/Logout",
-		getContactList: contextRoot + "Service/GetContactList"
+		getContactList: contextRoot + "Service/GetContactList",
+		getStatusUpdate: contextRoot + "Service/GetStatusUpdate",
+		setStatus: contextRoot + "Service/SetStatus",
+		getUserData: contextRoot + "Service/GetUserData"
 	}
 
 	return{

@@ -276,6 +276,20 @@ namespace duta.Controllers
         }
 
         [HttpPost]
+        public ActionResult GetMyData()
+        {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
+            logger.LogActionEnter(Session.SessionID, "/Service/GetUserData", "by login");
+            User usr = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
+            logger.LogActionLeave(Session.SessionID, "/Service/GetUserData");
+            return Json(new UserDataResponse(usr));
+        }
+
+        [HttpPost]
         public HttpStatusCodeResult Ping()
         {
             logger.LogActionEnter(Session.SessionID, "/Service/Ping");
