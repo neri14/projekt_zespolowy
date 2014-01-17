@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dutamobile.model.response.LoginResponse;
 import com.dutamobile.net.NetClient;
@@ -104,6 +105,11 @@ public class LoginActivity extends ActionBarActivity
         if (item.getItemId() == R.id.action_forgot_password)
         {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.registry_address))));
+        }
+
+        if (item.getItemId() == R.id.action_server)
+        {
+            Toast.makeText(this, NetClient.GetInstance().ChangeServer(), Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }

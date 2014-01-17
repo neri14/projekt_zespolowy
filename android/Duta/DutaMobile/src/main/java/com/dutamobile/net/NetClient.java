@@ -29,7 +29,20 @@ public class NetClient
 {
     private static NetClient mInstance = null;
     //private final String ServerAddress = "http://10.0.3.2:1404/Service";
-    private final String ServerAddress = "http://duta.somee.com/Service";
+    //todo dodać final w ostatecznej wersji
+    private String ServerAddress = "http://duta.somee.com/Service";
+
+    private boolean state = false;
+
+    public String ChangeServer()
+    {
+        if (state)
+            ServerAddress = "http://duta.somee.com/Service";
+        else
+            ServerAddress = "http://10.0.3.2:1404/Service";
+
+        return ServerAddress;
+    }
 
     private NetClient() {}
 
@@ -230,6 +243,7 @@ public class NetClient
             {
                 Type type = new TypeToken<List<StatusUpdateResponse>>() {}.getType();
                 statusUpdates = Helper.getObjectFromJson(client.getInputStream(), type);
+                GetSessionCookie(client);
             }
 
             client.disconnect();
