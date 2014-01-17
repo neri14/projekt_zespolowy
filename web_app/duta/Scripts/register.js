@@ -32,6 +32,7 @@
                 } else {
                     alert("Wystąpił błąd");
                 }
+                redirectToHomepage();
             },
             complete: redirectToHomepage
         });
