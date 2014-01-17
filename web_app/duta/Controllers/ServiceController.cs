@@ -94,6 +94,7 @@ namespace duta.Controllers
             return Json(list.OrderBy(u => u.user_id));
         }
 
+        [HttpPost]
         public ActionResult AddContact(string login, string nickname)
         {
             if (UserManager.AddContact(System.Web.HttpContext.Current.User.Identity.Name, login, nickname))
@@ -102,6 +103,7 @@ namespace duta.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
         }
 
+        [HttpPost]
         public ActionResult RemoveContact(string login)
         {
             if (UserManager.RemoveContact(System.Web.HttpContext.Current.User.Identity.Name, login))
@@ -110,6 +112,7 @@ namespace duta.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
         }
 
+        [HttpPost]
         public ActionResult UpdateContact(string login, string nickname)
         {
             if (UserManager.UpdateContact(System.Web.HttpContext.Current.User.Identity.Name, login, nickname))
@@ -156,8 +159,7 @@ namespace duta.Controllers
             return Json(list.OrderBy(u => u.user_id));
         }
 
-        //[HttpPost]
-        [HttpGet]
+        [HttpPost]
         public ActionResult SetStatus(int status, string description)
         {
             if (!PingNotif())
