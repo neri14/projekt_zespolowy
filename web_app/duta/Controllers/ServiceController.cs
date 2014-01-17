@@ -156,7 +156,8 @@ namespace duta.Controllers
             return Json(list.OrderBy(u => u.user_id));
         }
 
-        [HttpPost]
+        //[HttpPost]
+        [HttpGet]
         public ActionResult SetStatus(int status, string description)
         {
             if (!PingNotif())
@@ -248,7 +249,7 @@ namespace duta.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetUserData(int user_id)
+        public ActionResult GetUserDataById(int user_id)
         {
             if (!PingNotif())
             {
@@ -262,7 +263,7 @@ namespace duta.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetUserData(string login)
+        public ActionResult GetUserDataByLogin(string login)
         {
             if (!PingNotif())
             {
@@ -271,6 +272,20 @@ namespace duta.Controllers
 
             logger.LogActionEnter(Session.SessionID, "/Service/GetUserData", "by login");
             User usr = UserManager.GetUser(login);
+            logger.LogActionLeave(Session.SessionID, "/Service/GetUserData");
+            return Json(new UserDataResponse(usr));
+        }
+
+        [HttpPost]
+        public ActionResult GetMyData()
+        {
+            if (!PingNotif())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
+            logger.LogActionEnter(Session.SessionID, "/Service/GetUserData", "by login");
+            User usr = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
             logger.LogActionLeave(Session.SessionID, "/Service/GetUserData");
             return Json(new UserDataResponse(usr));
         }

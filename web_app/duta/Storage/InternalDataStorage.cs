@@ -168,5 +168,10 @@ namespace duta.Storage
         {
             return false;
         }
+
+        public override bool SetStatus(string login, EUserStatus status, string description)
+        {
+            return false;
+        }
     }
 }

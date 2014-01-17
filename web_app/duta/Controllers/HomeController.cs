@@ -24,6 +24,7 @@ namespace duta.Controllers
         public ActionResult komunikator()
         {
             ViewBag.Message = "Duta";
+            ViewBag.Login = System.Web.HttpContext.Current.User.Identity.Name;
 
             return View();
         }
@@ -47,6 +48,16 @@ namespace duta.Controllers
         }
 
         public ActionResult messageView()
+        {
+            return PartialView();
+        }
+
+        public ActionResult archiveView()
+        {
+            return PartialView();
+        }
+
+        public ActionResult userArchiveView()
         {
             return PartialView();
         }

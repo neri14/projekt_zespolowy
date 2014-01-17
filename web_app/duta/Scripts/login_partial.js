@@ -1,7 +1,10 @@
-﻿$(document).ready(function () {
+﻿var loginId;
+var loginName;
+$(document).ready(function () {
     function redirectToHomepage() {
         window.location.href = "/Home/Index";
     }
+    
 
     function onLogin() {
         var loginValue = $('#txt-login').val();
@@ -15,6 +18,12 @@
                 password: passValue
             },
             dataType: "json",
+            success: function (response) {
+                if (response.logged_in == 1) {                    
+                    loginId = response.user_id;
+                    loginName = loginValue;
+                }
+            },
             complete: redirectToHomepage
         });
     }

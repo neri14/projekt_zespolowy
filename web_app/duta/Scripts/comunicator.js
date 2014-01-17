@@ -43,10 +43,30 @@ function getRadio(){
 var duta = function () { 
 	var messagesPanelExists = false;
 	var dutaModel = {};
-	window.onload = function () {
-	//    login();
-	    
-	};
+
+	$(document).ready(function () {
+	    var loginName = $('#dutaContainer #application #userName').html();
+	    getUserData(login);
+	    dutaModel.myLogin = loginName;
+	    dutaModel.myStatus = 'available';
+	    dutaModel.myDescription = '';
+	    getContactList();
+//	    document.getElementsByTagName("body")[0].oncontextmenu = function (e) { e.preventDefault(); }
+	});
+
+	function getUserData(login){
+	    ajaxHelper.post(constants.urls.getUserData, {login: login},
+			function (result) {
+			    /*
+                public int user_id { get; set; }
+                public string login { get; set; }
+                public int status { get; set; }
+                public string description { get; set; }
+                */
+			    dutaModel.myId = result.user_id;
+			}
+		);
+	}
 	
 	function getActualContact(id) {
 	    var cont = {};
@@ -56,55 +76,6 @@ var duta = function () {
 			}
 		});
 		return cont;
-	}
-	
-	function login() {
-	    var url = window.location.origin + "/Service/Login";
-		$.ajax({
-			type: "post",
-			url: url,
-			data: {login: "user_a", password: "pass"},
-			dataType : "json",
-			success: function (response) {
-			    if (response.logged_in == 1) {
-			        $('#dutaContainer #application #userName').html(response.user_id);
-			        dutaModel.myId = response.user_id;
-			        getContactList();
-			    }
-			}
-		});
-	}
-
-	function login2() {
-	    $.ajax({
-	        type: "post",
-	        url: window.location.origin + "/Service/Login",
-	        data: { login: "user_b", password: "pass" },
-	        dataType: "json",
-	        success: function (response) {
-	            if (response.logged_in == 1) {
-	                $('#dutaContainer #application #userName').html(response.user_id);
-	                dutaModel.myId = response.user_id;
-	                getContactList();
-	            }
-	        }
-	    });
-	}
-	
-	function logout(){
-		$.ajax({
-			type: "post",
-			url: window.location.origin + "/Service/logout",
-			dataType : "json",
-			success: function(response) {
-				alert(response);
-			}
-		});
-	}
-	
-	function afterLogin(response){
-		alert('jest!!');
-
 	}
 	
 	
@@ -169,55 +140,81 @@ var duta = function () {
 	
 	
 	function getContactList(){
-		//jakis post a w jego callback:
 		ajaxHelper.post(constants.urls.getContactList,{},
-			function(result){
+			function (result) {
+			    /*
+                public int user_id { get; set; }
+                public string login { get; set; }
+                public string nickname { get; set; }
+                public int status { get; set; }
+                public string description { get; set; }
+                */
+			    $.each(result, function (index, value) {
+			        value.status = statusToString(value.status);
+			    });
 				dutaModel.contacts = result;
 				renderContactList(dutaModel.contacts);
 				getMessages();
+				getStatusUpdate();
 			}
-		);
-		var contacts = [
-			{
-			user_id : '1234',
-			nickname : 'Tomek',
-			status : 'available',
-			user_id : 'w zyciu piekne sa..'
-			},
-			{
-			user_id : '2345',
-			nickname : 'Gosia',
-			status : 'brb',
-			description : 'tylko chwile'
-			},
-			{
-			user_id : '3456',
-			nickname : 'Adam',
-			status : 'available',
-			description : 'zyj'
-			},
-			{
-			user_id : '4567',
-			nickname : 'Przemek',
-			status : 'brb',
-			description : 'i daj rzyc innym'
-			},
-			{
-			user_id : '5678',
-			nickname : 'Kasia',
-			status : 'inaccessible',
-			description : ''
-			}		
-		];
-		//renderContactList(contacts);
-		
+		);		
 	}
 	
 	function renderContactList(contacts){
 		$.each(contacts, function( index, value ) {
 			renderContact(value);
-		});
-		
+		});	
+	}
+
+	function setMyStatus(status) {
+	    var oldStatus = dutaModel.myStatus;
+	    dutaModel.myStatus = status;
+	    var stNr = statusToNumber(dutaModel.myStatus)
+	    ajaxHelper.post(constants.urls.setStatus,
+            {
+                status: stNr,
+                description: dutaModel.myDescription
+            },
+            function () {
+                var userStatus = $('#userStatus');
+                $(userStatus).removeClass(oldStatus);
+                $(userStatus).addClass(dutaModel.myStatus);
+                
+            }
+        );
+	}
+
+	function getStatusUpdate() {
+	    ajaxHelper.poll(constants.urls.getStatusUpdate, {},getStatusUpdate,
+			function (result) {
+			    $.each(result, function (index, value) {
+			        updateStatus(value);
+			    });
+			    
+			}
+		);
+	}
+
+	function updateStatus(model) {
+	    /*model
+			    public int user_id { get; set; }
+			    public int status { get; set; }
+			    public string description { get; set; }
+                */
+	    var oldModel;
+	    $.each(dutaModel.contacts, function (index, value) {
+	        if (value.user_id == model.user_id) {
+	            oldModel = value;
+	        }
+	    }); 
+	    var desc = $('#application #contacts #' + model.user_id + ' .description');
+	    desc.html(model.description);
+	    oldModel.description = model.description;
+	    var stat = $('#application #contacts #' + model.user_id + ' .status');
+	    $(stat).removeClass(oldModel.status);
+	    $(stat).addClass(statusToString(model.status));
+	    oldModel.status = statusToString(model.status);
+
 	}
 	
 	function startConversation(identificator){
@@ -246,16 +243,121 @@ var duta = function () {
 		$('#messagesPanel .nav-tabs a:last').tab('show');
 		return rendered;
 	}
-	
+
+	function statusToString(nr) {
+	    if (nr == 0) {
+	        return 'available';
+	    }
+	    if (nr == 1) {
+	        return 'brb';
+	    }
+	    if (nr == 2) {
+	        return 'inaccessible';
+	    }
+	}
+
+	function statusToNumber(str) {
+	    if (str === 'available') {
+	        return 0;
+	    }
+	    if (str === 'brb') {
+	        return 1;
+	    }
+	    if (str === 'inaccessible') {
+	        return 2;
+	    }
+	}
+
+	function showContextMenu(user_id) {
+	    var $contextMenu = $('#application #contacts #' + user_id + ' .contextMenu');
+
+	    $contextMenu.css({
+	        display: "block"
+	    });
+
+	    $contextMenu.on("click", "a", function () {
+	        $contextMenu.hide();
+	    });
+
+	    $(document).click(function () {
+	        $contextMenu.hide();
+	    });
+	    return false;
+	}
+
+
+	function selectArchiveDialog(user_id) {
+
+	    var archiveView = constants.templates.archiveView;
+//	    var renderedArchive = Handlebars.compile(archiveView)(model);
+	    $(archiveView).dialog({
+	        autoOpen: true,
+	        modal: true,
+            resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var from = new Date($('#datepickerFrom').val()).getTime();
+                    var to = new Date($('#datepickerTo').val()).getTime();
+                    $('#datepickerFrom').remove();
+                    $('#datepickerTo').remove();
+                    $(this).dialog("close");
+                    openUserArchiveDialog(user_id, from, to);
+                }
+            }
+	        ]
+	    });
+
+	    $('#datepickerFrom').datetimepicker();
+	    $('#datepickerTo').datetimepicker();
+	}
+
+	function openUserArchiveDialog(user_id, from, to) {
+	    var model = {};
+	    model.user_id = user_id;
+	    model.title = 'Archiwum: ' + user_id;
+	    var userArchiveView = constants.templates.userArchiveView;
+	    var compiledUserArchiveView = Handlebars.compile(userArchiveView)(model);
+	    
+	    ajaxHelper.post(constants.urls.getArchiveFilteredByUserId,
+            {
+                from: from,
+                to: to,
+                userid: user_id
+            },
+			function (result) {
+			    /* lista:
+                public List<int> users { get; set; }
+                public int author { get; set; }
+                public long timestamp { get; set; }
+                public string message { get; set; }
+                */
+			    $.each(result, function (index, value) {
+			        var date = new Date(value.timestamp);
+			        value.dateTime = date.toLocaleTimeString();
+			    });
+			    model.messages = result;
+			}
+		);
+
+
+
+	    $(compiledUserArchiveView).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false
+	    });
+	}
 
 	return{
 		renderMessage : renderMessage,
 		startConversation : startConversation,
 		getContactList : getContactList,
-		sendMessage : sendMessage,
-		login: login,
-		login2: login2,
-		logout: logout
+		sendMessage: sendMessage,
+		setMyStatus: setMyStatus,
+		showContextMenu: showContextMenu,
+		selectArchiveDialog: selectArchiveDialog
 	
 	};
 
@@ -330,7 +432,9 @@ var constants = function () {
     templates.tabListItem = ajaxHelper.getTemplate(contextRoot+"Home/tabListItemView");
     templates.messagesPanel = ajaxHelper.getTemplate(contextRoot+"Home/messagesPanelView");
     templates.conversation = ajaxHelper.getTemplate(contextRoot+"Home/conversationView");
-    templates.contact = ajaxHelper.getTemplate(contextRoot+"Home/contactView");
+    templates.contact = ajaxHelper.getTemplate(contextRoot + "Home/contactView");
+    templates.archiveView = ajaxHelper.getTemplate(contextRoot + "Home/archiveView");
+    templates.userArchiveView = ajaxHelper.getTemplate(contextRoot + "Home/userArchiveView");
 	
 	var urls = {
 	    sendMessage : contextRoot+"Service/SendMessage",
@@ -339,7 +443,11 @@ var constants = function () {
 		getStatus : "",
 		login : contextRoot+"Service/Login",
 		logout : contextRoot+"Service/Logout",
-		getContactList: contextRoot + "Service/GetContactList"
+		getContactList: contextRoot + "Service/GetContactList",
+		getStatusUpdate: contextRoot + "Service/GetStatusUpdate",
+		setStatus: contextRoot + "Service/SetStatus",
+		getUserData: contextRoot + "Service/GetUserData",
+		getArchiveFilteredByUserId: contextRoot + "Service/GetArchiveFilteredByUserId"
 	}
 
 	return{

@@ -21,6 +21,8 @@ namespace duta.Storage
 
         public abstract List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames);
 
+        public abstract bool SetStatus(string login, EUserStatus status, string description);
+
         public abstract bool AddContact(string login, string contact_login, string contact_nickname);
         public abstract bool RemoveContact(string login, string contact_login);
         public abstract bool UpdateContact(string login, string contact_login, string contact_nickname);

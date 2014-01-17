@@ -122,7 +122,7 @@
 	}
 }
 
-~/Service/GetUserData
+~/Service/GetUserDataById
 {
 	in
 	{
@@ -137,7 +137,7 @@
 	}
 }
 
-~/Service/GetUserData
+~/Service/GetUserDataByLogin
 {
 	in
 	{
