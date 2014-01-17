@@ -155,7 +155,7 @@ namespace duta.Managers
             public DateTime timestamp { get; set; }
         };
         private static List<UserPingData> pingData = new List<UserPingData>();
-        private static TimeSpan TIMEOUT = new TimeSpan(0,2,0);
+        private static TimeSpan TIMEOUT = new TimeSpan(0,0,5);
 
         public static bool Ping(string login, string session)
         {

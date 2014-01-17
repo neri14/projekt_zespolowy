@@ -29,7 +29,7 @@ namespace duta.Storage
         {
             using (DataEntities ctx = new DataEntities())
             {
-                return ctx.users.Where(u => u.contacts.FirstOrDefault(c => c.contacting_user.login == login) != null).Select(s => s.login).ToList();
+                return ctx.users.Where(u => u.contacts.FirstOrDefault(c => c.contact_.login == login) != null).Select(s => s.login).ToList();
             }
         }
 
@@ -185,7 +185,7 @@ namespace duta.Storage
                 if (usr == null || usr_ct == null)
                     return false;
 
-                contact ct = ctx.contacts.FirstOrDefault(u => u.user_id == usr.user_id && u.contact_id == usr.user_id);
+                contact ct = ctx.contacts.FirstOrDefault(u => u.user_id == usr.user_id && u.contact_id == usr_ct.user_id);
 
                 if (ct == null)
                     return false;
@@ -237,6 +237,9 @@ namespace duta.Storage
 
         private User Convert(user u)
         {
+            if (u == null)
+                return null;
+
             User entity = new User(u.user_id, u.login, u.password)
             {
                 descripton = u.description,
