@@ -6,17 +6,11 @@ by editing this MSBuild file. In order to learn more about this please visit htt
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
-    <EncryptedPassword />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA8AFD8pJ5MUO6ksUAiCopmgAAAAACAAAAAAAQZgAAAAEAACAAAADlEVYM/J7Q4F0bFhQwKsCjHsko5n/fxatn47hwl11/AwAAAAAOgAAAAAIAACAAAADeHzveuDBHhISsfYwtik+FbcoWU//ydaqluts99MCYCyAAAACeDELW/FpZcK/6z84/uRNSrY2uRoCQInogtujE+U21VkAAAAA11GBqchxSlpkp/rdYh8wewVuuGAB1avHsl0bzf1MIZqL7al9APGK8ypCl5ZB6WABSNmv0KUlrafhc60zG1co/</EncryptedPassword>
   </PropertyGroup>
   <ItemGroup>
     <File Include="bin/Antlr3.Runtime.dll">
       <publishTime>01/03/2014 13:48:58</publishTime>
-    </File>
-    <File Include="bin/App_global.asax.compiled">
-      <publishTime>01/17/2014 09:57:28</publishTime>
-    </File>
-    <File Include="bin/App_global.asax.dll">
-      <publishTime>01/17/2014 09:57:28</publishTime>
     </File>
     <File Include="bin/DotNetOpenAuth.AspNet.dll">
       <publishTime>01/03/2014 13:48:57</publishTime>
@@ -37,7 +31,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="bin/duta.dll">
-      <publishTime>01/17/2014 09:56:59</publishTime>
+      <publishTime>01/17/2014 20:54:02</publishTime>
     </File>
     <File Include="bin/EntityFramework.dll">
       <publishTime>01/03/2014 13:48:57</publishTime>
@@ -94,7 +88,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:56</publishTime>
     </File>
     <File Include="Content/Site.css">
-      <publishTime>01/03/2014 13:48:56</publishTime>
+      <publishTime>01/17/2014 20:12:08</publishTime>
     </File>
     <File Include="Content/themes/base/images/ui-bg_flat_0_aaaaaa_40x100.png">
       <publishTime>01/03/2014 13:48:56</publishTime>
@@ -309,9 +303,6 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="packages.config">
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
-    <File Include="PrecompiledApp.config">
-      <publishTime>01/17/2014 09:57:24</publishTime>
-    </File>
     <File Include="Scripts/bootstrap/css/bootstrap-theme.css">
       <publishTime>01/03/2014 13:48:56</publishTime>
     </File>
@@ -343,7 +334,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:56</publishTime>
     </File>
     <File Include="Scripts/comunicator.js">
-      <publishTime>01/17/2014 08:58:41</publishTime>
+      <publishTime>01/17/2014 20:12:08</publishTime>
     </File>
     <File Include="Scripts/handlebars.js">
       <publishTime>01/03/2014 13:48:56</publishTime>
@@ -400,7 +391,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="Views/Home/contactView.cshtml">
-      <publishTime>01/03/2014 13:48:57</publishTime>
+      <publishTime>01/17/2014 20:12:08</publishTime>
     </File>
     <File Include="Views/Home/conversationView.cshtml">
       <publishTime>01/03/2014 13:48:57</publishTime>
@@ -409,7 +400,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="Views/Home/komunikator.cshtml">
-      <publishTime>01/17/2014 08:58:41</publishTime>
+      <publishTime>01/17/2014 20:12:08</publishTime>
     </File>
     <File Include="Views/Home/messagesPanelView.cshtml">
       <publishTime>01/03/2014 13:48:57</publishTime>
@@ -427,7 +418,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="Views/Shared/_Layout.cshtml">
-      <publishTime>01/03/2014 13:48:57</publishTime>
+      <publishTime>01/17/2014 20:12:08</publishTime>
     </File>
     <File Include="Views/Shared/_LoginPartial.cshtml">
       <publishTime>01/03/2014 13:48:57</publishTime>
@@ -439,7 +430,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>01/17/2014 09:57:24</publishTime>
+      <publishTime>01/17/2014 20:48:45</publishTime>
     </File>
   </ItemGroup>
 </Project>
