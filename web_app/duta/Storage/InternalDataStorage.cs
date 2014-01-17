@@ -149,7 +149,7 @@ namespace duta.Storage
             }
         }
 
-        public override List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames)
+        public override List<Message> GetArchive(DateTime from, DateTime to, List<int> ids)
         {
             return new List<Message>();
         }

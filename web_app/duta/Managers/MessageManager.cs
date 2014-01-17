@@ -107,9 +107,9 @@ namespace duta.Managers
             data.SetLastMessageUpdate(user_id, time);
         }
 
-        public static List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames)
+        public static List<Message> GetArchive(DateTime from, DateTime to, List<int> ids)
         {
-            return data.GetArchive(from, to, usernames);
+            return data.GetArchive(from, to, ids);
         }
     }
 }

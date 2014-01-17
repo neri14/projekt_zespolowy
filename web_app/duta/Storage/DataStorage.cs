@@ -19,7 +19,7 @@ namespace duta.Storage
         public abstract DateTime GetLastMessageUpdate(int user_id);
         public abstract void SetLastMessageUpdate(int user_id, DateTime time);
 
-        public abstract List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames);
+        public abstract List<Message> GetArchive(DateTime from, DateTime to, List<int> usernames);
 
         public abstract bool SetStatus(string login, EUserStatus status, string description);
 
