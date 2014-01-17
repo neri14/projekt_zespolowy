@@ -3,7 +3,6 @@ package com.dutamobile;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
@@ -17,89 +16,34 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.dutamobile.adapter.ActiveConversationsAdapter;
-import com.dutamobile.fragments.ChatFragment;
 import com.dutamobile.fragments.ContactListFragment;
 import com.dutamobile.fragments.EditDialog;
 import com.dutamobile.fragments.Refreshable;
 import com.dutamobile.fragments.StatusDialog;
-import com.dutamobile.model.ActiveChat;
+import com.dutamobile.model.Status;
 import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends ActionBarActivity
 {
-    public ActiveConversationsAdapter rightAdapter;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-    private ListView mActiveChatList;
-    private List<ActiveChat> activeConversations;
     private ActionBarDrawerToggle mDrawerToggle;
-    private Handler handler;
     private Thread.UncaughtExceptionHandler uncaughtExceptionHandler;
-    private MenuItem chatItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         setup();
-
-        handler = new Handler();
-
         if (savedInstanceState != null)
         {
             Fragment fragment = getSupportFragmentManager().getFragment(savedInstanceState, Helper.CURRENT_FRAGMENT);
             Helper.fragmentReplacement(getSupportFragmentManager(), ((Object) fragment).getClass(), false, fragment.getTag(), null);
-
             return;
         }
-
         Helper.fragmentReplacement(getSupportFragmentManager(), ContactListFragment.class, false, ContactListFragment.TAG, null);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        getMenuInflater().inflate(R.menu.main, menu);
-        Helper.SetChatItem(menu.findItem(R.id.action_chats));
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        switch (item.getItemId())
-        {
-            case R.id.action_add_contact:
-            {
-                EditDialog editDialog = new EditDialog();
-                Bundle args = new Bundle();
-                args.putBoolean(EditDialog.ARG_MODE, EditDialog.MODE.ADD.getMode());
-                editDialog.setArguments(args);
-                editDialog.show(getSupportFragmentManager(), EditDialog.TAG);
-                break;
-            }
-            case R.id.action_chats:
-            {
-                if (mDrawerLayout.isDrawerOpen(mDrawerList))
-                    mDrawerLayout.closeDrawer(mDrawerList);
-
-                if (mDrawerLayout.isDrawerOpen(mActiveChatList))
-                    mDrawerLayout.closeDrawer(mActiveChatList);
-                else
-                    mDrawerLayout.openDrawer(mActiveChatList);
-
-                Helper.UpdateChatItemIcon(rightAdapter.isAnyItemsChecked());
-            }
-        }
-        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -124,90 +68,33 @@ public class MainActivity extends ActionBarActivity
         getSupportFragmentManager().putFragment(outState, Helper.CURRENT_FRAGMENT, f);
     }
 
-    private void setup()
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
     {
-        uncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
         {
-            @Override
-            public void uncaughtException(Thread thread, Throwable ex)
+            case R.id.action_add_contact:
             {
-                NetClient.GetInstance().Logout();
-                uncaughtExceptionHandler.uncaughtException(thread, ex);
+                EditDialog editDialog = new EditDialog();
+                Bundle args = new Bundle();
+                args.putBoolean(EditDialog.ARG_MODE, EditDialog.MODE.ADD.getMode());
+                editDialog.setArguments(args);
+                editDialog.show(getSupportFragmentManager(), EditDialog.TAG);
+                break;
             }
-        });
-
-        activeConversations = new ArrayList<ActiveChat>();
-
-        ((DutaApplication) getApplication()).SetMainActivity(this);
-        ((DutaApplication) getApplication()).DownloadContactList();
-        ((DutaApplication) getApplication()).StartReceiving();
-
-        String[] drawerItemsStrings = getResources().getStringArray(R.array.drawer_items);
-
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mActiveChatList = (ListView) findViewById(R.id.right_drawer);
-
-        // set a custom shadow that overlays the main content when the drawer opens
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-
-        // set up the drawer's list view with items and click listener
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, drawerItemsStrings));
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-
-        rightAdapter = new ActiveConversationsAdapter(this, activeConversations);
-        mActiveChatList.setAdapter(rightAdapter);
-        mActiveChatList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
-        {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
-            {
-                String name = ((ActiveChat) rightAdapter.getItem(position)).getChatName();
-                rightAdapter.deleteItem(position);
-
-                if (Helper.CURRENT_FRAGMENT.equals(name)) onBackPressed();
-
-                Toast.makeText(getApplication(), R.string.conversation_closed, Toast.LENGTH_SHORT).show();
-
-                return true;
-            }
-        });
-
-        mActiveChatList.setOnItemClickListener(new DrawerItemClickListener());
-
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                   /* host Activity */
-                mDrawerLayout,          /* DrawerLayout object */
-                R.drawable.blank,   /* nav drawer image to replace 'Up' caret */
-                R.string.drawer_open,   /* "open drawer" description for accessibility */
-                R.string.app_name       /* "close drawer" description for accessibility */
-        )
-        {
-            @Override
-            public void onDrawerStateChanged(int newState)
-            {
-                if (mDrawerLayout.isDrawerOpen(mDrawerList) && mDrawerLayout.isDrawerOpen(mActiveChatList))
-                    mDrawerLayout.closeDrawer(mActiveChatList);
-            }
-        };
-
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        //mActiveChatList.setFocusableInTouchMode(true);
-        // mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mActiveChatList);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        }
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onBackPressed()
     {
-        if (mDrawerLayout.isDrawerOpen(mActiveChatList))
-        {
-            mDrawerLayout.closeDrawer(mActiveChatList);
-        }
-
         if (!Helper.CURRENT_FRAGMENT.equals(ContactListFragment.TAG))
         {
             super.onBackPressed();
@@ -223,72 +110,68 @@ public class MainActivity extends ActionBarActivity
         ((DutaApplication) getApplication()).SetMainActivity(null);
     }
 
-    public void UpdateView(List<String> chatNames, boolean contactList)
+    private void setup()
     {
-        Refreshable f = null;
-
-        if (contactList)
+        SetStatus(true);
+        uncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
         {
-            f = (Refreshable) getSupportFragmentManager().findFragmentByTag(ContactListFragment.TAG);
-        }
-        else if (chatNames != null)
-        {
-            boolean notification = true;
-
-            if (chatNames.size() == 1)
+            @Override
+            public void uncaughtException(Thread thread, Throwable ex)
             {
-                String name = chatNames.get(0);
-
-                f = UpdateActiveChatList(name);
-
-                notification = (f == null);
+                NetClient.GetInstance().Logout();
+                uncaughtExceptionHandler.uncaughtException(thread, ex);
             }
-            else
-            {
-                for (String name : chatNames)
-                {
-                    f = UpdateActiveChatList(name);
-                }
-            }
+        });
 
-            final boolean b = notification;
-            handler.post(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    Helper.UpdateChatItemIcon(b);
-                    rightAdapter.notifyDataSetChanged();
-                }
-            });
+        ((DutaApplication) getApplication()).SetMainActivity(this);
+        ((DutaApplication) getApplication()).DownloadContactList();
+        ((DutaApplication) getApplication()).StartReceiving();
 
-        }
-        else return;
+        String[] drawerItemsStrings = getResources().getStringArray(R.array.drawer_items);
 
-        if (f != null) f.RefreshView();
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
+        // set a custom shadow that overlays the main content when the drawer opens
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
+        // set up the drawer's list view with items and click listener
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, drawerItemsStrings));
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                   /* host Activity */
+                mDrawerLayout,          /* DrawerLayout object */
+                R.drawable.blank,   /* nav drawer image to replace 'Up' caret */
+                R.string.drawer_open,   /* "open drawer" description for accessibility */
+                R.string.app_name       /* "close drawer" description for accessibility */
+        ) {};
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        //mActiveChatList.setFocusableInTouchMode(true);
+        // mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mActiveChatList);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
     }
 
-    private Refreshable UpdateActiveChatList(String name)
+    private void SetStatus(boolean isLogIn)
     {
-        boolean performAdd = true;
+        Status status = isLogIn ?
+                Status.valueOf(getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("status", "AVAILABLE"))
+                : Status.OFFLINE;
 
-        for (ActiveChat ac : activeConversations)
-            if (name.equals(ac.getChatName()))
-            {
-                ac.setChecked(true);
-                performAdd = false;
-            }
+        NetClient.GetInstance().SetStatus(status,
+                getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE)
+                        .getString(StatusDialog.CURRENT_DESC, ""));
+    }
 
-        if (performAdd)
-        {
-            ActiveChat activeChat = new ActiveChat(((DutaApplication) getApplication()).getContactByName(name));
-            activeChat.setChecked(true);
-            activeConversations.add(activeChat);
-        }
+    public void UpdateView()
+    {
+        Fragment f = getSupportFragmentManager().findFragmentByTag(Helper.CURRENT_FRAGMENT);
 
-        if (Helper.CURRENT_FRAGMENT.equals(name))
-            return (Refreshable) getSupportFragmentManager().findFragmentByTag(name);
-        return null;
+        if (f != null && f instanceof Refreshable) ((Refreshable) f).RefreshView();
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener
@@ -302,60 +185,28 @@ public class MainActivity extends ActionBarActivity
                 {
                     case 0:
                     {
-                        Toast.makeText(getApplication(), "Nuuuuda! ", Toast.LENGTH_SHORT).show();
+                        new StatusDialog().show(getSupportFragmentManager(), "Dialog");
                         break;
                     }
                     case 1:
                     {
-                        new StatusDialog().show(getSupportFragmentManager(), "Dialog");
-                        break;
-                    }
-                    case 3:
-                    {
-                        ((DutaApplication) getApplication()).StopReceiving();
-                        NetClient.GetInstance().Logout();
-                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                        finish();
+                        ((DutaApplication) getApplication()).DownloadContactList();
+                        Toast.makeText(getApplication(), "Odświeżono.", Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case 2:
                     {
-                        ((DutaApplication) getApplication()).DownloadContactList();
-                        Toast.makeText(getApplication(), "Odświeżono.", Toast.LENGTH_SHORT).show();
+                        ((DutaApplication) getApplication()).StopReceiving();
+                        SetStatus(false);
+                        NetClient.GetInstance().Logout();
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        finish();
                         break;
                     }
                     default:
                         break;
                 }
             }
-            else
-            {
-                ActiveChat activeChat = activeConversations.get(position);
-
-                if (getSupportFragmentManager().findFragmentByTag("Chat-" + activeChat.getChatDisplayName()) == null)
-                {
-                    Bundle args = new Bundle();
-                    args.putSerializable("Messages", (Serializable) activeChat.getMessageList());
-                    args.putString("ContactName", activeChat.getChatDisplayName());
-                    args.putInt("ContactID", activeChat.getChatId());
-
-                    while (getSupportFragmentManager().getBackStackEntryCount() > 0)
-                    {
-                        getSupportFragmentManager().popBackStackImmediate();
-                    }
-
-                    Helper.fragmentReplacement(getSupportFragmentManager(), ChatFragment.class, true, activeChat.getChatName(), args);
-                }
-
-                if (activeChat.isChecked())
-                {
-                    activeChat.setChecked(false);
-                    rightAdapter.notifyDataSetChanged();
-                }
-            }
-
-            Helper.UpdateChatItemIcon(rightAdapter.isAnyItemsChecked());
-
             mDrawerLayout.closeDrawer(parent);
         }
     }

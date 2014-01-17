@@ -30,7 +30,7 @@ import java.util.ArrayList;
 public class StatusDialog extends DialogFragment
 {
     private static String DESCRIPTIONS = "jsonDescs";
-    private static String CURRENT_DESC = "crntDesc";
+    public static String CURRENT_DESC = "crntDesc";
 
     Status myStatus, prevStatus;
     SharedPreferences.Editor editor;
@@ -82,25 +82,24 @@ public class StatusDialog extends DialogFragment
     private void setDescriptions()
     {
         String json = prefs.getString(DESCRIPTIONS, "[]");
-        Type type = new TypeToken<ArrayList<String>>(){}.getType();
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
         descs = Helper.getGsonInstance().fromJson(json, type);
     }
 
     @Override
     public void onStop()
     {
-        //TODO przetestować
-
         String desc = descView.getText().toString();
         boolean update = ((prevStatus != myStatus) || (!desc.equals(prevDesc)));
 
-        editor.putString("status", myStatus.toString())
-                .putString(CURRENT_DESC, desc);
-
+        editor.putString("status", myStatus.toString()).putString(CURRENT_DESC, desc);
 
         if (!descs.contains(desc))
         {
             descs.add(desc);
+            int size = descs.size();
+            if (size > 10)
+                descs = (ArrayList<String>) descs.subList(size - 10, size - 1);
             String json = Helper.getGsonInstance().toJson(descs);
             editor.putString(DESCRIPTIONS, json);
         }

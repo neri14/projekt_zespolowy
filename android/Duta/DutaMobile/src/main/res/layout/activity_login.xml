@@ -1,6 +1,6 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".LoginActivity">
+       xmlns:tools="http://schemas.android.com/tools"
+       tools:context=".LoginActivity">
 
     <!-- Login progress -->
     <LinearLayout
@@ -11,10 +11,13 @@
         android:layout_gravity="center"
         android:gravity="center_horizontal"
         android:orientation="vertical">
-        <ProgressBar style="?android:attr/progressBarStyleLarge"
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"/>
+
         <TextView
             android:id="@+id/login_status_message"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -22,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="@string/login_progress_signing_in" />
+            android:text="@string/login_progress_signing_in"/>
     </LinearLayout>
 
     <!-- Login form -->
@@ -58,14 +61,23 @@
                 android:imeActionId="@+id/login"
                 android:imeOptions="actionUnspecified"/>
 
-            <Button android:id="@+id/sign_in_button"
+            <Button
+                android:id="@+id/sign_in_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/action_sign_in_short"
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
-                android:layout_gravity="right" />
+                android:layout_gravity="right"/>
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test Accout"
+                android:id="@+id/button"
+                android:layout_gravity="right"/>
 
         </LinearLayout>
     </ScrollView>

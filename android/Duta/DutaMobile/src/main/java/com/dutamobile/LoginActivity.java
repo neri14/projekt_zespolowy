@@ -47,12 +47,24 @@ public class LoginActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login);
-
         // Set up the login form.
         //mUserId = getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("Login", "");
 
         //FIXME usuń w finalnej wersji
-        mUserId = "b_nowak";
+        {
+            mUserId = "b_nowak";
+            findViewById(R.id.button).setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    mUserId = "b_nowak_test";
+                    mUserIdView.setText(mUserId);
+                    mPasswordView.setText(mUserId);
+                    attemptLogin();
+                }
+            });
+        }
 
         mUserIdView = (EditText) findViewById(R.id.email);
         mUserIdView.setText(mUserId);

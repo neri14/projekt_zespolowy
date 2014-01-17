@@ -96,6 +96,18 @@ public class Contact
 
     private List<Message> messages;
 
+    public boolean haveNewMessages()
+    {
+        return newMessage;
+    }
+
+    public void setNewMessage(boolean newMessage)
+    {
+        this.newMessage = newMessage;
+    }
+
+    private boolean newMessage = false;
+
     public void Update(StatusUpdateResponse update)
     {
         status = update.getStatus();

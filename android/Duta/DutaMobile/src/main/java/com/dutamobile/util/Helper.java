@@ -11,7 +11,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.MenuItem;
 
 import com.dutamobile.R;
 import com.dutamobile.model.Status;
@@ -28,17 +27,16 @@ import java.lang.reflect.Type;
  */
 public class Helper
 {
+    private static boolean ChatIconStatus = false;
     public static int MyID;
     public static final String PREFS_MAIN = "main-prefs";
     public static String CURRENT_FRAGMENT;
     private static ActionBar actionBar = null;
     private static Gson gson = null;
-    private static MenuItem ChatItem;
-    private static final int [] statusIcons = new int[]
+    private static final int[] statusIcons = new int[]
             {
                     R.drawable.status_available,
                     R.drawable.status_away,
-                    R.drawable.status_busy,
                     R.drawable.status_offline
             };
 
@@ -47,13 +45,13 @@ public class Helper
         Fragment fragment = fragmentManager.findFragmentByTag(tag);
         try
         {
-            if(fragment == null)
+            if (fragment == null)
             {
                 android.util.Log.i("Fragment Replacement", String.format("Creating new instance of %s...", fragmentClass.getSimpleName()));
                 fragment = (Fragment) fragmentClass.newInstance();
                 android.util.Log.i("Fragment Replacement", String.format("%s created.", fragmentClass.getSimpleName()));
 
-                if(passedData != null)
+                if (passedData != null)
                 {
                     fragment.setArguments(passedData);
                 }
@@ -66,7 +64,7 @@ public class Helper
             android.util.Log.e("Fragment Replacement", String.format("Creating new instance of %s failed.\n%s", fragmentClass.getSimpleName(), e.getMessage()));
         }
 
-        if(fragment.isVisible())
+        if (fragment.isVisible())
         {
             android.util.Log.i("Fragment Replacement", String.format("No replacement - %s is already shown.", fragmentClass.getSimpleName()));
             return;
@@ -87,22 +85,21 @@ public class Helper
 
     public synchronized static ActionBar getSupportActionBar(Activity actionBarActivity)
     {
-        if(actionBar == null)
-            if(actionBarActivity instanceof ActionBarActivity)
-                actionBar = ((ActionBarActivity)actionBarActivity).getSupportActionBar();
+        if (actionBar == null)
+            if (actionBarActivity instanceof ActionBarActivity)
+                actionBar = ((ActionBarActivity) actionBarActivity).getSupportActionBar();
         return actionBar;
     }
 
-    public static void SetChatItem(MenuItem chatItem)
+    public static synchronized boolean getChatItemUpdateStatus()
     {
-        ChatItem = chatItem;
+        return ChatIconStatus;
     }
 
-    public static void UpdateChatItemIcon(boolean b)
+    public static synchronized void setChatItemUpdateStatus(boolean state)
     {
-        ChatItem.setIcon(b ? R.drawable.ic_new_message : R.drawable.ic_no_message);
+        ChatIconStatus = state;
     }
-
 
     public static Drawable getStatusIndicator(Context context, Status status)
     {
@@ -120,17 +117,16 @@ public class Helper
     //JSON
     public synchronized static Gson getGsonInstance()
     {
-        if(gson == null)
+        if (gson == null)
             gson = new Gson();
         return gson;
     }
 
-
-    private static String getJsonFromResponse(InputStream content)  throws IOException
+    private static String getJsonFromResponse(InputStream content) throws IOException
     {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(content,"UTF-8"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(content, "UTF-8"));
         StringBuilder builder = new StringBuilder();
-        for (String line; (line = reader.readLine()) != null;) builder.append(line).append("\n");
+        for (String line; (line = reader.readLine()) != null; ) builder.append(line).append("\n");
 
         return builder.toString();
     }

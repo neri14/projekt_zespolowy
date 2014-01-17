@@ -18,7 +18,6 @@ import android.widget.ListView;
 import com.dutamobile.DutaApplication;
 import com.dutamobile.MainActivity;
 import com.dutamobile.R;
-import com.dutamobile.adapter.ActiveConversationsAdapter;
 import com.dutamobile.adapter.ContactListAdapter;
 import com.dutamobile.model.Contact;
 import com.dutamobile.net.NetClient;
@@ -35,9 +34,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
     public static String ARG_MESSAGES = "Messages";
     public static String ARG_CONTACT_NAME = "ContactName";
     public static String ARG_CONTACT_ID = "ContactID";
-
     private Handler handler;
-
     private ActionMode actionMode;
 
     @Override
@@ -56,7 +53,6 @@ public class ContactListFragment extends ListFragment implements Refreshable
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
         {
             @Override
@@ -76,14 +72,12 @@ public class ContactListFragment extends ListFragment implements Refreshable
         if (actionMode == null)
         {
             Contact c = (Contact) getListAdapter().getItem(position);
+            c.setNewMessage(false);
             Bundle args = new Bundle();
             args.putSerializable(ARG_MESSAGES, (Serializable) c.getMessages());
             args.putString(ARG_CONTACT_NAME, c.getName());
             args.putInt(ARG_CONTACT_ID, c.getId());
             Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + c.getName(), args);
-            ActiveConversationsAdapter adapter = ((MainActivity) getActivity()).rightAdapter;
-            adapter.addItem(c);
-            Helper.UpdateChatItemIcon(adapter.isAnyItemsChecked());
         }
         else
             onListItemSelect(position);
@@ -95,18 +89,16 @@ public class ContactListFragment extends ListFragment implements Refreshable
         adapter.toggleSelection(position);
 
         int count = adapter.getSelectedCount();
-        boolean hasCheckedItems =  count > 0;
+        boolean hasCheckedItems = count > 0;
 
         if (hasCheckedItems && actionMode == null)
-            actionMode = ((MainActivity)getActivity()).startSupportActionMode(new ActionModeCallback(getListAdapter()));
-        else if (!hasCheckedItems && actionMode != null)
-            actionMode.finish();
+            actionMode = ((MainActivity) getActivity()).startSupportActionMode(new ActionModeCallback(getListAdapter()));
+        else if (!hasCheckedItems && actionMode != null) actionMode.finish();
 
         if (actionMode != null)
         {
             actionMode.setTitle(String.format("%d %s", count, getResources().getQuantityString(R.plurals.selected, count)));
-
-            if(count < 3) actionMode.invalidate();
+            if (count < 3) actionMode.invalidate();
         }
     }
 
@@ -162,7 +154,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
         {
             int count = adapter.getSelectedCount();
 
-            if(count == 1)
+            if (count == 1)
             {
                 menu.findItem(R.id.action_cl_group_conversation).setVisible(false);
                 menu.findItem(R.id.action_cl_edit).setVisible(true);

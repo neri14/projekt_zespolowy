@@ -20,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -28,16 +30,17 @@ import java.util.concurrent.TimeoutException;
 public class NetClient
 {
     private static NetClient mInstance = null;
-    //private final String ServerAddress = "http://10.0.3.2:1404/Service";
+
     //todo dodać final w ostatecznej wersji
-    private String ServerAddress = "http://duta.somee.com/Service";
+    private String ServerAddress = "http://10.0.3.2:1404/Service";
+    //private final String ServerAddress = "duta.hostingasp.pl/Service";
 
     private boolean state = false;
 
     public String ChangeServer()
     {
         if (state)
-            ServerAddress = "http://duta.somee.com/Service";
+            ServerAddress = "duta.hostingasp.pl/Service";
         else
             ServerAddress = "http://10.0.3.2:1404/Service";
 
@@ -55,10 +58,10 @@ public class NetClient
         return mInstance;
     }
 
-    private synchronized HttpURLConnection CreatePostRequest(String endpoint, String postData, boolean addCookie) throws IOException
+    private synchronized HttpURLConnection CreatePostRequest(String endpoint, String postData, boolean addCookie, String requestMethod) throws IOException
     {
         HttpURLConnection client = (HttpURLConnection) new URL(ServerAddress + endpoint).openConnection();
-        client.setRequestMethod("POST");
+        client.setRequestMethod(requestMethod);
         client.setDoInput(true);
         client.setDoOutput(true);
 
@@ -80,6 +83,7 @@ public class NetClient
         {
             PrintWriter writer = new PrintWriter(client.getOutputStream());
             writer.println(postData + "&action=session_auth&https=1");
+            writer.flush();
             writer.close();
         }
 
@@ -106,7 +110,7 @@ public class NetClient
         LoginResponse loginResponse = null;
 
         String postData = String.format("login=%s&password=%s", login, password);
-        HttpURLConnection client = CreatePostRequest(endpoint, postData, false);
+        HttpURLConnection client = CreatePostRequest(endpoint, postData, false, "POST");
 
         loginResponse = Helper.getObjectFromJson(client.getInputStream(), LoginResponse.class);
 
@@ -126,7 +130,7 @@ public class NetClient
             {
                 try
                 {
-                    HttpURLConnection client = CreatePostRequest(endpoint, null, true);
+                    HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
                     client.connect();
                     if (client.getResponseCode() == 200)
                     {
@@ -151,7 +155,7 @@ public class NetClient
 
         try
         {
-            HttpURLConnection client = CreatePostRequest(endpoint, null, true);
+            HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
             client.setFixedLengthStreamingMode(0);
 
             if (client.getResponseCode() == 200)
@@ -192,7 +196,7 @@ public class NetClient
                 {
                     HttpURLConnection client = CreatePostRequest(update ? endpointUpdate : endpointAdd,
                             "login=" + login + "&nickname=" + nickname,
-                            true);
+                            true, "POST");
 
                     client.connect();
                     client.getResponseCode();
@@ -217,7 +221,7 @@ public class NetClient
             {
                 try
                 {
-                    HttpURLConnection client = CreatePostRequest(endpoint, "login=" + contact.getLogin(), true);
+                    HttpURLConnection client = CreatePostRequest(endpoint, "login=" + contact.getLogin(), true, "POST");
                     client.getResponseCode();
                     client.disconnect();
                 }
@@ -238,7 +242,7 @@ public class NetClient
 
         try
         {
-            HttpURLConnection client = CreatePostRequest(endpoint, null, true);
+            HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
             if (client.getResponseCode() == 200)
             {
                 Type type = new TypeToken<List<StatusUpdateResponse>>() {}.getType();
@@ -268,11 +272,9 @@ public class NetClient
                 try
                 {
                     String postData = String.format("status=%d&description=%s", status.ordinal(), description);
-
-                    HttpURLConnection client = CreatePostRequest(endpoint, postData, true);
+                    HttpURLConnection client = CreatePostRequest(endpoint, postData, true, "GET");
                     client.getResponseCode();
                     client.disconnect();
-
                     postData = null;
                 }
                 catch(IOException e)
@@ -297,7 +299,7 @@ public class NetClient
             for (int id : usersIds)
                 postData.append("&users=" + id);
 
-            HttpURLConnection client = CreatePostRequest(endpoint, postData.toString(), true);
+            HttpURLConnection client = CreatePostRequest(endpoint, postData.toString(), true, "POST");
 
             if (client.getResponseCode() == 200)
                 timestamp = Helper.getObjectFromJson(client.getInputStream(), MessageResponse.class);
@@ -318,7 +320,7 @@ public class NetClient
 
         try
         {
-            HttpURLConnection client = CreatePostRequest(endpoint, null, true);
+            HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
 
             if (client.getResponseCode() == 200)
             {
@@ -361,10 +363,9 @@ public class NetClient
             @Override
             protected Contact doInBackground(String... params)
             {
-
                 try
                 {
-                    HttpURLConnection client = CreatePostRequest(endpoint, params[0], true);
+                    HttpURLConnection client = CreatePostRequest(endpoint, params[0], true, "POST");
 
                     if (client.getResponseCode() == 200)
                     {
@@ -414,9 +415,8 @@ public class NetClient
             {
                 try
                 {
-                    HttpURLConnection client = CreatePostRequest((asyncPing ? endpointAsync : endpoint), null, true);
-                    android.util.Log.v("NetClient", "Ping: " + client.getResponseCode());
-                    GetSessionCookie(client);
+                    HttpURLConnection client = CreatePostRequest((asyncPing ? endpointAsync : endpoint), null, true, "POST");
+                    if (client.getResponseCode() == 200) GetSessionCookie(client);
                     client.disconnect();
                 }
                 catch(MalformedURLException e)
@@ -435,7 +435,7 @@ public class NetClient
         }).start();
     }
 
-    public List<Message> GetArchive(final long fromDate, final long toDate)
+    public List<Message> GetArchive(final Date fromDate, final Date toDate)
     {
         final String endpoint = "/GetArchive";
 
@@ -443,9 +443,10 @@ public class NetClient
 
         try
         {
-            String postData = String.format("from=%d&to=%d", fromDate, toDate);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String postData = String.format("from=%s&to=%s", sdf.format(fromDate), sdf.format(toDate));
 
-            HttpURLConnection client = CreatePostRequest(endpoint, postData, true);
+            HttpURLConnection client = CreatePostRequest(endpoint, postData, true, "POST");
 
             if (client.getResponseCode() == 200)
             {
@@ -469,9 +470,10 @@ public class NetClient
 
         try
         {
+
             String postData = String.format("from=%d&to=%d&username=%s", fromDate, toDate, username);
 
-            HttpURLConnection client = CreatePostRequest(endpoint, postData, true);
+            HttpURLConnection client = CreatePostRequest(endpoint, postData, true, "POST");
 
             if (client.getResponseCode() == 200)
             {
@@ -497,7 +499,7 @@ public class NetClient
         {
             String postData = String.format("from=%d&to=%d&userid=%d", fromDate, toDate, userId);
 
-            HttpURLConnection client = CreatePostRequest(endpoint, postData, true);
+            HttpURLConnection client = CreatePostRequest(endpoint, postData, true, "POST");
 
             if (client.getResponseCode() == 200)
             {

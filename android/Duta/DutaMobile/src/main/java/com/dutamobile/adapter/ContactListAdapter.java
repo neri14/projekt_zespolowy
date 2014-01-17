@@ -2,6 +2,7 @@ package com.dutamobile.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -76,7 +77,8 @@ public class ContactListAdapter extends BaseAdapter
             holder.status = (ImageView) convertView.findViewById(R.id.image_1);
             holder.desc = (TextView) convertView.findViewById(R.id.text_2);
             convertView.setTag(holder);
-        } else
+        }
+        else
         {
             holder = (ViewHolder) convertView.getTag();
         }
@@ -85,6 +87,8 @@ public class ContactListAdapter extends BaseAdapter
 
         if (c != null)
         {
+            holder.name.setTypeface(null, c.haveNewMessages() ? Typeface.BOLD : Typeface.NORMAL);
+            holder.name.setTextColor(c.haveNewMessages() ? Color.argb(255, 170, 210, 120) : Color.WHITE);
             holder.name.setText(c.getName());
             holder.status.setImageDrawable(Helper.getStatusIndicator(context, c.getStatus()));
             holder.desc.setText(c.getDescription());
@@ -95,7 +99,7 @@ public class ContactListAdapter extends BaseAdapter
     }
 
 
-    //CAB Method
+    //CAB Methods
     public void toggleSelection(int position)
     {
         selectView(position, !mSelectedItemsIds.get(position));
