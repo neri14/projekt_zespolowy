@@ -248,7 +248,7 @@ namespace duta.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetUserData(int user_id)
+        public ActionResult GetUserDataById(int user_id)
         {
             if (!PingNotif())
             {
@@ -262,7 +262,7 @@ namespace duta.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetUserData(string login)
+        public ActionResult GetUserDataByLogin(string login)
         {
             if (!PingNotif())
             {
