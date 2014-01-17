@@ -156,7 +156,8 @@ namespace duta.Controllers
             return Json(list.OrderBy(u => u.user_id));
         }
 
-        [HttpPost]
+        //[HttpPost]
+        [HttpGet]
         public ActionResult SetStatus(int status, string description)
         {
             if (!PingNotif())

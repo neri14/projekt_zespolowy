@@ -29,7 +29,7 @@ namespace duta.Storage
         {
             using (DataEntities ctx = new DataEntities())
             {
-                return ctx.users.Where(u => u.contacts.FirstOrDefault(c => c.contacting_user.login == login) != null).Select(s => s.login).ToList();
+                return ctx.users.Where(u => u.contacts.FirstOrDefault(c => c.contact_.login == login) != null).Select(s => s.login).ToList();
             }
         }
 
