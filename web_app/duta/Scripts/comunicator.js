@@ -51,6 +51,7 @@ var duta = function () {
 	    dutaModel.myStatus = 'available';
 	    dutaModel.myDescription = '';
 	    getContactList();
+//	    document.getElementsByTagName("body")[0].oncontextmenu = function (e) { e.preventDefault(); }
 	});
 
 	function getUserData(login){
@@ -156,41 +157,7 @@ var duta = function () {
 				getMessages();
 				getStatusUpdate();
 			}
-		);
-		var contacts = [
-			{
-			user_id : '1234',
-			nickname : 'Tomek',
-			status : 'available',
-			user_id : 'w zyciu piekne sa..'
-			},
-			{
-			user_id : '2345',
-			nickname : 'Gosia',
-			status : 'brb',
-			description : 'tylko chwile'
-			},
-			{
-			user_id : '3456',
-			nickname : 'Adam',
-			status : 'available',
-			description : 'zyj'
-			},
-			{
-			user_id : '4567',
-			nickname : 'Przemek',
-			status : 'brb',
-			description : 'i daj rzyc innym'
-			},
-			{
-			user_id : '5678',
-			nickname : 'Kasia',
-			status : 'inaccessible',
-			description : ''
-			}		
-		];
-		//renderContactList(contacts);
-		
+		);		
 	}
 	
 	function renderContactList(contacts){
@@ -301,12 +268,96 @@ var duta = function () {
 	    }
 	}
 
+	function showContextMenu(user_id) {
+	    var $contextMenu = $('#application #contacts #' + user_id + ' .contextMenu');
+
+	    $contextMenu.css({
+	        display: "block"
+	    });
+
+	    $contextMenu.on("click", "a", function () {
+	        $contextMenu.hide();
+	    });
+
+	    $(document).click(function () {
+	        $contextMenu.hide();
+	    });
+	    return false;
+	}
+
+
+	function selectArchiveDialog(user_id) {
+
+	    var archiveView = constants.templates.archiveView;
+//	    var renderedArchive = Handlebars.compile(archiveView)(model);
+	    $(archiveView).dialog({
+	        autoOpen: true,
+	        modal: true,
+            resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var from = new Date($('#datepickerFrom').val()).getTime();
+                    var to = new Date($('#datepickerTo').val()).getTime();
+                    $('#datepickerFrom').remove();
+                    $('#datepickerTo').remove();
+                    $(this).dialog("close");
+                    openUserArchiveDialog(user_id, from, to);
+                }
+            }
+	        ]
+	    });
+
+	    $('#datepickerFrom').datetimepicker();
+	    $('#datepickerTo').datetimepicker();
+	}
+
+	function openUserArchiveDialog(user_id, from, to) {
+	    var model = {};
+	    model.user_id = user_id;
+	    model.title = 'Archiwum: ' + user_id;
+	    var userArchiveView = constants.templates.userArchiveView;
+	    var compiledUserArchiveView = Handlebars.compile(userArchiveView)(model);
+	    
+	    ajaxHelper.post(constants.urls.getArchiveFilteredByUserId,
+            {
+                from: from,
+                to: to,
+                userid: user_id
+            },
+			function (result) {
+			    /* lista:
+                public List<int> users { get; set; }
+                public int author { get; set; }
+                public long timestamp { get; set; }
+                public string message { get; set; }
+                */
+			    $.each(result, function (index, value) {
+			        var date = new Date(value.timestamp);
+			        value.dateTime = date.toLocaleTimeString();
+			    });
+			    model.messages = result;
+			}
+		);
+
+
+
+	    $(compiledUserArchiveView).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false
+	    });
+	}
+
 	return{
 		renderMessage : renderMessage,
 		startConversation : startConversation,
 		getContactList : getContactList,
 		sendMessage: sendMessage,
-		setMyStatus: setMyStatus
+		setMyStatus: setMyStatus,
+		showContextMenu: showContextMenu,
+		selectArchiveDialog: selectArchiveDialog
 	
 	};
 
@@ -381,7 +432,9 @@ var constants = function () {
     templates.tabListItem = ajaxHelper.getTemplate(contextRoot+"Home/tabListItemView");
     templates.messagesPanel = ajaxHelper.getTemplate(contextRoot+"Home/messagesPanelView");
     templates.conversation = ajaxHelper.getTemplate(contextRoot+"Home/conversationView");
-    templates.contact = ajaxHelper.getTemplate(contextRoot+"Home/contactView");
+    templates.contact = ajaxHelper.getTemplate(contextRoot + "Home/contactView");
+    templates.archiveView = ajaxHelper.getTemplate(contextRoot + "Home/archiveView");
+    templates.userArchiveView = ajaxHelper.getTemplate(contextRoot + "Home/userArchiveView");
 	
 	var urls = {
 	    sendMessage : contextRoot+"Service/SendMessage",
@@ -393,7 +446,8 @@ var constants = function () {
 		getContactList: contextRoot + "Service/GetContactList",
 		getStatusUpdate: contextRoot + "Service/GetStatusUpdate",
 		setStatus: contextRoot + "Service/SetStatus",
-		getUserData: contextRoot + "Service/GetUserData"
+		getUserData: contextRoot + "Service/GetUserData",
+		getArchiveFilteredByUserId: contextRoot + "Service/GetArchiveFilteredByUserId"
 	}
 
 	return{

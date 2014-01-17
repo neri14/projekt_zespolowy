@@ -310,6 +310,8 @@
     <None Include="Scripts\jquery.validate-vsdoc.js" />
     <Content Include="Scripts\jquery-ui-1.8.20.js" />
     <Content Include="Scripts\jquery-ui-1.8.20.min.js" />
+    <Content Include="Scripts\jquery-ui-timepicker-addon.css" />
+    <Content Include="Scripts\jquery-ui-timepicker-addon.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
     <Content Include="Scripts\jquery.validate.js" />
@@ -321,6 +323,21 @@
     <Content Include="Scripts\login_partial.js" />
     <Content Include="Scripts\modernizr-2.5.3.js" />
     <Content Include="Scripts\register.js" />
+    <Content Include="Scripts\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Scripts\smoothness\images\ui-bg_flat_75_ffffff_40x100.png" />
+    <Content Include="Scripts\smoothness\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Scripts\smoothness\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Scripts\smoothness\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Scripts\smoothness\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Scripts\smoothness\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Scripts\smoothness\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Scripts\smoothness\images\ui-icons_222222_256x240.png" />
+    <Content Include="Scripts\smoothness\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Scripts\smoothness\images\ui-icons_454545_256x240.png" />
+    <Content Include="Scripts\smoothness\images\ui-icons_888888_256x240.png" />
+    <Content Include="Scripts\smoothness\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Scripts\smoothness\jquery-ui.css" />
+    <Content Include="Scripts\smoothness\jquery.ui.theme.css" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -360,6 +377,8 @@
     <Content Include="Views\Home\messageView.cshtml" />
     <Content Include="Views\Debug\Logs.cshtml" />
     <Content Include="Views\Home\Register.cshtml" />
+    <Content Include="Views\Home\archiveView.cshtml" />
+    <Content Include="Views\Home\userArchiveView.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

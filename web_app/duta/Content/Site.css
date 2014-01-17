@@ -856,7 +856,7 @@ li.active a{
 	text-align:right;
 }
 
-.tabMessages{
+.tabMessages, .archiveMessages{
 	border-top: 1px solid #DDDDDD;
 	border-left: 1px solid #DDDDDD;
 	border-right: 1px solid #DDDDDD;
@@ -919,4 +919,7 @@ li.active a{
 	color: #757575;
 }
 
-
+.contextMenu {
+  position: absolute;
+  display:none;
+}

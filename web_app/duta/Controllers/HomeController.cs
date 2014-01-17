@@ -51,5 +51,15 @@ namespace duta.Controllers
         {
             return PartialView();
         }
+
+        public ActionResult archiveView()
+        {
+            return PartialView();
+        }
+
+        public ActionResult userArchiveView()
+        {
+            return PartialView();
+        }
     }
 }
