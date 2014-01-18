@@ -20,8 +20,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -39,11 +37,9 @@ public class NetClient
 
     public String ChangeServer()
     {
-        if (state)
-            ServerAddress = "duta.hostingasp.pl/Service";
-        else
-            ServerAddress = "http://10.0.3.2:1404/Service";
-
+        if (state) ServerAddress = "duta.hostingasp.pl/Service";
+        else ServerAddress = "http://10.0.3.2:1404/Service";
+        state = !state;
         return ServerAddress;
     }
 
@@ -51,10 +47,7 @@ public class NetClient
 
     public static synchronized NetClient GetInstance()
     {
-        if (mInstance == null)
-        {
-            mInstance = new NetClient();
-        }
+        if (mInstance == null )mInstance = new NetClient();
         return mInstance;
     }
 
@@ -68,16 +61,9 @@ public class NetClient
         if (addCookie)
         {
             String cookie = CookieManager.getInstance().getCookie(client.getURL().toString());
-            if (cookie != null)
-            {
-                client.setRequestProperty("Cookie", cookie);
-            }
-            else
-            {
-                new NoCookieException(ServerAddress + endpoint).printStackTrace();
-            }
+            if (cookie != null) client.setRequestProperty("Cookie", cookie);
+            else new NoCookieException(ServerAddress + endpoint).printStackTrace();
         }
-
         // write our POST fields
         if (postData != null)
         {
@@ -86,7 +72,6 @@ public class NetClient
             writer.flush();
             writer.close();
         }
-
         return client;
     }
 
@@ -108,14 +93,10 @@ public class NetClient
     {
         final String endpoint = "/Login";
         LoginResponse loginResponse = null;
-
         String postData = String.format("login=%s&password=%s", login, password);
         HttpURLConnection client = CreatePostRequest(endpoint, postData, false, "POST");
-
         loginResponse = Helper.getObjectFromJson(client.getInputStream(), LoginResponse.class);
-
         GetSessionCookie(client);
-
         return loginResponse;
     }
 
@@ -150,20 +131,16 @@ public class NetClient
     public List<Contact> GetContactList()
     {
         final String endpoint = "/GetContactList";
-
         List<Contact> data = null;
-
         try
         {
             HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
             client.setFixedLengthStreamingMode(0);
-
             if (client.getResponseCode() == 200)
             {
                 Type type = new TypeToken<List<Contact>>() {}.getType();
                 data = Helper.getObjectFromJson(client.getInputStream(), type);
             }
-
             client.disconnect();
         }
         catch(MalformedURLException e)
@@ -235,11 +212,8 @@ public class NetClient
 
     public List<StatusUpdateResponse> GetStatusUpdate()
     {
-        //TODO przeprowadzić testy
         final String endpoint = "/GetStatusUpdate";
-
         List<StatusUpdateResponse> statusUpdates = null;
-
         try
         {
             HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
@@ -315,9 +289,7 @@ public class NetClient
     public List<Message> GetMessage()
     {
         final String endpoint = "/GetMessage";
-
         List<Message> data = null;
-
         try
         {
             HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
@@ -327,7 +299,6 @@ public class NetClient
                 Type type = new TypeToken<List<Message>>() {}.getType();
                 data = Helper.getObjectFromJson(client.getInputStream(), type);
             }
-
             client.disconnect();
         }
         catch(Exception e)
@@ -435,19 +406,14 @@ public class NetClient
         }).start();
     }
 
-    public List<Message> GetArchive(final Date fromDate, final Date toDate)
+    public List<Message> GetArchive(final long fromDate, final long toDate)
     {
         final String endpoint = "/GetArchive";
-
         List<Message> archive = null;
-
         try
         {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String postData = String.format("from=%s&to=%s", sdf.format(fromDate), sdf.format(toDate));
-
+            String postData = String.format("from=%d&to=%d", fromDate, toDate);
             HttpURLConnection client = CreatePostRequest(endpoint, postData, true, "POST");
-
             if (client.getResponseCode() == 200)
             {
                 Type type = new TypeToken<List<Message>>() {}.getType();

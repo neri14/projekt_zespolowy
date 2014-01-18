@@ -12,7 +12,6 @@ import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -87,19 +86,6 @@ public class DutaApplication extends Application
             contactList.clear();
     }
 
-    public Contact getContactByName(String chatName)
-    {
-        String name = chatName.substring(chatName.indexOf('-') + 1);
-
-        for(Contact c : contactList)
-            if(c.getName().equals(name))
-            {
-                return c;
-            }
-
-        return null;
-    }
-
     public void DownloadContactList()
     {
         Helper.startTask(new AsyncTask<Void, Void, Void>()
@@ -108,12 +94,10 @@ public class DutaApplication extends Application
             protected Void doInBackground(Void... params)
             {
                 contactList = NetClient.GetInstance().GetContactList();
-
-                Date to = new Date();
-                Date from = new Date(to.getTime() - DAY_IN_MILLIS);
+                long to = System.currentTimeMillis();
+                long from = to - DAY_IN_MILLIS;
                 messageList = NetClient.GetInstance().GetArchive(from, to);
                 MergeMessagesWithContacts();
-
                 return null;
             }
 
