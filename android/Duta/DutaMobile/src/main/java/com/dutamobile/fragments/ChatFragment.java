@@ -10,10 +10,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
+import com.dutamobile.MainActivity;
 import com.dutamobile.R;
 import com.dutamobile.adapter.ChatAdapter;
 import com.dutamobile.model.Message;
@@ -31,6 +32,7 @@ public class ChatFragment extends ListFragment implements Refreshable
     private EditText message_box;
     private ActionMode actionMode;
     private Handler handler;
+    private MenuItem chatItem;
 
     private int contactId;
 
@@ -48,49 +50,21 @@ public class ChatFragment extends ListFragment implements Refreshable
             @Override
             public void onClick(View v)
             {
-                new Thread("SendingMessageThread")
-                {
-                    @Override
-                    public void run()
-                    {
-                        final String text = message_box.getText().toString();
-
-                        if(text.length() > 0)// && !text.matches(<same białe znaki>))
-                        {
-                            final int [] users = new int[] { Helper.MyID, contactId};
-                            final long timestamp = NetClient.GetInstance().SendMessage(text, users);
-
-                            handler.post(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    Message msg = new Message(text, users);
-                                    msg.setTimestamp(timestamp);
-                                    ((ChatAdapter) getListAdapter()).addMessage(msg);
-                                    message_box.setText(null);
-                                    getListView().setSelection(getListAdapter().getCount() - 1);
-                                }
-                            }
-                            );
-                        }
-
-                    }
-                }.start();
+                String text = message_box.getText().toString();
+                //if text longer than 0 and doesn't contain only whitespace chars
+                if (text.length() > 0 && !text.matches("^\\s*$")) SendMessage(text);
             }
         }
         );
 
-        if(getListAdapter() == null)
+        if (getListAdapter() == null)
         {
             HashMap<Integer, String> usernames = new HashMap<Integer, String>();
             usernames.put(contactId, getArguments().getString(ContactListFragment.ARG_CONTACT_NAME));
-
             setListAdapter(new ChatAdapter(getActivity(), (List<Message>) getArguments().get(ContactListFragment.ARG_MESSAGES), usernames));
         }
-
         Helper.getSupportActionBar(getActivity()).setTitle(getArguments().getString(ContactListFragment.ARG_CONTACT_NAME));
-
+        setHasOptionsMenu(true);
         return v;
     }
 
@@ -100,48 +74,107 @@ public class ChatFragment extends ListFragment implements Refreshable
         super.onViewCreated(view, savedInstanceState);
         getListView().setDividerHeight(0);
         getListView().setSelection(getListAdapter().getCount() - 1);
-
-        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        getListView().setItemsCanFocus(false);
-
-        /* FIXME zrobić zaznaczenie/odznaczanie wiadomości w celu usunięcia
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
         {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
             {
-                if(actionMode == null)
-                    actionMode = ((MainActivity)getActivity()).startSupportActionMode(contextualActionBarCallback);
-
-
-                if(view.isSelected())  //TODO zdobyć tablice zaznaczonych elementów (prawdopodobnie z adaptera);
-                {
-                    view.setSelected(false);
-                    view.setBackgroundColor(Color.TRANSPARENT);
-                    actionMode.setTitle("Deselected " + position);
-                }
-                else
-                {
-                view.setSelected(true);
-                view.setBackgroundColor(Color.CYAN);
-                actionMode.setTitle("Selected " + position);
-                }
-
-        ((ChatAdapter) getListAdapter()).notifyDataSetChanged();
-
+                onListItemSelect(position);
                 return true;
             }
         });
-        */
     }
 
-    private ActionMode.Callback contextualActionBarCallback = new ActionMode.Callback()
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+        inflater.inflate(R.menu.chat, menu);
+        chatItem = menu.findItem(R.id.action_chats);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id)
+    {
+        super.onListItemClick(l, v, position, id);
+
+        if (actionMode != null)
+            onListItemSelect(position);
+    }
+
+    private void onListItemSelect(int position)
+    {
+        ChatAdapter adapter = (ChatAdapter) getListAdapter();
+        adapter.toggleSelection(position);
+
+        int count = adapter.getSelectedCount();
+        boolean hasCheckedItems = count > 0;
+
+        if (hasCheckedItems && actionMode == null)
+            actionMode = ((MainActivity) getActivity()).startSupportActionMode(ActionModeCallback);
+        else if (!hasCheckedItems && actionMode != null) actionMode.finish();
+
+        if (actionMode != null)
+            actionMode.setTitle(String.format("%d %s", count, getResources().getQuantityString(R.plurals.selected, count)));
+    }
+
+    @Override
+    public void RefreshView()
+    {
+        handler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                chatItem.setIcon(Helper.getChatItemUpdateStatus() ? R.drawable.ic_new_message : R.drawable.ic_no_message);
+                Helper.setChatItemUpdateStatus(false);
+                ((ChatAdapter) getListAdapter()).notifyDataSetInvalidated();
+                getListView().setSelection(getListAdapter().getCount() - 1);
+            }
+        });
+    }
+
+    private void SendMessage(final String text)
+    {
+        new Thread("SendingMessageThread")
+        {
+            @Override
+            public void run()
+            {
+                handler.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        message_box.setText(null);
+                    }
+                });
+                final int[] users = new int[]{Helper.MyID, contactId};
+                final long timestamp = NetClient.GetInstance().SendMessage(text, users);
+
+                handler.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Message msg = new Message(text, users);
+                        msg.setTimestamp(timestamp);
+                        ((ChatAdapter) getListAdapter()).addMessage(msg);
+                        getListView().setSelection(getListAdapter().getCount() - 1);
+                    }
+                }
+                );
+            }
+        }.start();
+    }
+
+
+    private ActionMode.Callback ActionModeCallback = new ActionMode.Callback()
     {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu)
         {
             MenuInflater menuInflater = mode.getMenuInflater();
-            menuInflater.inflate(R.menu.chat, menu);
+            menuInflater.inflate(R.menu.cab_chat, menu);
             return true;
         }
 
@@ -154,7 +187,6 @@ public class ChatFragment extends ListFragment implements Refreshable
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item)
         {
-            Toast.makeText(getActivity(), "Delete", Toast.LENGTH_SHORT).show();
             mode.finish();
             return true;
         }
@@ -165,19 +197,4 @@ public class ChatFragment extends ListFragment implements Refreshable
             actionMode = null;
         }
     };
-
-    @Override
-    public void RefreshView()
-    {
-        handler.post(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                ((ChatAdapter) getListAdapter()).notifyDataSetInvalidated();
-                getListView().setSelection(getListAdapter().getCount() - 1);
-            }
-        });
-
-    }
 }

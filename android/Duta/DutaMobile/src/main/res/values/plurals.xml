@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="selected">
+        <item quantity="one">zaznaczony</item>
+        <item quantity="other">zaznaczone</item>
+    </plurals>
+</resources>

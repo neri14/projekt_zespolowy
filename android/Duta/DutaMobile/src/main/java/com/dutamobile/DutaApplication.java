@@ -2,11 +2,11 @@ package com.dutamobile;
 
 import android.app.Application;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.webkit.CookieSyncManager;
 
 import com.dutamobile.model.Contact;
 import com.dutamobile.model.Message;
+import com.dutamobile.model.UpdateMessageOutput;
 import com.dutamobile.model.response.StatusUpdateResponse;
 import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
@@ -19,10 +19,10 @@ import java.util.List;
  */
 public class DutaApplication extends Application
 {
+    private static final long DAY_IN_MILLIS = 86400000;
     private MainActivity mainActivity;
     private List<Contact> contactList;
     private List<Message> messageList;
-
     private MessageReceiver messageReceiver;
     private StatusUpdater statusUpdater;
 
@@ -30,60 +30,49 @@ public class DutaApplication extends Application
     public void onCreate()
     {
         super.onCreate();
-
         contactList = new ArrayList<Contact>();
-
         CookieSyncManager.createInstance(this);
     }
 
-    private List<String> MergeMessagesWithContacts()
+    private UpdateMessageOutput MergeMessagesWithContacts()
     {
-        ArrayList<String> chatNames;
-
-        if(contactList == null ) return null;
-
-        if(messageList == null) return null;
-
-        chatNames = new ArrayList<String>();
-
+        UpdateMessageOutput output = new UpdateMessageOutput();
+        if (contactList == null || messageList == null) return output;
+        String currentName;
+        if (Helper.CURRENT_FRAGMENT.contains("Chat-"))
+            currentName = Helper.CURRENT_FRAGMENT.substring(5);
+        else currentName = "";
         for(Message m : messageList)
-        {
             for(int id : m.getUsers())
             {
                 if(id == Helper.MyID) continue;
-
                 for(Contact c : contactList)
-                {
                     if(c.getId() == id)
                     {
                         c.addMessage(m);
-
-                        String chatName = "Chat-" + c.getName();
-
-                        if(!chatNames.contains(chatName))
-                            chatNames.add(chatName);
+                        if (!c.getName().equals(currentName))
+                        {
+                            output.setOnlyForCurrent(false);
+                            c.setNewMessage(true);
+                        }
+                        output.setNewMessage(true);
                         break;
                     }
-                }
             }
-        }
-
         messageList.clear();
-
-        return chatNames;
+        return output;
     }
 
     private void UpdateContactStatuses(List<StatusUpdateResponse> update)
     {
         for (StatusUpdateResponse u : update)
-        {
             for(Contact c : contactList)
                 if(c.getId() == u.getUser_id())
                 {
                     c.Update(u);
                     break;
                 }
-        }
+        mainActivity.UpdateView();
     }
 
     public List<Contact> GetContactList()
@@ -97,35 +86,18 @@ public class DutaApplication extends Application
             contactList.clear();
     }
 
-    public Contact getContactByName(String chatName)
-    {
-        String name = chatName.substring(chatName.indexOf('-') + 1);
-
-        for(Contact c : contactList)
-            if(c.getName().equals(name))
-            {
-                return c;
-            }
-
-        return null;
-    }
-
     public void DownloadContactList()
     {
-        new AsyncTask<Void, Void, Void>()
+        Helper.startTask(new AsyncTask<Void, Void, Void>()
         {
             @Override
             protected Void doInBackground(Void... params)
             {
                 contactList = NetClient.GetInstance().GetContactList();
-
-                String s = "Statuses:\n";
-                for(Contact c : contactList)
-                    s += c.getDescription() + "\n";
-
-                android.util.Log.v("Contact List", contactList != null ? contactList.size() + "" : "null");
-                android.util.Log.v("Contact List", s);
-
+                long to = System.currentTimeMillis();
+                long from = to - DAY_IN_MILLIS;
+                messageList = NetClient.GetInstance().GetArchive(from, to);
+                MergeMessagesWithContacts();
                 return null;
             }
 
@@ -133,9 +105,9 @@ public class DutaApplication extends Application
             protected void onPostExecute(Void aVoid)
             {
                 super.onPostExecute(aVoid);
-                mainActivity.UpdateView(null, true);
+                mainActivity.UpdateView();
             }
-        }.execute();
+        });
     }
 
     public class MessageReceiver extends AsyncTask<Void, Void, Void>
@@ -153,12 +125,10 @@ public class DutaApplication extends Application
             while(Run)
             {
                 messageList = NetClient.GetInstance().GetMessage();
-                List<String> chatNames = MergeMessagesWithContacts();
-
-                mainActivity.UpdateView(chatNames, false);
-
+                UpdateMessageOutput output = MergeMessagesWithContacts();
+                Helper.setChatItemUpdateStatus(!output.isOnlyForCurrent());
+                if (output.isNewMessage()) mainActivity.UpdateView();
             }
-
             return null;
         }
     }
@@ -178,10 +148,8 @@ public class DutaApplication extends Application
             while(Run)
             {
                 List<StatusUpdateResponse> data =  NetClient.GetInstance().GetStatusUpdate();
-
                 if(data != null) UpdateContactStatuses(data);
             }
-
             return null;
         }
     }
@@ -191,13 +159,13 @@ public class DutaApplication extends Application
         if(messageReceiver == null)
         {
             messageReceiver = new MessageReceiver();
-            startTask(messageReceiver);
+            Helper.startTask(messageReceiver);
         }
 
         if(statusUpdater == null)
         {
             statusUpdater = new StatusUpdater();
-            startTask(statusUpdater);
+            Helper.startTask(statusUpdater);
         }
     }
 
@@ -214,14 +182,6 @@ public class DutaApplication extends Application
             messageReceiver.stop();
             messageReceiver.cancel(true);
         }
-    }
-
-    public void startTask(AsyncTask<?,?,?> asyncTask)
-    {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
-        else
-            asyncTask.execute();
     }
 
     public void SetMainActivity(MainActivity mainActivity)

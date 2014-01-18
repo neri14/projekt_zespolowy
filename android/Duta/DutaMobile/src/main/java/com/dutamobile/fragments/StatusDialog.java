@@ -23,20 +23,20 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Bartosz on 30.12.13.
  */
 public class StatusDialog extends DialogFragment
 {
+    public static String CURRENT_DESC = "crntDesc";
     private static String DESCRIPTIONS = "jsonDescs";
-    private static String CURRENT_DESC = "crntDesc";
-
     Status myStatus, prevStatus;
     SharedPreferences.Editor editor;
     SharedPreferences prefs;
     AutoCompleteTextView descView;
-    ArrayList<String> descs;
+    List<String> descs;
     String prevDesc;
 
     @Override
@@ -82,36 +82,28 @@ public class StatusDialog extends DialogFragment
     private void setDescriptions()
     {
         String json = prefs.getString(DESCRIPTIONS, "[]");
-        Type type = new TypeToken<ArrayList<String>>(){}.getType();
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
         descs = Helper.getGsonInstance().fromJson(json, type);
     }
 
     @Override
     public void onStop()
     {
-        //TODO przetestować
-
         String desc = descView.getText().toString();
         boolean update = ((prevStatus != myStatus) || (!desc.equals(prevDesc)));
-
-        editor.putString("status", myStatus.toString())
-                .putString(CURRENT_DESC, desc);
-
-
+        editor.putString("status", myStatus.toString()).putString(CURRENT_DESC, desc);
         if (!descs.contains(desc))
         {
             descs.add(desc);
+            int size = descs.size();
+            android.util.Log.v("DESCS SIZE", "" + size); //TODO LOG USUNĄĆ
+            if (size > 10)
+                descs = descs.subList(size - 10, size - 1);
             String json = Helper.getGsonInstance().toJson(descs);
             editor.putString(DESCRIPTIONS, json);
         }
-
         editor.commit();
-
-        if (update)
-        {
-            NetClient.GetInstance().SetStatus(myStatus, desc);
-        }
-
+        if (update) NetClient.GetInstance().SetStatus(myStatus, desc);
         super.onStop();
     }
 
@@ -127,24 +119,21 @@ public class StatusDialog extends DialogFragment
         @Override
         public int getCount()
         {
-            if (data != null)
-                return data.length;
+            if (data != null) return data.length;
             return 0;
         }
 
         @Override
         public Object getItem(int position)
         {
-            if (data != null)
-                return data[position];
+            if (data != null) return data[position];
             return null;
         }
 
         @Override
         public long getItemId(int position)
         {
-            if (data != null)
-                return data[position].hashCode();
+            if (data != null) return data[position].hashCode();
             return 0;
         }
 
@@ -152,10 +141,8 @@ public class StatusDialog extends DialogFragment
         public View getView(int position, View convertView, ViewGroup parent)
         {
             convertView = LayoutInflater.from(getActivity()).inflate(R.layout.list_status, null);
-
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image);
             TextView textView = (TextView) convertView.findViewById(R.id.text);
-
             textView.setText(data[position]);
             imageView.setImageDrawable(Helper.getStatusIndicator(getActivity(), Status.values()[position]));
 

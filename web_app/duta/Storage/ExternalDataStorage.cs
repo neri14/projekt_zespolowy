@@ -131,21 +131,22 @@ namespace duta.Storage
             }
         }
 
-        public override List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames)
+        private bool ContainsAllOf(List<int> list_a, List<int> list_b)
+        {
+            foreach (int id in list_b)
+            {
+                if (!list_a.Contains(id))
+                    return false;
+            }
+            return true;
+        }
+
+        public override List<Message> GetArchive(DateTime from, DateTime to, List<int> ids)
         {
             using (DataEntities ctx = new DataEntities())
             {
-                List<int> userids = ctx.users.Where(u => usernames.Contains(u.login)).Select(u2 => u2.user_id).ToList();
-
-                List<Message> msgs = new List<Message>();
-                foreach (message msg in ctx.messages.Where(m =>
-                                                              m.time >= from &&
-                                                              m.time <= to &&
-                                                              userids.TrueForAll(i => m.users.FirstOrDefault(u => u.user_id == i) != null)))
-                {
-                    msgs.Add(Convert(msg));
-                }
-                return msgs;
+                List<message> msgs = ctx.messages.Where(m => m.users.Select(u => u.user_id).Intersect(ids).Count() == ids.Count()).Where(m2 => m2.time >= from && m2.time <= to).ToList();
+                return Convert(msgs);
             }
         }
 
@@ -255,6 +256,18 @@ namespace duta.Storage
             }
 
             return entity;
+        }
+
+        private List<Message> Convert(List<message> msgs)
+        {
+            List<Message> converted = new List<Message>();
+
+            foreach(message m in msgs)
+            {
+                converted.Add(Convert(m));
+            }
+
+            return converted;
         }
 
         private Message Convert(message m)

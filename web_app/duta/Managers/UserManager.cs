@@ -40,7 +40,7 @@ namespace duta.Managers
                 if (!Ping(login, session))
                     return false;
 
-                FormsAuthentication.SetAuthCookie(login, true);
+                FormsAuthentication.SetAuthCookie(login, false);
                 return true;
             }
             return false;
