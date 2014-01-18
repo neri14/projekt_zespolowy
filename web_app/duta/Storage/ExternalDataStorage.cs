@@ -63,7 +63,7 @@ namespace duta.Storage
             using (DataEntities ctx = new DataEntities())
             {
                 List<Message> msgs = new List<Message>();
-                foreach (message msg in ctx.messages.Where(m => m.author_id != user && m.users.FirstOrDefault(u => u.user_id == user) != null && m.time >= time))
+                foreach (message msg in ctx.messages.Where(m => m.author_id != user && m.users.FirstOrDefault(u => u.user_id == user) != null && m.time >= time).ToList())
                 {
                     msgs.Add(Convert(msg));
                 }
