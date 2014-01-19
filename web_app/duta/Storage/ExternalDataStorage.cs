@@ -160,7 +160,7 @@ namespace duta.Storage
                 if (usr == null || usr_ct == null)
                     return false;
 
-                if (ctx.contacts.FirstOrDefault(u => u.user_id == usr.user_id && u.contact_id == usr.user_id) != null)
+                if (ctx.contacts.FirstOrDefault(u => u.user_id == usr.user_id && u.contact_id == usr_ct.user_id) != null)
                     return false;
 
                 contact ct = new contact()
@@ -207,7 +207,7 @@ namespace duta.Storage
                 if (usr == null || usr_ct == null)
                     return false;
 
-                contact ct = ctx.contacts.FirstOrDefault(u => u.user_id == usr.user_id && u.contact_id == usr.user_id);
+                contact ct = ctx.contacts.FirstOrDefault(u => u.user_id == usr.user_id && u.contact_id == usr_ct.user_id);
 
                 if (ct == null)
                     return false;
