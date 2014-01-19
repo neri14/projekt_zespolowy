@@ -1,6 +1,7 @@
 package com.dutamobile.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
@@ -101,9 +102,7 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
         {
             holder.messageView.setText(msg.getMessageText());
             holder.timestampView.setText(msg.getDate());
-
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-
             if (msg.getAuthor() != Helper.MyID)
             {
                 holder.usernameView.setText(usernames.get(msg.getAuthor()) + ":");
@@ -119,7 +118,7 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 holder.container.setGravity(Gravity.RIGHT);
             }
-
+            convertView.setBackgroundColor(mSelectedItemsIds.get(position) ? 0x8834B5E4 : Color.TRANSPARENT);
             holder.container.setLayoutParams(params);
         }
         return convertView;

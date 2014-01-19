@@ -6,12 +6,15 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.dutamobile.DutaApplication;
 import com.dutamobile.R;
 import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
+
+import java.io.IOException;
 
 /**
  * Created by Bartosz on 30.12.13.
@@ -26,17 +29,14 @@ public class EditDialog extends DialogFragment
         MODE(boolean b)
         {
             mode = b;
-
         }
+
+        private boolean mode;
 
         public boolean getMode()
         {
             return mode;
         }
-
-        private boolean mode;
-
-
     }
 
     public static final String TAG = "Edit Dialog";
@@ -51,6 +51,7 @@ public class EditDialog extends DialogFragment
     String contactLogin;
     Boolean mode;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -59,6 +60,9 @@ public class EditDialog extends DialogFragment
 
         nickEditText = ((EditText) v.findViewById(R.id.editText));
         loginEditText = ((EditText) v.findViewById(R.id.editText2));
+        Button okBtn = (Button) v.findViewById(R.id.button);
+        okBtn.setOnClickListener(okListener);
+        v.findViewById(R.id.button2).setOnClickListener(cancelListener);
 
         if (mode)
         {
@@ -68,48 +72,60 @@ public class EditDialog extends DialogFragment
             loginEditText.setEnabled(false);
             nickEditText.setText(contactName);
             getDialog().setTitle(getString(R.string.editting_contact));
+            okBtn.setText(R.string.edit);
         }
         else
         {
+            okBtn.setText(R.string.add);
             application = (DutaApplication) getActivity().getApplication();
             getDialog().setTitle(getString(R.string.adding_contact));
         }
         return v;
     }
 
-    @Override
-    public void onStop()
-    {
-        String newName = nickEditText.getText().toString();
-
-        if (mode)
-        {
-            if (!newName.equals(contactName))
-                NetClient.GetInstance().PutContact(contactLogin, newName, true);
-        }
-        else
-        {
-            contactLogin = loginEditText.getText().toString();
-            Helper.startTask(new AddContactTask(), newName);
-        }
-
-        super.onStop();
-    }
-
-    private class AddContactTask extends AsyncTask<String, Void, Void>
+    private View.OnClickListener cancelListener = new View.OnClickListener()
     {
         @Override
-        protected Void doInBackground(String... params)
+        public void onClick(View v)
         {
-            NetClient.GetInstance().PutContact(contactLogin, params[0], false);
-            return null;
+            onStop();
+        }
+    };
+
+    private View.OnClickListener okListener = new View.OnClickListener()
+    {
+        @Override
+        public void onClick(View v)
+        {
+            String newName = nickEditText.getText().toString();
+            Boolean test = mode && !newName.equals(contactName);
+            if (!test) contactLogin = loginEditText.getText().toString();
+            Helper.startTask(new AddContactTask(), newName, test);
+            onStop();
+        }
+    };
+
+    private class AddContactTask extends AsyncTask<Object, Void, Boolean>
+    {
+        @Override
+        protected Boolean doInBackground(Object... params)
+        {
+            try
+            {
+                return NetClient.GetInstance().PutContact(contactLogin, (String) params[0], (Boolean) params[1]);
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+            return false;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid)
+        protected void onPostExecute(Boolean result)
         {
-            super.onPostExecute(aVoid);
-            application.DownloadContactList();
+            super.onPostExecute(result);
+            if (result) application.DownloadContactList(false);
         }
     }
 }

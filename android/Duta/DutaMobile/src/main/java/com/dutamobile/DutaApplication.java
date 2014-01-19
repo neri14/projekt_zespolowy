@@ -86,7 +86,7 @@ public class DutaApplication extends Application
             contactList.clear();
     }
 
-    public void DownloadContactList()
+    public void DownloadContactList(final boolean getArchive)
     {
         Helper.startTask(new AsyncTask<Void, Void, Void>()
         {
@@ -94,10 +94,7 @@ public class DutaApplication extends Application
             protected Void doInBackground(Void... params)
             {
                 contactList = NetClient.GetInstance().GetContactList();
-                long to = System.currentTimeMillis();
-                long from = to - DAY_IN_MILLIS;
-                messageList = NetClient.GetInstance().GetArchive(from, to);
-                MergeMessagesWithContacts();
+                if (getArchive) GetArchive();
                 return null;
             }
 
@@ -108,6 +105,14 @@ public class DutaApplication extends Application
                 mainActivity.UpdateView();
             }
         });
+    }
+
+    private void GetArchive()
+    {
+        long to = System.currentTimeMillis();
+        long from = to - DAY_IN_MILLIS;
+        messageList = NetClient.GetInstance().GetArchive(from, to);
+        MergeMessagesWithContacts();
     }
 
     public class MessageReceiver extends AsyncTask<Void, Void, Void>
@@ -175,12 +180,14 @@ public class DutaApplication extends Application
         {
             statusUpdater.stop();
             statusUpdater.cancel(true);
+            statusUpdater = null;
         }
 
         if(messageReceiver != null)
         {
             messageReceiver.stop();
             messageReceiver.cancel(true);
+            messageReceiver = null;
         }
     }
 

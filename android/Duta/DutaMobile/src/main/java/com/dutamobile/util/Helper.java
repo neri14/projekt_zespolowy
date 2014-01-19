@@ -29,6 +29,7 @@ public class Helper
 {
     private static boolean ChatIconStatus = false;
     public static int MyID;
+    public static String PREFS_PRIVATE;
     public static final String PREFS_MAIN = "main-prefs";
     public static String CURRENT_FRAGMENT;
     private static ActionBar actionBar = null;

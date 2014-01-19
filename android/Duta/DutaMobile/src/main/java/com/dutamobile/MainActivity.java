@@ -125,7 +125,7 @@ public class MainActivity extends ActionBarActivity
         });
 
         ((DutaApplication) getApplication()).SetMainActivity(this);
-        ((DutaApplication) getApplication()).DownloadContactList();
+        ((DutaApplication) getApplication()).DownloadContactList(true);
         ((DutaApplication) getApplication()).StartReceiving();
 
         String[] drawerItemsStrings = getResources().getStringArray(R.array.drawer_items);
@@ -159,11 +159,11 @@ public class MainActivity extends ActionBarActivity
     private void SetStatus(boolean isLogIn)
     {
         Status status = isLogIn ?
-                Status.valueOf(getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("status", "AVAILABLE"))
+                Status.valueOf(getSharedPreferences(Helper.PREFS_PRIVATE, MODE_PRIVATE).getString("status", "AVAILABLE"))
                 : Status.OFFLINE;
 
         NetClient.GetInstance().SetStatus(status,
-                getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE)
+                getSharedPreferences(Helper.PREFS_PRIVATE, MODE_PRIVATE)
                         .getString(StatusDialog.CURRENT_DESC, ""));
     }
 
@@ -190,7 +190,7 @@ public class MainActivity extends ActionBarActivity
                     }
                     case 1:
                     {
-                        ((DutaApplication) getApplication()).DownloadContactList();
+                        ((DutaApplication) getApplication()).DownloadContactList(false);
                         Toast.makeText(getApplication(), "Odświeżono.", Toast.LENGTH_SHORT).show();
                         break;
                     }

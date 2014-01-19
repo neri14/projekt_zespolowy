@@ -44,7 +44,7 @@ public class StatusDialog extends DialogFragment
     {
         View v = inflater.inflate(R.layout.dialog_status_change, null);
 
-        prefs = getActivity().getSharedPreferences(Helper.PREFS_MAIN, Activity.MODE_PRIVATE);
+        prefs = getActivity().getSharedPreferences(Helper.PREFS_PRIVATE, Activity.MODE_PRIVATE);
         editor = prefs.edit();
 
         prevStatus = myStatus = Status.valueOf(prefs.getString("status", "AVAILABLE"));
@@ -103,7 +103,8 @@ public class StatusDialog extends DialogFragment
             editor.putString(DESCRIPTIONS, json);
         }
         editor.commit();
-        if (update) NetClient.GetInstance().SetStatus(myStatus, desc);
+        if (update)
+            NetClient.GetInstance().SetStatus(myStatus, desc);
         super.onStop();
     }
 

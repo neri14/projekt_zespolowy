@@ -19,19 +19,9 @@
         android:layout_gravity="start"
         android:background="#111"
         android:choiceMode="singleChoice"
-        android:divider="@android:color/white"
+        android:divider="@drawable/divider"
         android:dividerHeight="1dp"/>
 
     <!-- The chats drawer -->
-    <ListView
-        android:id="@+id/right_drawer"
-        android:layout_width="240dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"
-        android:background="#111"
-        android:choiceMode="singleChoice"
-        android:divider="@android:color/white"
-        android:dividerHeight="1dp"
-       />
 
 </android.support.v4.widget.DrawerLayout>

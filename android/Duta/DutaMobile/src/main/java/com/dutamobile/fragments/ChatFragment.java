@@ -40,11 +40,9 @@ public class ChatFragment extends ListFragment implements Refreshable
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View v = inflater.inflate(R.layout.chat_fragment, container, false);
-
         contactId = getArguments().getInt(ContactListFragment.ARG_CONTACT_ID);
         message_box = (EditText) v.findViewById(R.id.edittext_1);
         handler = new Handler();
-
         v.findViewById(R.id.imagebutton_1).setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -72,7 +70,6 @@ public class ChatFragment extends ListFragment implements Refreshable
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        getListView().setDividerHeight(0);
         getListView().setSelection(getListAdapter().getCount() - 1);
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
         {
@@ -167,7 +164,6 @@ public class ChatFragment extends ListFragment implements Refreshable
         }.start();
     }
 
-
     private ActionMode.Callback ActionModeCallback = new ActionMode.Callback()
     {
         @Override
@@ -194,6 +190,7 @@ public class ChatFragment extends ListFragment implements Refreshable
         @Override
         public void onDestroyActionMode(ActionMode mode)
         {
+            ((ChatAdapter) getListAdapter()).removeSelection();
             actionMode = null;
         }
     };

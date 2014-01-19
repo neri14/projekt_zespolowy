@@ -114,15 +114,11 @@ public class LoginActivity extends ActionBarActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        if (item.getItemId() == R.id.action_forgot_password)
-        {
+        if (item.getItemId() == R.id.action_sign_up)
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.registry_address))));
-        }
 
         if (item.getItemId() == R.id.action_server)
-        {
             Toast.makeText(this, NetClient.GetInstance().ChangeServer(), Toast.LENGTH_SHORT).show();
-        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -264,6 +260,7 @@ public class LoginActivity extends ActionBarActivity
                 if (success)
                 {
                     Helper.MyID = loginResponse.getUser_id();
+                    Helper.PREFS_PRIVATE = "priv-prefs-" + Helper.MyID;
 
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();

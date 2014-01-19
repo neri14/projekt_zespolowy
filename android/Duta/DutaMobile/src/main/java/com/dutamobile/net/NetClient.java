@@ -33,22 +33,22 @@ public class NetClient
     private String ServerAddress = "http://10.0.3.2:1404/Service";
     //private final String ServerAddress = "duta.hostingasp.pl/Service";
 
-    private boolean state = false;
-
-    public String ChangeServer()
-    {
-        if (state) ServerAddress = "duta.hostingasp.pl/Service";
-        else ServerAddress = "http://10.0.3.2:1404/Service";
-        state = !state;
-        return ServerAddress;
-    }
+    private boolean state = true;
 
     private NetClient() {}
 
     public static synchronized NetClient GetInstance()
     {
-        if (mInstance == null )mInstance = new NetClient();
+        if (mInstance == null) mInstance = new NetClient();
         return mInstance;
+    }
+
+    public String ChangeServer()
+    {
+        if (state) ServerAddress = "http://duta.hostingasp.pl/Service";
+        else ServerAddress = "http://10.0.3.2:1404/Service";
+        state = !state;
+        return ServerAddress;
     }
 
     private synchronized HttpURLConnection CreatePostRequest(String endpoint, String postData, boolean addCookie, String requestMethod) throws IOException
@@ -79,13 +79,8 @@ public class NetClient
     {
         List<String> cookieList = client.getHeaderFields().get("Set-Cookie");
         if (cookieList != null)
-        {
             for (String cookieTemp : cookieList)
-            {
                 CookieManager.getInstance().setCookie(client.getURL().toString(), cookieTemp);
-            }
-        }
-
         CookieManager.getInstance().removeExpiredCookie();
     }
 
@@ -113,7 +108,7 @@ public class NetClient
                 {
                     HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
                     client.connect();
-                    if (client.getResponseCode() == 200)
+                    if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
                     {
                         CookieManager.getInstance().removeSessionCookie();
                         CookieManager.getInstance().removeExpiredCookie();
@@ -136,7 +131,7 @@ public class NetClient
         {
             HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
             client.setFixedLengthStreamingMode(0);
-            if (client.getResponseCode() == 200)
+            if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
             {
                 Type type = new TypeToken<List<Contact>>() {}.getType();
                 data = Helper.getObjectFromJson(client.getInputStream(), type);
@@ -155,36 +150,23 @@ public class NetClient
         {
             e.printStackTrace();
         }
-
         return data;
     }
 
-    public synchronized void PutContact(final String login, final String nickname, final boolean update)
+    public synchronized boolean PutContact(final String login, final String nickname, final boolean update) throws IOException
     {
         final String endpointAdd = "/AddContact";
         final String endpointUpdate = "/UpdateContact";
 
-        new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                try
-                {
-                    HttpURLConnection client = CreatePostRequest(update ? endpointUpdate : endpointAdd,
-                            "login=" + login + "&nickname=" + nickname,
-                            true, "POST");
+        HttpURLConnection client = CreatePostRequest(update ? endpointUpdate : endpointAdd,
+                "login=" + login + "&nickname=" + nickname,
+                true, "POST");
 
-                    client.connect();
-                    client.getResponseCode();
-                    client.disconnect();
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        client.connect();
+        boolean updateComplete = client.getResponseCode() == HttpURLConnection.HTTP_OK;
+        client.disconnect();
+
+        return updateComplete;
     }
 
     public synchronized void RemoveContact(final Contact contact)
@@ -217,20 +199,18 @@ public class NetClient
         try
         {
             HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
-            if (client.getResponseCode() == 200)
+            if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
             {
                 Type type = new TypeToken<List<StatusUpdateResponse>>() {}.getType();
                 statusUpdates = Helper.getObjectFromJson(client.getInputStream(), type);
                 GetSessionCookie(client);
             }
-
             client.disconnect();
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
-
         return statusUpdates;
     }
 
@@ -264,25 +244,20 @@ public class NetClient
         final String endpoint = "/SendMessage";
 
         MessageResponse timestamp = null;
-
         try
         {
             StringBuilder postData = new StringBuilder();
             postData.append("message=" + message);
-
             for (int id : usersIds)
                 postData.append("&users=" + id);
-
             HttpURLConnection client = CreatePostRequest(endpoint, postData.toString(), true, "POST");
-
-            if (client.getResponseCode() == 200)
+            if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
                 timestamp = Helper.getObjectFromJson(client.getInputStream(), MessageResponse.class);
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
-
         return timestamp == null ? -1 : timestamp.getTimestamp();
     }
 
@@ -294,7 +269,7 @@ public class NetClient
         {
             HttpURLConnection client = CreatePostRequest(endpoint, null, true, "POST");
 
-            if (client.getResponseCode() == 200)
+            if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
             {
                 Type type = new TypeToken<List<Message>>() {}.getType();
                 data = Helper.getObjectFromJson(client.getInputStream(), type);
@@ -316,18 +291,12 @@ public class NetClient
     private Contact GetUserData(final int userId, final String login)
     {
         final String endpoint = "/GetUserData";
-
         Contact user = null;
         String postData;
-
         if (userId == -1 && login == null)
             throw new IllegalArgumentException("You can use ONLY ONE of parameter: userId OR login");
-
-        if (login == null)
-            postData = "user_id=" + userId;
-        else
-            postData = "login=" + login;
-
+        if (login == null) postData = "user_id=" + userId;
+        else postData = "login=" + login;
 
         AsyncTask<String, Void, Contact> task = new AsyncTask<String, Void, Contact>()
         {
@@ -337,8 +306,7 @@ public class NetClient
                 try
                 {
                     HttpURLConnection client = CreatePostRequest(endpoint, params[0], true, "POST");
-
-                    if (client.getResponseCode() == 200)
+                    if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
                     {
                         return Helper.getObjectFromJson(client.getInputStream(), Contact.class);
                     }
@@ -347,11 +315,9 @@ public class NetClient
                 {
                     e.printStackTrace();
                 }
-
                 return null;
             }
         };
-
         task.execute(postData);
 
         try
@@ -370,7 +336,6 @@ public class NetClient
         {
             e.printStackTrace();
         }
-
         return user;
     }
 
@@ -387,7 +352,8 @@ public class NetClient
                 try
                 {
                     HttpURLConnection client = CreatePostRequest((asyncPing ? endpointAsync : endpoint), null, true, "POST");
-                    if (client.getResponseCode() == 200) GetSessionCookie(client);
+                    if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
+                        GetSessionCookie(client);
                     client.disconnect();
                 }
                 catch(MalformedURLException e)
@@ -414,7 +380,7 @@ public class NetClient
         {
             String postData = String.format("from=%d&to=%d", fromDate, toDate);
             HttpURLConnection client = CreatePostRequest(endpoint, postData, true, "POST");
-            if (client.getResponseCode() == 200)
+            if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
             {
                 Type type = new TypeToken<List<Message>>() {}.getType();
                 archive = Helper.getObjectFromJson(client.getInputStream(), type);
@@ -424,24 +390,18 @@ public class NetClient
         {
             e.printStackTrace();
         }
-
         return archive;
     }
 
     public List<Message> GetArchiveFilteredByUserName(final long fromDate, final long toDate, final String username)
     {
         final String endpoint = "/GetArchiveFilteredByUserName";
-
         List<Message> archive = null;
-
         try
         {
-
             String postData = String.format("from=%d&to=%d&username=%s", fromDate, toDate, username);
-
             HttpURLConnection client = CreatePostRequest(endpoint, postData, true, "POST");
-
-            if (client.getResponseCode() == 200)
+            if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
             {
                 Type type = new TypeToken<List<Message>>() {}.getType();
                 archive = Helper.getObjectFromJson(client.getInputStream(), type);
@@ -451,23 +411,18 @@ public class NetClient
         {
             e.printStackTrace();
         }
-
         return archive;
     }
 
     public List<Message> GetArchiveFilteredByUserId(final long fromDate, final long toDate, final int userId)
     {
         final String endpoint = "/GetArchiveFilteredByUserId";
-
         List<Message> archive = null;
-
         try
         {
             String postData = String.format("from=%d&to=%d&userid=%d", fromDate, toDate, userId);
-
             HttpURLConnection client = CreatePostRequest(endpoint, postData, true, "POST");
-
-            if (client.getResponseCode() == 200)
+            if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
             {
                 Type type = new TypeToken<List<Message>>() {}.getType();
                 archive = Helper.getObjectFromJson(client.getInputStream(), type);
@@ -477,7 +432,6 @@ public class NetClient
         {
             e.printStackTrace();
         }
-
         return archive;
     }
 }
