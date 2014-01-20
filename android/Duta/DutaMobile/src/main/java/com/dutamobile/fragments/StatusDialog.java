@@ -30,14 +30,14 @@ import java.util.List;
  */
 public class StatusDialog extends DialogFragment
 {
-    public static String CURRENT_DESC = "crntDesc";
-    private static String DESCRIPTIONS = "jsonDescs";
-    Status myStatus, prevStatus;
-    SharedPreferences.Editor editor;
-    SharedPreferences prefs;
-    AutoCompleteTextView descView;
-    List<String> descs;
-    String prevDesc;
+    public static final String CURRENT_DESC = "crntDesc";
+    private static final String DESCRIPTIONS = "jsonDescs";
+    private Status myStatus, prevStatus;
+    private SharedPreferences.Editor editor;
+    private SharedPreferences prefs;
+    private AutoCompleteTextView descView;
+    private List<String> descs;
+    private String prevDesc;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -96,7 +96,6 @@ public class StatusDialog extends DialogFragment
         {
             descs.add(desc);
             int size = descs.size();
-            android.util.Log.v("DESCS SIZE", "" + size); //TODO LOG USUNĄĆ
             if (size > 10)
                 descs = descs.subList(size - 10, size - 1);
             String json = Helper.getGsonInstance().toJson(descs);

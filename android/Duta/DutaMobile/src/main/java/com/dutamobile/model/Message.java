@@ -13,31 +13,26 @@ import java.util.List;
  */
 public class Message
 {
-    public Message()
-    {
-        this(null, new ArrayList<Contact>());
-    }
-
     public Message(String messageText, List<Contact> contactList)
     {
         this.users = new ArrayList<Integer>();
 
-        if(contactList != null)
+        if (contactList != null)
         {
-            for(Contact c : contactList)
+            for (Contact c : contactList)
                 this.users.add(c.getId());
         }
 
         this.messageText = messageText;
     }
 
-    public Message(String messageText, int [] contactList)
+    public Message(String messageText, int[] contactList)
     {
         this.users = new ArrayList<Integer>();
 
-        if(contactList != null)
+        if (contactList != null)
         {
-            for(int i : contactList)
+            for (int i : contactList)
                 this.users.add(i);
         }
 

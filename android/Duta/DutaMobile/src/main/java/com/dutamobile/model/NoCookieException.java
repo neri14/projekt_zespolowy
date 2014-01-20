@@ -5,11 +5,11 @@ package com.dutamobile.model;
  */
 public class NoCookieException extends Exception
 {
-    String URL;
+    private String URL;
 
     public NoCookieException(String url)
     {
-       URL = url;
+        URL = url;
     }
 
     @Override

@@ -61,7 +61,6 @@ public class ChatFragment extends ListFragment implements Refreshable
             usernames.put(contactId, getArguments().getString(ContactListFragment.ARG_CONTACT_NAME));
             setListAdapter(new ChatAdapter(getActivity(), (List<Message>) getArguments().get(ContactListFragment.ARG_MESSAGES), usernames));
         }
-        Helper.getSupportActionBar(getActivity()).setTitle(getArguments().getString(ContactListFragment.ARG_CONTACT_NAME));
         setHasOptionsMenu(true);
         return v;
     }
@@ -70,6 +69,7 @@ public class ChatFragment extends ListFragment implements Refreshable
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
+        getListView().setDividerHeight(0);
         getListView().setSelection(getListAdapter().getCount() - 1);
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
         {
@@ -80,6 +80,7 @@ public class ChatFragment extends ListFragment implements Refreshable
                 return true;
             }
         });
+        Helper.getSupportActionBar(getActivity()).setTitle(getArguments().getString(ContactListFragment.ARG_CONTACT_NAME));
     }
 
     @Override
@@ -107,7 +108,10 @@ public class ChatFragment extends ListFragment implements Refreshable
         boolean hasCheckedItems = count > 0;
 
         if (hasCheckedItems && actionMode == null)
+        {
             actionMode = ((MainActivity) getActivity()).startSupportActionMode(ActionModeCallback);
+            getListView().setDividerHeight(1);
+        }
         else if (!hasCheckedItems && actionMode != null) actionMode.finish();
 
         if (actionMode != null)
@@ -164,7 +168,7 @@ public class ChatFragment extends ListFragment implements Refreshable
         }.start();
     }
 
-    private ActionMode.Callback ActionModeCallback = new ActionMode.Callback()
+    private final ActionMode.Callback ActionModeCallback = new ActionMode.Callback()
     {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu)
@@ -191,6 +195,7 @@ public class ChatFragment extends ListFragment implements Refreshable
         public void onDestroyActionMode(ActionMode mode)
         {
             ((ChatAdapter) getListAdapter()).removeSelection();
+            getListView().setDividerHeight(0);
             actionMode = null;
         }
     };

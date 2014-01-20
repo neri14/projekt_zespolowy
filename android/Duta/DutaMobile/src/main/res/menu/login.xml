@@ -6,8 +6,4 @@
         android:showAsAction="ifRoom|withText"
         duta:showAsAction="ifRoom|withText"
         android:icon="@drawable/sign_up"/>
-    <item
-        android:id="@+id/action_server"
-        android:title="Zmień serwer"
-        android:showAsAction="never"/>
 </menu>

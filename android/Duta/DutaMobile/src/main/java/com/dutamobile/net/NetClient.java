@@ -29,11 +29,8 @@ public class NetClient
 {
     private static NetClient mInstance = null;
 
-    //todo dodać final w ostatecznej wersji
-    private String ServerAddress = "http://10.0.3.2:1404/Service";
-    //private final String ServerAddress = "duta.hostingasp.pl/Service";
-
-    private boolean state = true;
+    //private String ServerAddress = "http://10.0.3.2:1404/Service";
+    private final String ServerAddress = "http://duta.hostingasp.pl/Service";
 
     private NetClient() {}
 
@@ -41,14 +38,6 @@ public class NetClient
     {
         if (mInstance == null) mInstance = new NetClient();
         return mInstance;
-    }
-
-    public String ChangeServer()
-    {
-        if (state) ServerAddress = "http://duta.hostingasp.pl/Service";
-        else ServerAddress = "http://10.0.3.2:1404/Service";
-        state = !state;
-        return ServerAddress;
     }
 
     private synchronized HttpURLConnection CreatePostRequest(String endpoint, String postData, boolean addCookie, String requestMethod) throws IOException
@@ -87,7 +76,7 @@ public class NetClient
     public LoginResponse Login(final String login, final String password) throws IOException
     {
         final String endpoint = "/Login";
-        LoginResponse loginResponse = null;
+        LoginResponse loginResponse;
         String postData = String.format("login=%s&password=%s", login, password);
         HttpURLConnection client = CreatePostRequest(endpoint, postData, false, "POST");
         loginResponse = Helper.getObjectFromJson(client.getInputStream(), LoginResponse.class);
@@ -229,7 +218,6 @@ public class NetClient
                     HttpURLConnection client = CreatePostRequest(endpoint, postData, true, "GET");
                     client.getResponseCode();
                     client.disconnect();
-                    postData = null;
                 }
                 catch(IOException e)
                 {
@@ -247,9 +235,13 @@ public class NetClient
         try
         {
             StringBuilder postData = new StringBuilder();
-            postData.append("message=" + message);
+            postData.append("message=");
+            postData.append(message);
             for (int id : usersIds)
-                postData.append("&users=" + id);
+            {
+                postData.append("&users=");
+                postData.append(id);
+            }
             HttpURLConnection client = CreatePostRequest(endpoint, postData.toString(), true, "POST");
             if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
                 timestamp = Helper.getObjectFromJson(client.getInputStream(), MessageResponse.class);

@@ -30,10 +30,10 @@ import java.io.Serializable;
  */
 public class ContactListFragment extends ListFragment implements Refreshable
 {
-    public static String TAG = "ContactList";
-    public static String ARG_MESSAGES = "Messages";
-    public static String ARG_CONTACT_NAME = "ContactName";
-    public static String ARG_CONTACT_ID = "ContactID";
+    public static final String TAG = "ContactList";
+    public static final String ARG_MESSAGES = "Messages";
+    public static final String ARG_CONTACT_NAME = "ContactName";
+    public static final String ARG_CONTACT_ID = "ContactID";
     private Handler handler;
     private ActionMode actionMode;
 
@@ -130,7 +130,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
 
     private void CreateGroupConversation()
     {
-
+        //TODO implement that
     }
 
     private class ActionModeCallback implements ActionMode.Callback

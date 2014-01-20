@@ -52,21 +52,21 @@
 
         <Button
             android:layout_width="0dp"
-            android:layout_weight="0.5"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
-            android:layout_marginLeft="8dp"
-            android:id="@+id/button"
-            />
-
-        <Button
-            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:text="@android:string/cancel"
             android:layout_marginRight="8dp"
             android:layout_marginLeft="8dp"
             android:id="@+id/button2"
+            />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"
+            android:id="@+id/button"
             />
     </LinearLayout>
 
