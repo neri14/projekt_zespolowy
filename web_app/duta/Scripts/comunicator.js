@@ -46,16 +46,18 @@ var duta = function () {
 
 	$(document).ready(function () {
 	    var loginName = $('#dutaContainer #application #userName').html();
-	    getUserData(login);
+	    
 	    dutaModel.myLogin = loginName;
 	    dutaModel.myStatus = 'available';
 	    dutaModel.myDescription = '';
 	    getContactList();
+//	    getUserData(login);
+	    getMyData();
 //	    document.getElementsByTagName("body")[0].oncontextmenu = function (e) { e.preventDefault(); }
 	});
 
 	function getUserData(login){
-	    ajaxHelper.post(constants.urls.getUserData, {login: login},
+	    ajaxHelper.post(constants.urls.getUserDataByLogin, {login: login},
 			function (result) {
 			    /*
                 public int user_id { get; set; }
@@ -67,6 +69,22 @@ var duta = function () {
 			}
 		);
 	}
+
+	function getMyData() {
+	    ajaxHelper.post(constants.urls.getMyData, {},
+			function (result) {
+			    /*
+                public int user_id { get; set; }
+                public string login { get; set; }
+                public int status { get; set; }
+                public string description { get; set; }
+                */
+			    dutaModel.myId = result.user_id;
+			}
+		);
+	}
+
+	
 	
 	function getActualContact(id) {
 	    var cont = {};
@@ -316,10 +334,9 @@ var duta = function () {
 	function openUserArchiveDialog(user_id, from, to) {
 	    var model = {};
 	    model.user_id = user_id;
-	    model.title = 'Archiwum: ' + user_id;
+	    model.title = 'Archiwum: ' + getActualContact(user_id).nickname;
 	    var userArchiveView = constants.templates.userArchiveView;
 	    var compiledUserArchiveView = Handlebars.compile(userArchiveView)(model);
-	    
 	    ajaxHelper.post(constants.urls.getArchiveFilteredByUserId,
             {
                 from: from,
@@ -327,6 +344,11 @@ var duta = function () {
                 userid: user_id
             },
 			function (result) {
+			    $(compiledUserArchiveView).dialog({
+			        autoOpen: true,
+			        modal: true,
+			        resizable: false
+			    });
 			    /* lista:
                 public List<int> users { get; set; }
                 public int author { get; set; }
@@ -334,20 +356,34 @@ var duta = function () {
                 public string message { get; set; }
                 */
 			    $.each(result, function (index, value) {
+			        var message = {};
 			        var date = new Date(value.timestamp);
-			        value.dateTime = date.toLocaleTimeString();
+			        message.dateTime = date.toLocaleTimeString();
+			        if (value.author === dutaModel.myId) {
+			            message.author = 'Ja'
+			        } else {
+			            var cont = getActualContact(value.author);
+			            if (cont!=undefined)
+			                message.author = cont.nickname;
+			        }
+			        message.messageText = value.message;
+			        renderArchiveMessage(message);
 			    });
-			    model.messages = result;
 			}
 		);
 
 
 
-	    $(compiledUserArchiveView).dialog({
-	        autoOpen: true,
-	        modal: true,
-	        resizable: false
-	    });
+	    
+	}
+
+	function renderArchiveMessage(model) {
+	    var template = constants.templates.message;
+	    var rendered = Handlebars.compile(template)(model);
+	    var div = $('.archiveMessages');
+
+	    $(div).append(rendered);
+
 	}
 
 	return{
@@ -446,7 +482,8 @@ var constants = function () {
 		getContactList: contextRoot + "Service/GetContactList",
 		getStatusUpdate: contextRoot + "Service/GetStatusUpdate",
 		setStatus: contextRoot + "Service/SetStatus",
-		getUserData: contextRoot + "Service/GetUserData",
+		getUserDataByLogin: contextRoot + "Service/GetUserDataByLogin",
+		getMyData: contextRoot + "Service/GetMyData",
 		getArchiveFilteredByUserId: contextRoot + "Service/GetArchiveFilteredByUserId"
 	}
 

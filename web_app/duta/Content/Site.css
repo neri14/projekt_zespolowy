@@ -920,6 +920,10 @@ li.active a{
 }
 
 .contextMenu {
-  position: absolute;
-  display:none;
+    position: absolute;
+    display:none;
 }
+#datepickerFrom, #datepickerTo {
+    width: inherit;
+}
+
