@@ -197,6 +197,7 @@ public class MainActivity extends ActionBarActivity
                     {
                         ((DutaApplication) getApplication()).StopReceiving();
                         SetStatus(false);
+                        Helper.releaseSupportActionBar();
                         NetClient.GetInstance().Logout();
                         startActivity(new Intent(MainActivity.this, LoginActivity.class));
                         finish();
