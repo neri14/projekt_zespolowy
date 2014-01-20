@@ -3,7 +3,6 @@
 
     <string name="app_name">Duta Mobile</string>
     <string name="title_activity_main">Duta Mobile</string>
-    <string name="action_settings">Ustawienia</string>
     <string name="action_signup">Rejestracja</string>
     <string name="contentDesc">content</string>
     <string name="drawer_open">Menu</string>
@@ -19,6 +18,9 @@
 
     <string name="registry_address">http://duta.hostingasp.pl/Home/Register</string>
     <string name="add">Dodaj</string>
+    <string name="input_message_hint">Tu wpisz wiadomość...</string>
+    <string name="new_messages">Noew wiadomości</string>
+    <string name="no_internet_connection">Brak połączenia z Internetem.</string>
 
     <string-array name="drawer_items">
         <item>Zmień opis</item>

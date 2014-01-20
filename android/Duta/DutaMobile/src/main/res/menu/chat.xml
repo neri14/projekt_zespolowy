@@ -5,8 +5,9 @@
     <item
         android:id="@+id/action_chats"
         android:icon="@drawable/chat_drawer"
+        android:title="@string/new_messages"
         android:enabled="false"
-        android:showAsAction="always"
-        duta:showAsAction="always"
+        android:showAsAction="ifRoom"
+        duta:showAsAction="ifRoom"
         />
 </menu>

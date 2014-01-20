@@ -125,7 +125,7 @@ public class MainActivity extends ActionBarActivity
         });
 
         ((DutaApplication) getApplication()).SetMainActivity(this);
-        ((DutaApplication) getApplication()).DownloadContactList(true);
+        ((DutaApplication) getApplication()).DownloadContactList();
         ((DutaApplication) getApplication()).StartReceiving();
 
         String[] drawerItemsStrings = getResources().getStringArray(R.array.drawer_items);
@@ -170,7 +170,6 @@ public class MainActivity extends ActionBarActivity
     public void UpdateView()
     {
         Fragment f = getSupportFragmentManager().findFragmentByTag(Helper.CURRENT_FRAGMENT);
-
         if (f != null && f instanceof Refreshable) ((Refreshable) f).RefreshView();
     }
 
@@ -190,7 +189,7 @@ public class MainActivity extends ActionBarActivity
                     }
                     case 1:
                     {
-                        ((DutaApplication) getApplication()).DownloadContactList(false);
+                        ((DutaApplication) getApplication()).DownloadContactList();
                         Toast.makeText(getApplication(), "Odświeżono.", Toast.LENGTH_SHORT).show();
                         break;
                     }

@@ -27,5 +27,5 @@ public class LoginResponse
         this.user_id = user_id;
     }
 
-    public int user_id;
+    private int user_id;
 }

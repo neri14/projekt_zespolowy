@@ -34,7 +34,7 @@ public class DutaApplication extends Application
         CookieSyncManager.createInstance(this);
     }
 
-    private UpdateMessageOutput MergeMessagesWithContacts()
+    private UpdateMessageOutput MergeMessagesWithContacts(boolean forNewMessages)
     {
         UpdateMessageOutput output = new UpdateMessageOutput();
         if (contactList == null || messageList == null) return output;
@@ -42,18 +42,18 @@ public class DutaApplication extends Application
         if (Helper.CURRENT_FRAGMENT.contains("Chat-"))
             currentName = Helper.CURRENT_FRAGMENT.substring(5);
         else currentName = "";
-        for(Message m : messageList)
-            for(int id : m.getUsers())
+        for (Message m : messageList)
+            for (int id : m.getUsers())
             {
-                if(id == Helper.MyID) continue;
-                for(Contact c : contactList)
-                    if(c.getId() == id)
+                if (id == Helper.MyID) continue;
+                for (Contact c : contactList)
+                    if (c.getId() == id)
                     {
                         c.addMessage(m);
                         if (!c.getName().equals(currentName))
                         {
                             output.setOnlyForCurrent(false);
-                            c.setNewMessage(true);
+                            c.setNewMessage(forNewMessages);
                         }
                         output.setNewMessage(true);
                         break;
@@ -66,8 +66,8 @@ public class DutaApplication extends Application
     private void UpdateContactStatuses(List<StatusUpdateResponse> update)
     {
         for (StatusUpdateResponse u : update)
-            for(Contact c : contactList)
-                if(c.getId() == u.getUser_id())
+            for (Contact c : contactList)
+                if (c.getId() == u.getUser_id())
                 {
                     c.Update(u);
                     break;
@@ -80,13 +80,20 @@ public class DutaApplication extends Application
         return contactList;
     }
 
+    public Contact GetContactByLogin(String login)
+    {
+        Contact theContact = null;
+        for (Contact c : contactList) if (c.getLogin().equals(login)) theContact = c;
+        return theContact;
+    }
+
     public void ClearContactList()
     {
-        if(contactList != null && contactList.size() > 0)
+        if (contactList != null && contactList.size() > 0)
             contactList.clear();
     }
 
-    public void DownloadContactList(final boolean getArchive)
+    public void DownloadContactList()
     {
         Helper.startTask(new AsyncTask<Void, Void, Void>()
         {
@@ -94,7 +101,7 @@ public class DutaApplication extends Application
             protected Void doInBackground(Void... params)
             {
                 contactList = NetClient.GetInstance().GetContactList();
-                if (getArchive) GetArchive();
+                GetArchive();
                 return null;
             }
 
@@ -112,7 +119,7 @@ public class DutaApplication extends Application
         long to = System.currentTimeMillis();
         long from = to - DAY_IN_MILLIS;
         messageList = NetClient.GetInstance().GetArchive(from, to);
-        MergeMessagesWithContacts();
+        MergeMessagesWithContacts(false);
     }
 
     public class MessageReceiver extends AsyncTask<Void, Void, Void>
@@ -127,10 +134,10 @@ public class DutaApplication extends Application
         @Override
         protected Void doInBackground(Void... params)
         {
-            while(Run)
+            while (Run)
             {
                 messageList = NetClient.GetInstance().GetMessage();
-                UpdateMessageOutput output = MergeMessagesWithContacts();
+                UpdateMessageOutput output = MergeMessagesWithContacts(true);
                 Helper.setChatItemUpdateStatus(!output.isOnlyForCurrent());
                 if (output.isNewMessage()) mainActivity.UpdateView();
             }
@@ -150,10 +157,10 @@ public class DutaApplication extends Application
         @Override
         protected Void doInBackground(Void... params)
         {
-            while(Run)
+            while (Run)
             {
-                List<StatusUpdateResponse> data =  NetClient.GetInstance().GetStatusUpdate();
-                if(data != null) UpdateContactStatuses(data);
+                List<StatusUpdateResponse> data = NetClient.GetInstance().GetStatusUpdate();
+                if (data != null) UpdateContactStatuses(data);
             }
             return null;
         }
@@ -161,13 +168,13 @@ public class DutaApplication extends Application
 
     public void StartReceiving()
     {
-        if(messageReceiver == null)
+        if (messageReceiver == null)
         {
             messageReceiver = new MessageReceiver();
             Helper.startTask(messageReceiver);
         }
 
-        if(statusUpdater == null)
+        if (statusUpdater == null)
         {
             statusUpdater = new StatusUpdater();
             Helper.startTask(statusUpdater);
@@ -176,14 +183,14 @@ public class DutaApplication extends Application
 
     public void StopReceiving()
     {
-        if(statusUpdater != null)
+        if (statusUpdater != null)
         {
             statusUpdater.stop();
             statusUpdater.cancel(true);
             statusUpdater = null;
         }
 
-        if(messageReceiver != null)
+        if (messageReceiver != null)
         {
             messageReceiver.stop();
             messageReceiver.cancel(true);

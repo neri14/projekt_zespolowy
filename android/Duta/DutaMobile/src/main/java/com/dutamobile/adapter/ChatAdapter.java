@@ -33,10 +33,10 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
         RelativeLayout.LayoutParams params1;
     }
 
-    private List<Message> data;
+    private final List<Message> data;
     private final LayoutInflater inflater;
     private final int width;
-    private HashMap<Integer, String> usernames;
+    private final HashMap<Integer, String> usernames;
     private SparseBooleanArray mSelectedItemsIds;
 
     public ChatAdapter(Context context, List<Message> messages, HashMap<Integer, String> usernames)
@@ -136,7 +136,7 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
         notifyDataSetChanged();
     }
 
-    public void selectView(int position, boolean value)
+    void selectView(int position, boolean value)
     {
         if (value)
             mSelectedItemsIds.put(position, value);

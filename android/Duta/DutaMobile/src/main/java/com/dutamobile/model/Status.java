@@ -7,5 +7,5 @@ public enum Status
 {
     AVAILABLE,
     AWAY,
-    OFFLINE;
+    OFFLINE
 }

@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.dutamobile.DutaApplication;
+import com.dutamobile.MainActivity;
 import com.dutamobile.R;
 import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
@@ -44,12 +45,12 @@ public class EditDialog extends DialogFragment
     public static final String ARG_NICK = "n12";
     public static final String ARG_LOGIN = "log1";
 
-    DutaApplication application;
-    EditText nickEditText;
-    EditText loginEditText;
-    String contactName;
-    String contactLogin;
-    Boolean mode;
+    private DutaApplication application;
+    private EditText nickEditText;
+    private EditText loginEditText;
+    private String contactName;
+    private String contactLogin;
+    private Boolean mode;
 
 
     @Override
@@ -125,7 +126,14 @@ public class EditDialog extends DialogFragment
         protected void onPostExecute(Boolean result)
         {
             super.onPostExecute(result);
-            if (result) application.DownloadContactList(false);
+            if (result)
+                if (mode)
+                {
+                    ((DutaApplication) getActivity().getApplication())
+                            .GetContactByLogin(contactLogin).setName(nickEditText.getText().toString());
+                    ((MainActivity) getActivity()).UpdateView();
+                }
+                else application.DownloadContactList();
         }
     }
 }

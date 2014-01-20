@@ -9,7 +9,6 @@ public class UpdateMessageOutput
     {
         newMessage = false;
         onlyForCurrent = true;
-        count = 0;
     }
 
     private boolean newMessage;
@@ -34,16 +33,5 @@ public class UpdateMessageOutput
         this.newMessage = newMessage;
     }
 
-    public int getCount()
-    {
-        return count;
-    }
-
-    public void IncrementCount()
-    {
-        this.count++;
-    }
-
     private boolean onlyForCurrent;
-    private int count;
 }
