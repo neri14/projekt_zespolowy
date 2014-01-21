@@ -69,6 +69,21 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    protected void onResume()
+    {
+        super.onResume();
+        ((DutaApplication) getApplication()).SetMainActivity(this);
+    }
+
+    @Override
+    protected void onRestart()
+    {
+        super.onRestart();
+        if (((DutaApplication) getApplication()).GetContactList().size() == 0)
+            ((DutaApplication) getApplication()).DownloadContactList();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
         return super.onCreateOptionsMenu(menu);
@@ -124,7 +139,6 @@ public class MainActivity extends ActionBarActivity
             }
         });
 
-        ((DutaApplication) getApplication()).SetMainActivity(this);
         ((DutaApplication) getApplication()).DownloadContactList();
         ((DutaApplication) getApplication()).StartReceiving();
 
