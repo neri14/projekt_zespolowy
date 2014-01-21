@@ -91,7 +91,7 @@ namespace duta.Managers
             //User u = GetUser(login);
             //u.status = status;
             //u.descripton = description;
-            //u.last_status_update = DateTime.Now;
+            //u.last_status_update = DateTime.UtcNow;
             data.SetStatus(login, status, description);
 
             lock (awaitingStatusUpdates)
@@ -168,7 +168,7 @@ namespace duta.Managers
 
                 bool userLoggedIn = ping != null;
                 bool userSessionCorrect = ping != null && session == ping.session;
-                bool userTimedOut = ping != null && DateTime.Now - ping.timestamp > TIMEOUT;
+                bool userTimedOut = ping != null && DateTime.UtcNow - ping.timestamp > TIMEOUT;
 
                 logger.Log("userLoggedIn " + (userLoggedIn ? "T" : "F"));
                 logger.Log("userSessionCorrect " + (userSessionCorrect ? "T" : "F"));
@@ -187,7 +187,7 @@ namespace duta.Managers
                 {
                     login = login,
                     session = session,
-                    timestamp = DateTime.Now
+                    timestamp = DateTime.UtcNow
                 });
             }
 
