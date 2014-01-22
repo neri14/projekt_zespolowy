@@ -1,6 +1,7 @@
 package com.dutamobile.model;
 
 import com.dutamobile.model.response.StatusUpdateResponse;
+import com.dutamobile.util.Helper;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -12,9 +13,34 @@ import java.util.List;
  */
 public class Contact implements Serializable
 {
+    boolean groupConversation = false;
+
     public Contact()
     {
         messages = new ArrayList<Message>();
+    }
+
+    public Contact(Boolean groupConversation, String login, List<Integer> ids )
+    {
+        this.login = login;
+        id = Integer.parseInt(login.substring(5));
+        name = "Konwersacja " + id;
+        status = Status.AVAILABLE.ordinal();
+        messages = new ArrayList<Message>();
+        this.groupConversation = groupConversation;
+        try
+        {
+            ids.remove((Integer) Helper.MyID);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        this.ids = new int[ids.size()];
+        for (int i = 0 ; i < ids.size() ; i++)
+            this.ids[i] = ids.get(i);
+
+
     }
 
     public int getId()
@@ -95,6 +121,8 @@ public class Contact implements Serializable
     @SerializedName("description")
     private String description;
 
+    private int[] ids;
+
     private List<Message> messages;
 
     public boolean haveNewMessages()
@@ -114,4 +142,15 @@ public class Contact implements Serializable
         status = update.getStatus();
         description = update.getDescription();
     }
+
+    public int[] getIdArray()
+    {
+        return groupConversation ?  ids : new int [] { id, Helper.MyID };
+    }
+
+    public boolean isGroupConversation()
+    {
+        return groupConversation;
+    }
+
 }

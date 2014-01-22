@@ -21,9 +21,13 @@ import com.dutamobile.R;
 import com.dutamobile.adapter.ContactListAdapter;
 import com.dutamobile.model.Contact;
 import com.dutamobile.net.NetClient;
+import com.dutamobile.util.AddContactTask;
 import com.dutamobile.util.Helper;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Bartosz on 12.10.13.
@@ -31,9 +35,11 @@ import java.io.Serializable;
 public class ContactListFragment extends ListFragment implements Refreshable
 {
     public static final String TAG = "ContactList";
-    public static final String ARG_MESSAGES = "Messages";
-    public static final String ARG_CONTACT_NAME = "ContactName";
-    public static final String ARG_CONTACT_ID = "ContactID";
+    public static final String ARG_MESSAGES = "mgs1";
+    public static final String ARG_CONTACT_NAME = "cName";
+    public static final String ARG_CONTACT_ID = "cId";
+    public static final String ARG_GROUP_CONVERSATION = "gConv";
+    public static final String ARG_CONVERSATION_NAME = "cvName";
     private Handler handler;
     private ActionMode actionMode;
 
@@ -74,11 +80,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
         {
             Contact c = (Contact) getListAdapter().getItem(position);
             c.setNewMessage(false);
-            Bundle args = new Bundle();
-            args.putSerializable(ARG_MESSAGES, (Serializable) c.getMessages());
-            args.putString(ARG_CONTACT_NAME, c.getName());
-            args.putInt(ARG_CONTACT_ID, c.getId());
-            Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + c.getName(), args);
+            StartConversation(c);
         }
         else
             onListItemSelect(position);
@@ -131,7 +133,48 @@ public class ContactListFragment extends ListFragment implements Refreshable
 
     private void CreateGroupConversation()
     {
-        //TODO implement that
+        SparseBooleanArray a = ((ContactListAdapter) getListAdapter()).getSelectedPositions();
+        int size = a.size() + 1;
+        Integer[] ids = new Integer[size];
+        String[] names = new String[size];
+        StringBuilder nameBuilder = new StringBuilder();
+
+        ids[0] = Helper.MyID;
+        names[0] = getResources().getString(R.string.me);
+        for(int i = 1 ; i < size; i++)
+        {
+            Contact c = ((Contact)getListAdapter().getItem(a.keyAt(i)));
+            ids[i] = c.getId();
+            names[i] = c.getName();
+        }
+
+        List<Integer> duplicate = Arrays.asList(ids);
+        Collections.sort(duplicate);
+        for(int id : duplicate) nameBuilder.append(id);
+
+        Contact group = new Contact(true, "Chat_" + nameBuilder.toString(), duplicate);
+        group.setName("Konwersacja " + nameBuilder.toString());
+        group.setId(Integer.parseInt(nameBuilder.toString()));
+        group.setLogin("Chat_" + nameBuilder.toString());
+        ((ContactListAdapter) getListAdapter()).getData().add(group);
+        ((ContactListAdapter) getListAdapter()).notifyDataSetChanged();
+        android.util.Log.v("GROUP CLF", group.getLogin());
+        Helper.startTask(new AddContactTask(getActivity(), group.getLogin(), group.getName(), EditDialog.MODE.ADD.getMode()));
+        StartConversation(group);
+    }
+
+    private void StartConversation(Contact contact)
+    {
+        boolean gc = contact.isGroupConversation();
+        String[] names = gc ? ((ContactListAdapter)getListAdapter()).getContactNamesByIds(contact.getIdArray())
+                :  new String[] {contact.getName(), getResources().getString(R.string.me)};
+        Bundle args = new Bundle();
+        args.putIntArray(ARG_CONTACT_ID, contact.getIdArray());
+        args.putStringArray(ARG_CONTACT_NAME, names);
+        args.putString(ARG_CONVERSATION_NAME, contact.getName());
+        args.putBoolean(ARG_GROUP_CONVERSATION,gc);
+        args.putSerializable(ARG_MESSAGES, (Serializable) contact.getMessages());
+        Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + contact.getName(), args);
     }
 
     private class ActionModeCallback implements ActionMode.Callback
@@ -176,7 +219,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
             {
                 case R.id.action_cl_delete:
                 {
-                    SparseBooleanArray selected = adapter.getSelectedIds();
+                    SparseBooleanArray selected = adapter.getSelectedPositions();
                     for (int i = (selected.size() - 1); i >= 0; i--)
                     {
                         if (selected.valueAt(i))
@@ -190,7 +233,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
                 }
                 case R.id.action_cl_edit:
                 {
-                    Contact contact = (Contact) adapter.getItem(adapter.getSelectedIds().keyAt(0));
+                    Contact contact = (Contact) adapter.getItem(adapter.getSelectedPositions().keyAt(0));
                     EditDialog editDialog = new EditDialog();
                     Bundle args = new Bundle();
                     args.putString(EditDialog.ARG_LOGIN, contact.getLogin());
@@ -203,6 +246,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
                 }
                 case R.id.action_cl_group_conversation:
                 {
+                    CreateGroupConversation();
                     break;
                 }
 

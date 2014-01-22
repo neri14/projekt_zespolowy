@@ -50,7 +50,7 @@ public class ContactListAdapter extends BaseAdapter
     @Override
     public long getItemId(int position)
     {
-        return data.get(position).hashCode();
+        return ((Object)data.get(position)).hashCode();
     }
 
     public void setData(List<Contact> data)
@@ -64,7 +64,21 @@ public class ContactListAdapter extends BaseAdapter
         return this.data;
     }
 
-
+    public String [] getContactNamesByIds(int[] ids)
+    {
+        String[] names = new String[ids.length];
+        int iter = 0;
+        for(int id : ids)
+        {
+            for(Contact c : data)
+                if(c.getId() == id)
+                {
+                    names[iter++] = c.getName();
+                    break;
+                }
+        }
+        return names;
+    }
     public boolean removeItem(Contact contact)
     {
         return data.remove(contact);
@@ -132,7 +146,7 @@ public class ContactListAdapter extends BaseAdapter
         return mSelectedItemsIds.size();
     }
 
-    public SparseBooleanArray getSelectedIds()
+    public SparseBooleanArray getSelectedPositions()
     {
         return mSelectedItemsIds;
     }

@@ -21,6 +21,7 @@
     <string name="input_message_hint">Tu wpisz wiadomość...</string>
     <string name="new_messages">Noew wiadomości</string>
     <string name="no_internet_connection">Brak połączenia z Internetem.</string>
+    <string name="me">Ja:</string>
 
     <string-array name="drawer_items">
         <item>Zmień opis</item>

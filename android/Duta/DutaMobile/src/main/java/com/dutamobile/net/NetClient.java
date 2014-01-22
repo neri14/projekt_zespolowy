@@ -29,8 +29,8 @@ public class NetClient
 {
     private static NetClient mInstance = null;
 
-    //private String ServerAddress = "http://10.0.3.2:1404/Service";
-    private final String ServerAddress = "http://duta.hostingasp.pl/Service";
+    private String ServerAddress = "http://10.0.3.2:1404/Service";
+    //private final String ServerAddress = "http://duta.hostingasp.pl/Service";
 
     private NetClient() {}
 
