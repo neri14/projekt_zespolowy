@@ -61,5 +61,15 @@ namespace duta.Controllers
         {
             return PartialView();
         }
+
+        public ActionResult addContactView()
+        {
+            return PartialView();
+        }
+
+        public ActionResult editContactView()
+        {
+            return PartialView();
+        }
     }
 }

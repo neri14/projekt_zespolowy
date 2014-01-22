@@ -50,7 +50,7 @@ var duta = function () {
 	    dutaModel.myLogin = loginName;
 	    dutaModel.myStatus = 'available';
 	    dutaModel.myDescription = '';
-	    getContactList();
+	    getContactList(true);
 //	    getUserData(login);
 	    getMyData();
 //	    document.getElementsByTagName("body")[0].oncontextmenu = function (e) { e.preventDefault(); }
@@ -157,7 +157,7 @@ var duta = function () {
 	}
 	
 	
-	function getContactList(){
+	function getContactList(callAsync){
 		ajaxHelper.post(constants.urls.getContactList,{},
 			function (result) {
 			    /*
@@ -172,8 +172,10 @@ var duta = function () {
 			    });
 				dutaModel.contacts = result;
 				renderContactList(dutaModel.contacts);
-				getMessages();
-				getStatusUpdate();
+				if (callAsync) {
+				    getMessages();
+				    getStatusUpdate();
+				}
 			}
 		);		
 	}
@@ -320,7 +322,7 @@ var duta = function () {
                     var to = new Date($('#datepickerTo').val()).getTime();
                     $('#datepickerFrom').remove();
                     $('#datepickerTo').remove();
-                    $(this).dialog("close");
+                    $(this).dialog('destroy').remove();
                     openUserArchiveDialog(user_id, from, to);
                 }
             }
@@ -386,6 +388,90 @@ var duta = function () {
 
 	}
 
+
+	function addContactView() {
+	    var addContactView = constants.templates.addContactView;
+	    $(addContactView).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var login = $('#userLogin').val();
+                    var nickname = $('#userNickname').val();
+                    addContact(login, nickname);
+
+                    $(this).dialog('destroy').remove();
+
+                }
+            }
+	        ]
+	    });
+	}
+
+	function addContact(login, nickname) {
+
+	    ajaxHelper.post(constants.urls.addContact,
+            {
+                login: login,
+                nickname: nickname
+            },
+			function (result) {
+			    $('#application #contacts').html('');
+			    getContactList(false);
+			}
+		);
+	}
+
+	function editContactView(login) {
+	    var editContactView = constants.templates.editContactView;
+	    $(editContactView).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var nickname = $('#userNickname').val();
+                    editContact(login, nickname);
+
+                    $(this).dialog('destroy').remove();
+                }
+            }
+	        ]
+	    });
+	}
+
+	function editContact(login, nickname) {
+
+	    ajaxHelper.post(constants.urls.updateContact,
+            {
+                login: login,
+                nickname: nickname
+            },
+			function (result) {
+			    $('#application #contacts').html('');
+			    getContactList(false);
+			}
+		);
+	}
+
+	function removeContact(login) {
+
+	    ajaxHelper.post(constants.urls.removeContact,
+            {
+                login: login
+            },
+			function (result) {
+			    $('#application #contacts').html('');
+			    getContactList(false);
+			}
+		);
+	} 
+
 	return{
 		renderMessage : renderMessage,
 		startConversation : startConversation,
@@ -393,7 +479,10 @@ var duta = function () {
 		sendMessage: sendMessage,
 		setMyStatus: setMyStatus,
 		showContextMenu: showContextMenu,
-		selectArchiveDialog: selectArchiveDialog
+		selectArchiveDialog: selectArchiveDialog,
+		addContactView: addContactView,
+		editContactView: editContactView,
+		removeContact: removeContact
 	
 	};
 
@@ -471,6 +560,8 @@ var constants = function () {
     templates.contact = ajaxHelper.getTemplate(contextRoot + "Home/contactView");
     templates.archiveView = ajaxHelper.getTemplate(contextRoot + "Home/archiveView");
     templates.userArchiveView = ajaxHelper.getTemplate(contextRoot + "Home/userArchiveView");
+    templates.addContactView = ajaxHelper.getTemplate(contextRoot + "Home/addContactView");
+    templates.editContactView = ajaxHelper.getTemplate(contextRoot + "Home/editContactView"); 
 	
 	var urls = {
 	    sendMessage : contextRoot+"Service/SendMessage",
@@ -484,7 +575,10 @@ var constants = function () {
 		setStatus: contextRoot + "Service/SetStatus",
 		getUserDataByLogin: contextRoot + "Service/GetUserDataByLogin",
 		getMyData: contextRoot + "Service/GetMyData",
-		getArchiveFilteredByUserId: contextRoot + "Service/GetArchiveFilteredByUserId"
+		getArchiveFilteredByUserId: contextRoot + "Service/GetArchiveFilteredByUserId",
+		addContact: contextRoot + "Service/AddContact",
+		updateContact: contextRoot + "Service/UpdateContact",
+		removeContact: contextRoot + "Service/RemoveContact"
 	}
 
 	return{
