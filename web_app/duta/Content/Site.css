@@ -831,7 +831,6 @@ tr.pager td {
 #userDesription{
 	margin:5px;
 	width: 97%;
-	color: #757575;
 }
 
 .conversation{
@@ -923,7 +922,16 @@ li.active a{
     position: absolute;
     display:none;
 }
-#datepickerFrom, #datepickerTo {
+#datepickerFrom, #datepickerTo, #userLogin, #userNickname {
     width: inherit;
 }
 
+.statusActive {
+    background-color:white;
+    color:black;
+}
+
+.statusInActive {
+    background-color:#7ac0da;
+    color:black;
+}

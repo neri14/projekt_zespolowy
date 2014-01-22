@@ -50,7 +50,8 @@ var duta = function () {
 	    dutaModel.myLogin = loginName;
 	    dutaModel.myStatus = 'available';
 	    dutaModel.myDescription = '';
-	    getContactList();
+	    dutaModel.lastConvId = 0;
+	    getContactList(true);
 //	    getUserData(login);
 	    getMyData();
 //	    document.getElementsByTagName("body")[0].oncontextmenu = function (e) { e.preventDefault(); }
@@ -96,7 +97,60 @@ var duta = function () {
 		return cont;
 	}
 	
-	
+	function conferenceView() {
+	    var model = {}
+	    model.contacts = dutaModel.contacts;
+	    var conferenceView = constants.templates.conferenceView;
+	    var rendered = Handlebars.compile(conferenceView)(model);
+
+	    $(rendered).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var checkBoxes = $('.conferenceCheckbox');
+                    var users = [];
+                    $.each(checkBoxes, function (index, value) {
+                        if (value.checked == true) {
+                            users.push(value.value);
+                        }
+                    });
+                    $(this).dialog('destroy').remove();
+                    users.push(dutaModel.myId);
+                    users.sort(function (a, b) { return a - b });
+
+                    var conversationId = users[0];
+                    var i=1;
+                    for (i; i < users.length; i++) {
+                        conversationId += 'a' + users[i];
+                    }
+                    var cont = 'Konferencja';
+                    var model = {
+                        users: conversationId,
+                        participants: cont
+                    };
+                    prepareConversation(model);
+
+                    
+                }
+            }
+	        ]
+	    });
+
+	    
+	}
+
+	function addConvToModel(users) {
+	    var conversationModel = {};
+
+	    dutaModel.conversations;
+	    dutaModel.lastConvId;
+
+	}
+
 	function renderMessage(model){
 		var template = constants.templates.message;
 		var rendered = Handlebars.compile(template)(model);
@@ -111,7 +165,7 @@ var duta = function () {
 		messageText = $('#messagesPanel .conversation#'+conversationId+' .messageToSend').val();
 		//jakis post a w jego callback:
 		var data = {
-		    users: [conversationId.split('a')[0], dutaModel.myId],
+		    users: conversationId.split('a'),
 			message : messageText
 		}
 		ajaxHelper.post(constants.urls.sendMessage,data,
@@ -135,9 +189,13 @@ var duta = function () {
 			function(result){
 				$.each(result, function(index, value ) {
 				    var conversationId = value.users[0];
+				    var i=1;
+				    for (i; i < value.users.length; i++) {
+				        conversationId += 'a' + value.users[i];
+				    }
 				    var date = new Date(value.timestamp);
 					var model={
-					    users: value.author+'a',
+					    users: conversationId,
 						author: getActualContact(value.author).nickname,
 						messageText : value.message,
 						dateTime: date.toLocaleTimeString(),
@@ -157,7 +215,7 @@ var duta = function () {
 	}
 	
 	
-	function getContactList(){
+	function getContactList(callAsync){
 		ajaxHelper.post(constants.urls.getContactList,{},
 			function (result) {
 			    /*
@@ -172,8 +230,10 @@ var duta = function () {
 			    });
 				dutaModel.contacts = result;
 				renderContactList(dutaModel.contacts);
-				getMessages();
-				getStatusUpdate();
+				if (callAsync) {
+				    getMessages();
+				    getStatusUpdate();
+				}
 			}
 		);		
 	}
@@ -200,6 +260,27 @@ var duta = function () {
                 
             }
         );
+	}
+
+	function setDescription() {
+	    var desc = $('#userDesription');
+	    var status = statusToNumber(dutaModel.myStatus);
+	    var description = $(desc).val();
+	    dutaModel.myDescription = description;
+	    ajaxHelper.post(constants.urls.setStatus,
+            {
+                status: status,
+                description: description
+            },
+            function () {
+                desc.removeClass('statusActive');
+                desc.addClass('statusInActive');
+
+            }
+        );
+
+	    
+	    
 	}
 
 	function getStatusUpdate() {
@@ -238,8 +319,12 @@ var duta = function () {
 	function startConversation(identificator){
 	    //jakis post a w jego callback:
 	    var cont = getActualContact(identificator);
+
+	    var users = [identificator, dutaModel.myId];
+	    users.sort(function (a, b) { return a - b });
+
 		var model = {
-			users : identificator+'a',
+		    users: users[0] + 'a' + users[1],
 			participants: cont.nickname
 		};
 		prepareConversation(model);
@@ -260,6 +345,12 @@ var duta = function () {
 		$('#messagesPanel .tab-content').append(rendered);
 		$('#messagesPanel .nav-tabs a:last').tab('show');
 		return rendered;
+	}
+
+	function closeConversation() {
+	    $('#messagesPanel .nav.nav-tabs .active').remove();
+
+	    $('#messagesPanel .tab-content .active').remove();
 	}
 
 	function statusToString(nr) {
@@ -320,7 +411,7 @@ var duta = function () {
                     var to = new Date($('#datepickerTo').val()).getTime();
                     $('#datepickerFrom').remove();
                     $('#datepickerTo').remove();
-                    $(this).dialog("close");
+                    $(this).dialog('destroy').remove();
                     openUserArchiveDialog(user_id, from, to);
                 }
             }
@@ -386,6 +477,96 @@ var duta = function () {
 
 	}
 
+
+	function addContactView() {
+	    var addContactView = constants.templates.addContactView;
+	    $(addContactView).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var login = $('#userLogin').val();
+                    var nickname = $('#userNickname').val();
+                    addContact(login, nickname);
+
+                    $(this).dialog('destroy').remove();
+
+                }
+            }
+	        ]
+	    });
+	}
+
+	function addContact(login, nickname) {
+
+	    ajaxHelper.post(constants.urls.addContact,
+            {
+                login: login,
+                nickname: nickname
+            },
+			function (result) {
+			    $('#application #contacts').html('');
+			    getContactList(false);
+			}
+		);
+	}
+
+	function editContactView(login) {
+	    var editContactView = constants.templates.editContactView;
+	    $(editContactView).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var nickname = $('#userNickname').val();
+                    editContact(login, nickname);
+
+                    $(this).dialog('destroy').remove();
+                }
+            }
+	        ]
+	    });
+	}
+
+	function editContact(login, nickname) {
+
+	    ajaxHelper.post(constants.urls.updateContact,
+            {
+                login: login,
+                nickname: nickname
+            },
+			function (result) {
+			    $('#application #contacts').html('');
+			    getContactList(false);
+			}
+		);
+	}
+
+	function removeContact(login) {
+
+	    ajaxHelper.post(constants.urls.removeContact,
+            {
+                login: login
+            },
+			function (result) {
+			    $('#application #contacts').html('');
+			    getContactList(false);
+			}
+		);
+	}
+
+	function descriptionFocus() {
+	    var desc = $('#userDesription');
+	    desc.removeClass('statusInActive');
+	    desc.addClass('statusActive');
+	}
+
 	return{
 		renderMessage : renderMessage,
 		startConversation : startConversation,
@@ -393,7 +574,14 @@ var duta = function () {
 		sendMessage: sendMessage,
 		setMyStatus: setMyStatus,
 		showContextMenu: showContextMenu,
-		selectArchiveDialog: selectArchiveDialog
+		selectArchiveDialog: selectArchiveDialog,
+		addContactView: addContactView,
+		editContactView: editContactView,
+		removeContact: removeContact,
+		conferenceView: conferenceView,
+		closeConversation: closeConversation,
+		descriptionFocus: descriptionFocus,
+		setDescription: setDescription
 	
 	};
 
@@ -471,6 +659,9 @@ var constants = function () {
     templates.contact = ajaxHelper.getTemplate(contextRoot + "Home/contactView");
     templates.archiveView = ajaxHelper.getTemplate(contextRoot + "Home/archiveView");
     templates.userArchiveView = ajaxHelper.getTemplate(contextRoot + "Home/userArchiveView");
+    templates.addContactView = ajaxHelper.getTemplate(contextRoot + "Home/addContactView");
+    templates.editContactView = ajaxHelper.getTemplate(contextRoot + "Home/editContactView");
+    templates.conferenceView = ajaxHelper.getTemplate(contextRoot + "Home/conferenceView");
 	
 	var urls = {
 	    sendMessage : contextRoot+"Service/SendMessage",
@@ -484,7 +675,10 @@ var constants = function () {
 		setStatus: contextRoot + "Service/SetStatus",
 		getUserDataByLogin: contextRoot + "Service/GetUserDataByLogin",
 		getMyData: contextRoot + "Service/GetMyData",
-		getArchiveFilteredByUserId: contextRoot + "Service/GetArchiveFilteredByUserId"
+		getArchiveFilteredByUserId: contextRoot + "Service/GetArchiveFilteredByUserId",
+		addContact: contextRoot + "Service/AddContact",
+		updateContact: contextRoot + "Service/UpdateContact",
+		removeContact: contextRoot + "Service/RemoveContact"
 	}
 
 	return{

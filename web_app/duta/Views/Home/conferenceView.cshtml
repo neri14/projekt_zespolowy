@@ -1,0 +1,11 @@
+﻿<div id="conferenceView" title="Rozpocznij konferencję">
+    <div id="contacts">
+        {{#each contacts}}
+            <div id="{{user_id}}" class="contact odd">
+	            <input type="checkbox" class="conferenceCheckbox" value="{{user_id}}" style=" display: inline-block;"/>
+                <div class="" style=" display: inline-block;">{{nickname}}</div>
+            </div>
+
+        {{/each}}
+    </div>
+</div>

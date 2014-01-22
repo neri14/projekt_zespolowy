@@ -379,6 +379,9 @@
     <Content Include="Views\Home\Register.cshtml" />
     <Content Include="Views\Home\archiveView.cshtml" />
     <Content Include="Views\Home\userArchiveView.cshtml" />
+    <Content Include="Views\Home\addContactView.cshtml" />
+    <Content Include="Views\Home\editContactView.cshtml" />
+    <Content Include="Views\Home\conferenceView.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
