@@ -3,13 +3,14 @@ package com.dutamobile.model;
 import com.dutamobile.model.response.StatusUpdateResponse;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Bartosz on 12.10.13.
  */
-public class Contact
+public class Contact implements Serializable
 {
     public Contact()
     {

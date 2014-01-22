@@ -45,8 +45,8 @@ namespace duta.Storage
                         password = password,
                         status = 0,
                         description = "",
-                        last_status_update = DateTime.Now,
-                        last_messages_download = DateTime.Now
+                        last_status_update = DateTime.UtcNow,
+                        last_messages_download = DateTime.UtcNow
                     };
                     ctx.users.Add(new_user);
                     ctx.SaveChanges();
@@ -229,7 +229,7 @@ namespace duta.Storage
 
                 usr.status = (int)status;
                 usr.description = description;
-                usr.last_status_update = DateTime.Now;
+                usr.last_status_update = DateTime.UtcNow;
 
                 ctx.SaveChanges();
                 return true;

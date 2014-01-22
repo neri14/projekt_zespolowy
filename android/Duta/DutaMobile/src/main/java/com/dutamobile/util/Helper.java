@@ -48,39 +48,21 @@ public class Helper
         {
             if (fragment == null)
             {
-                android.util.Log.i("Fragment Replacement", String.format("Creating new instance of %s...", fragmentClass.getSimpleName()));
                 fragment = (Fragment) fragmentClass.newInstance();
-                android.util.Log.i("Fragment Replacement", String.format("%s created.", fragmentClass.getSimpleName()));
-
-                if (passedData != null)
-                {
-                    fragment.setArguments(passedData);
-                }
+                if (passedData != null) fragment.setArguments(passedData);
             }
-            else
-                android.util.Log.i("Fragment Replacement", String.format("%s already exists.", fragmentClass.getSimpleName()));
         }
         catch(Exception e)
         {
             android.util.Log.e("Fragment Replacement", String.format("Creating new instance of %s failed.\n%s", fragmentClass.getSimpleName(), e.getMessage()));
         }
 
-        if (fragment.isVisible())
-        {
-            android.util.Log.i("Fragment Replacement", String.format("No replacement - %s is already shown.", fragmentClass.getSimpleName()));
-            return;
-        }
+        if (fragment.isVisible()) return;
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.content_frame, fragment, tag);
-
         CURRENT_FRAGMENT = tag;
-
-        if (addToBackStack)
-        {
-            transaction.addToBackStack(tag);
-        }
-
+        if (addToBackStack) transaction.addToBackStack(tag);
         transaction.commit();
     }
 
@@ -90,6 +72,11 @@ public class Helper
             if (actionBarActivity instanceof ActionBarActivity)
                 actionBar = ((ActionBarActivity) actionBarActivity).getSupportActionBar();
         return actionBar;
+    }
+
+    public synchronized static void releaseSupportActionBar()
+    {
+        actionBar = null;
     }
 
     public static synchronized boolean getChatItemUpdateStatus()

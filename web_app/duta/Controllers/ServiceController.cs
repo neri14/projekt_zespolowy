@@ -142,7 +142,7 @@ namespace duta.Controllers
             }
 
             List<User> updates = await UserManager.GetStatusUpdate(System.Web.HttpContext.Current.User.Identity.Name, lastTime);
-            Response.AppendCookie(new HttpCookie("last_sent_status_update", DateTime.Now.ToBinary().ToString()));
+            Response.AppendCookie(new HttpCookie("last_sent_status_update", DateTime.UtcNow.ToBinary().ToString()));
 
             List<GetStatusUpdateResponse_User> list = new List<GetStatusUpdateResponse_User>();
             foreach (User u in updates)
@@ -229,7 +229,7 @@ namespace duta.Controllers
 
             User usr = UserManager.GetUser(System.Web.HttpContext.Current.User.Identity.Name);
             List<Message> messages = await MessageManager.GetMessageUpdate(usr.user_id, MessageManager.GetLastMessageUpdate(usr.user_id));
-            MessageManager.SetLastMessageUpdate(usr.user_id, DateTime.Now);
+            MessageManager.SetLastMessageUpdate(usr.user_id, DateTime.UtcNow);
 
             List<GetMessageResponse_Message> response = new List<GetMessageResponse_Message>();
 

@@ -59,6 +59,12 @@ public class ContactListAdapter extends BaseAdapter
         notifyDataSetChanged();
     }
 
+    public List<Contact> getData()
+    {
+        return this.data;
+    }
+
+
     public boolean removeItem(Contact contact)
     {
         return data.remove(contact);
