@@ -71,5 +71,10 @@ namespace duta.Controllers
         {
             return PartialView();
         }
+
+        public ActionResult conferenceView()
+        {
+            return PartialView();
+        }
     }
 }
