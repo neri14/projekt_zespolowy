@@ -31,7 +31,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="bin/duta.dll">
-      <publishTime>01/21/2014 19:57:40</publishTime>
+      <publishTime>01/22/2014 22:15:05</publishTime>
     </File>
     <File Include="bin/EntityFramework.dll">
       <publishTime>01/03/2014 13:48:57</publishTime>
@@ -88,7 +88,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:56</publishTime>
     </File>
     <File Include="Content/Site.css">
-      <publishTime>01/21/2014 19:52:43</publishTime>
+      <publishTime>01/22/2014 20:38:19</publishTime>
     </File>
     <File Include="Content/themes/base/images/ui-bg_flat_0_aaaaaa_40x100.png">
       <publishTime>01/03/2014 13:48:56</publishTime>
@@ -334,7 +334,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:56</publishTime>
     </File>
     <File Include="Scripts/comunicator.js">
-      <publishTime>01/21/2014 19:52:43</publishTime>
+      <publishTime>01/22/2014 20:38:19</publishTime>
     </File>
     <File Include="Scripts/handlebars.js">
       <publishTime>01/03/2014 13:48:56</publishTime>
@@ -430,7 +430,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/18/2014 21:12:26</publishTime>
     </File>
     <File Include="Scripts/smoothness/jquery-ui.css">
-      <publishTime>01/18/2014 21:12:26</publishTime>
+      <publishTime>01/22/2014 20:38:19</publishTime>
     </File>
     <File Include="Scripts/smoothness/jquery.ui.theme.css">
       <publishTime>01/18/2014 21:12:26</publishTime>
@@ -441,20 +441,29 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="Views/Debug/Logs.cshtml">
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
+    <File Include="Views/Home/addContactView.cshtml">
+      <publishTime>01/22/2014 20:09:07</publishTime>
+    </File>
     <File Include="Views/Home/archiveView.cshtml">
       <publishTime>01/18/2014 21:12:26</publishTime>
     </File>
+    <File Include="Views/Home/conferenceView.cshtml">
+      <publishTime>01/22/2014 20:38:19</publishTime>
+    </File>
     <File Include="Views/Home/contactView.cshtml">
-      <publishTime>01/17/2014 20:12:08</publishTime>
+      <publishTime>01/22/2014 20:38:19</publishTime>
     </File>
     <File Include="Views/Home/conversationView.cshtml">
-      <publishTime>01/03/2014 13:48:57</publishTime>
+      <publishTime>01/22/2014 20:38:19</publishTime>
+    </File>
+    <File Include="Views/Home/editContactView.cshtml">
+      <publishTime>01/22/2014 20:38:19</publishTime>
     </File>
     <File Include="Views/Home/Index.cshtml">
-      <publishTime>01/03/2014 13:48:57</publishTime>
+      <publishTime>01/22/2014 20:15:59</publishTime>
     </File>
     <File Include="Views/Home/komunikator.cshtml">
-      <publishTime>01/17/2014 20:12:08</publishTime>
+      <publishTime>01/22/2014 20:38:19</publishTime>
     </File>
     <File Include="Views/Home/messagesPanelView.cshtml">
       <publishTime>01/03/2014 13:48:57</publishTime>

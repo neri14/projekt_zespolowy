@@ -135,6 +135,7 @@ namespace duta.Controllers
             try
             {
                 lastTime = DateTime.FromBinary(long.Parse(Request.Cookies["last_sent_status_update"].Value));
+                lastTime = lastTime.ToUniversalTime();
             }
             catch (Exception e)
             {
