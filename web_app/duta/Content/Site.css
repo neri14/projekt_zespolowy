@@ -933,5 +933,10 @@ li.active a{
 
 .statusInActive {
     background-color:#7ac0da;
-    color:black;
+    color:#3D3D3D;
+}
+
+#participants2 {
+    float: left;
+    margin-top: 4px;
 }

@@ -119,6 +119,12 @@ var duta = function () {
                         }
                     });
                     $(this).dialog('destroy').remove();
+                    var j=1;
+                    var participants2 = getActualContact(users[0]).nickname;
+                    for (j; j < users.length; j++) {
+                        var kont = getActualContact(users[j]);
+                        participants2 += ", " + kont.nickname
+                    }
                     users.push(dutaModel.myId);
                     users.sort(function (a, b) { return a - b });
 
@@ -130,7 +136,8 @@ var duta = function () {
                     var cont = 'Konferencja';
                     var model = {
                         users: conversationId,
-                        participants: cont
+                        participants: cont,
+                        participants2: participants2
                     };
                     prepareConversation(model);
 
@@ -159,6 +166,8 @@ var duta = function () {
 			prepareConversation(model);
 		}
 		$('#messagesPanel .conversation#' + model.users + ' .tabMessages').append(rendered);
+		var elem = $('#messagesPanel .conversation#' + model.users + ' .tabMessages');
+		elem.scrollTop(elem[0].scrollHeight);
 		
 	}
 	function sendMessage(conversationId){
@@ -351,6 +360,7 @@ var duta = function () {
 	    $('#messagesPanel .nav.nav-tabs .active').remove();
 
 	    $('#messagesPanel .tab-content .active').remove();
+	    $('#messagesPanel .nav-tabs a:last').tab('show');
 	}
 
 	function statusToString(nr) {
