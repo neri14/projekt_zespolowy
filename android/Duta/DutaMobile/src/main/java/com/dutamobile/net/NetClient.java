@@ -1,6 +1,5 @@
 package com.dutamobile.net;
 
-import android.os.AsyncTask;
 import android.webkit.CookieManager;
 
 import com.dutamobile.model.Contact;
@@ -21,16 +20,13 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class NetClient
 {
     private static NetClient mInstance = null;
 
-    private String ServerAddress = "http://10.0.3.2:1404/Service";
-    //private final String ServerAddress = "http://duta.hostingasp.pl/Service";
+    //private String ServerAddress = "http://10.0.3.2:1404/Service";
+    private final String ServerAddress = "http://duta.hostingasp.pl/Service";
 
     private NetClient() {}
 
@@ -282,53 +278,35 @@ public class NetClient
 
     private Contact GetUserData(final int userId, final String login)
     {
-        final String endpoint = "/GetUserData";
+        final String endpointId = "/GetUserDataById";
+        final String endpointLogin = "/GetUserDataByLogin";
         Contact user = null;
         String postData;
+        boolean mSwitch;
         if (userId == -1 && login == null)
             throw new IllegalArgumentException("You can use ONLY ONE of parameter: userId OR login");
-        if (login == null) postData = "user_id=" + userId;
-        else postData = "login=" + login;
-
-        AsyncTask<String, Void, Contact> task = new AsyncTask<String, Void, Contact>()
+        if (login == null)
         {
-            @Override
-            protected Contact doInBackground(String... params)
-            {
-                try
-                {
-                    HttpURLConnection client = CreatePostRequest(endpoint, params[0], true, "POST");
-                    if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
-                    {
-                        return Helper.getObjectFromJson(client.getInputStream(), Contact.class);
-                    }
-                }
-                catch(IOException e)
-                {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
-        task.execute(postData);
+            postData = "user_id=" + userId;
+            mSwitch = true;
+        }
+        else
+        {
+            postData = "login=" + login;
+            mSwitch = false;
+        }
 
         try
         {
-            user = task.get(10, TimeUnit.SECONDS);
+            HttpURLConnection client = CreatePostRequest(mSwitch ? endpointId : endpointLogin, postData, true, "POST");
+            if (client.getResponseCode() == HttpURLConnection.HTTP_OK)
+                return Helper.getObjectFromJson(client.getInputStream(), Contact.class);
         }
-        catch(InterruptedException e)
+        catch(IOException e)
         {
             e.printStackTrace();
         }
-        catch(ExecutionException e)
-        {
-            e.printStackTrace();
-        }
-        catch(TimeoutException e)
-        {
-            e.printStackTrace();
-        }
-        return user;
+        return null;
     }
 
     public void Ping(final boolean asyncPing)

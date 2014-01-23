@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -20,26 +21,19 @@ public class Contact implements Serializable
         messages = new ArrayList<Message>();
     }
 
-    public Contact(Boolean groupConversation, String login, List<Integer> ids )
+    public Contact(Boolean groupConversation, String login, Collection<Integer> ids, Collection<String> names)
     {
         this.login = login;
-        id = Integer.parseInt(login.substring(5));
-        name = "Konwersacja " + id;
-        status = Status.AVAILABLE.ordinal();
-        messages = new ArrayList<Message>();
+        this.id = Integer.parseInt(login.substring(5));
+        this.name = "Konwersacja " + id;
+        this.status = Status.AVAILABLE.ordinal();
+        this.messages = new ArrayList<Message>();
+        this.names = new String[names.size()];
+        names.toArray(this.names);
         this.groupConversation = groupConversation;
-        try
-        {
-            ids.remove((Integer) Helper.MyID);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
         this.ids = new int[ids.size()];
-        for (int i = 0 ; i < ids.size() ; i++)
-            this.ids[i] = ids.get(i);
-
+        int iter = 0;
+        for (Integer i : ids) this.ids[iter++] = i;
 
     }
 
@@ -123,6 +117,13 @@ public class Contact implements Serializable
 
     private int[] ids;
 
+    public void setNamesArray(String[] names)
+    {
+        this.names = names;
+    }
+
+    private String[] names;
+
     private List<Message> messages;
 
     public boolean haveNewMessages()
@@ -145,7 +146,12 @@ public class Contact implements Serializable
 
     public int[] getIdArray()
     {
-        return groupConversation ?  ids : new int [] { id, Helper.MyID };
+        return groupConversation ? ids : new int[]{id, Helper.MyID};
+    }
+
+    public String[] getNamesArray(String myName)
+    {
+        return groupConversation ? names : new String[]{name, myName};
     }
 
     public boolean isGroupConversation()

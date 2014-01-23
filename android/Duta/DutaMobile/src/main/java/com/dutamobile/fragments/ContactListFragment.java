@@ -21,13 +21,11 @@ import com.dutamobile.R;
 import com.dutamobile.adapter.ContactListAdapter;
 import com.dutamobile.model.Contact;
 import com.dutamobile.net.NetClient;
-import com.dutamobile.util.AddContactTask;
 import com.dutamobile.util.Helper;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Created by Bartosz on 12.10.13.
@@ -78,9 +76,8 @@ public class ContactListFragment extends ListFragment implements Refreshable
 
         if (actionMode == null)
         {
-            Contact c = (Contact) getListAdapter().getItem(position);
-            c.setNewMessage(false);
-            StartConversation(c);
+            Contact contact = (Contact) getListAdapter().getItem(position);
+            StartConversation(contact);
         }
         else
             onListItemSelect(position);
@@ -101,7 +98,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
         if (actionMode != null)
         {
             actionMode.setTitle(String.format("%d %s", count, getResources().getQuantityString(R.plurals.selected, count)));
-            if (count < 3) actionMode.invalidate();
+            actionMode.invalidate();
         }
     }
 
@@ -133,44 +130,31 @@ public class ContactListFragment extends ListFragment implements Refreshable
 
     private void CreateGroupConversation()
     {
-        SparseBooleanArray a = ((ContactListAdapter) getListAdapter()).getSelectedPositions();
-        int size = a.size() + 1;
-        Integer[] ids = new Integer[size];
-        String[] names = new String[size];
+        SparseBooleanArray tmp = ((ContactListAdapter) getListAdapter()).getSelectedPositions();
+        int size = tmp.size() + 1;
+        SortedMap<Integer, String> map = new TreeMap<Integer, String>();
         StringBuilder nameBuilder = new StringBuilder();
-
-        ids[0] = Helper.MyID;
-        names[0] = getResources().getString(R.string.me);
+        map.put(Helper.MyID, getResources().getString(R.string.me));
         for(int i = 1 ; i < size; i++)
         {
-            Contact c = ((Contact)getListAdapter().getItem(a.keyAt(i)));
-            ids[i] = c.getId();
-            names[i] = c.getName();
+            Contact c = ((Contact) getListAdapter().getItem(tmp.keyAt(i)));
+            map.put(c.getId(), c.getName());
         }
-
-        List<Integer> duplicate = Arrays.asList(ids);
-        Collections.sort(duplicate);
-        for(int id : duplicate) nameBuilder.append(id);
-
-        Contact group = new Contact(true, "Chat_" + nameBuilder.toString(), duplicate);
-        group.setName("Konwersacja " + nameBuilder.toString());
-        group.setId(Integer.parseInt(nameBuilder.toString()));
-        group.setLogin("Chat_" + nameBuilder.toString());
+        for (int id : map.keySet()) nameBuilder.append(id);
+        Contact group = new Contact(true, "Chat_" + nameBuilder.toString(), map.keySet(), map.values());
         ((ContactListAdapter) getListAdapter()).getData().add(group);
         ((ContactListAdapter) getListAdapter()).notifyDataSetChanged();
-        android.util.Log.v("GROUP CLF", group.getLogin());
-        Helper.startTask(new AddContactTask(getActivity(), group.getLogin(), group.getName(), EditDialog.MODE.ADD.getMode()));
+        //Helper.startTask(new AddContactTask(getActivity(), group.getLogin(), group.getName(), EditDialog.MODE.ADD.getMode()));
         StartConversation(group);
     }
 
     private void StartConversation(Contact contact)
     {
         boolean gc = contact.isGroupConversation();
-        String[] names = gc ? ((ContactListAdapter)getListAdapter()).getContactNamesByIds(contact.getIdArray())
-                :  new String[] {contact.getName(), getResources().getString(R.string.me)};
+        contact.setNewMessage(false);
         Bundle args = new Bundle();
         args.putIntArray(ARG_CONTACT_ID, contact.getIdArray());
-        args.putStringArray(ARG_CONTACT_NAME, names);
+        args.putStringArray(ARG_CONTACT_NAME, contact.getNamesArray(getString(R.string.me)));
         args.putString(ARG_CONVERSATION_NAME, contact.getName());
         args.putBoolean(ARG_GROUP_CONVERSATION,gc);
         args.putSerializable(ARG_MESSAGES, (Serializable) contact.getMessages());
@@ -205,7 +189,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
             }
             else
             {
-                menu.findItem(R.id.action_cl_group_conversation).setVisible(true);
+                menu.findItem(R.id.action_cl_group_conversation).setVisible(!adapter.IsAnyGroupConversationSelected());
                 menu.findItem(R.id.action_cl_edit).setVisible(false);
             }
 

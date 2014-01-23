@@ -15,6 +15,9 @@ import com.dutamobile.util.Helper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by Bartosz on 17.11.13.
@@ -44,8 +47,10 @@ public class DutaApplication extends Application
         if (Helper.CURRENT_FRAGMENT.contains("Chat-"))
             currentName = Helper.CURRENT_FRAGMENT.substring(5);
         else currentName = "";
+        boolean unknown = true;
         for (Message m : messageList)
         {
+            if (m.getUsers().size() < 2) continue;
             if (m.getUsers().size() == 2)
             {
                 for (int id : m.getUsers())
@@ -54,44 +59,93 @@ public class DutaApplication extends Application
                     for (Contact c : contactList)
                         if (c.getId() == id)
                         {
-                            c.addMessage(m);
-                            if (!c.getName().equals(currentName))
-                            {
-                                output.setOnlyForCurrent(false);
-                                c.setNewMessage(forNewMessages);
-                            }
-                            output.setNewMessage(true);
+                            unknown = false;
+                            TakeCareOfMessage(c, m, currentName, output, forNewMessages);
                             break;
                         }
+                }
+
+                if (unknown)
+                {
+                    Contact unknownBro;
+
+                    AsyncTask<Integer, Void, Contact> task = new AsyncTask<Integer, Void, Contact>()
+                    {
+                        @Override
+                        protected Contact doInBackground(Integer... params)
+                        {
+                            return NetClient.GetInstance().GetUserData(params[0]);
+                        }
+                    };
+                    Helper.startTask(task, m.getAuthor());
+
+                    try
+                    {
+                        unknownBro = task.get(30, TimeUnit.SECONDS);
+                        if (unknownBro != null)
+                        {
+                            unknownBro.setName(unknownBro.getLogin());
+                            TakeCareOfMessage(unknownBro, m, currentName, output, forNewMessages);
+                            contactList.add(unknownBro);
+                            Helper.startTask(new AddContactTask(mainActivity,
+                                    unknownBro.getLogin(), unknownBro.getName(), EditDialog.MODE.ADD.getMode()));
+                        }
+                    }
+                    catch(InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    catch(ExecutionException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    catch(TimeoutException e)
+                    {
+                        e.printStackTrace();
+                    }
                 }
             }
             else
             {
                 StringBuilder nameBuilder = new StringBuilder("Chat_");
                 List<Integer> users = m.getUsers();
-                for(int id : users) nameBuilder.append(id);
+                for (int id : users) nameBuilder.append(id);
 
                 Contact c = GetContactByLogin(nameBuilder.toString());
-                if(c == null)
+                if (c == null)
                 {
-                    c = new Contact(true, nameBuilder.toString(), m.getUsers());
+                    ArrayList<String> names = new ArrayList<String>();
+                    for (int id : users)
+                    {
+                        if (id == Helper.MyID)
+                            names.add(getResources().getString(R.string.me));
+                        else
+                        {
+                            Contact cTemp = GetContactById(id);
+                            names.add(cTemp != null ? cTemp.getName() : "" + id);
+                        }
+                    }
+                    c = new Contact(true, nameBuilder.toString(), m.getUsers(), names);
                     contactList.add(c);
-                    android.util.Log.v("GROUP DA", c.getLogin());
-                    Helper.startTask(new AddContactTask(mainActivity, c.getLogin(), c.getName(), EditDialog.MODE.ADD.getMode()));
+                    //Helper.startTask(new AddContactTask(mainActivity, c.getLogin(), c.getName(), EditDialog.MODE.ADD.getMode()));
                 }
 
-                c.addMessage(m);
-                if (!c.getName().equals(currentName))
-                {
-                    output.setOnlyForCurrent(false);
-                    c.setNewMessage(forNewMessages);
-                }
-                output.setNewMessage(true);
-                break;
+                TakeCareOfMessage(c, m, currentName, output, forNewMessages);
             }
         }
         messageList.clear();
         return output;
+    }
+
+    private void TakeCareOfMessage(Contact contact, Message message, String currentName, UpdateMessageOutput output, boolean forNewMessages)
+    {
+        contact.addMessage(message);
+        if (!contact.getName().equals(currentName))
+        {
+            output.setOnlyForCurrent(false);
+            contact.setNewMessage(forNewMessages);
+        }
+        output.setNewMessage(true);
     }
 
     private void UpdateContactStatuses(List<StatusUpdateResponse> update)
@@ -115,6 +169,13 @@ public class DutaApplication extends Application
     {
         Contact theContact = null;
         for (Contact c : contactList) if (c.getLogin().equals(login)) theContact = c;
+        return theContact;
+    }
+
+    public Contact GetContactById(int id)
+    {
+        Contact theContact = null;
+        for (Contact c : contactList) if (c.getId() == id) theContact = c;
         return theContact;
     }
 

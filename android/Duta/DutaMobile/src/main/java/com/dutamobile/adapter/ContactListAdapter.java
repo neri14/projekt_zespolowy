@@ -128,15 +128,21 @@ public class ContactListAdapter extends BaseAdapter
     public void removeSelection()
     {
         mSelectedItemsIds = new SparseBooleanArray();
+        SelectedGroupConversation = 0;
         notifyDataSetChanged();
     }
 
     public void selectView(int position, boolean value)
     {
-        if (value)
-            mSelectedItemsIds.put(position, value);
-        else
-            mSelectedItemsIds.delete(position);
+        if (value) mSelectedItemsIds.put(position, value);
+        else mSelectedItemsIds.delete(position);
+
+        if (data.get(position).isGroupConversation())
+        {
+            if (value) SelectedGroupConversation++;
+            else if (SelectedGroupConversation > 0) SelectedGroupConversation--;
+            android.util.Log.v("SelGroupConv", "" + SelectedGroupConversation);
+        }
 
         notifyDataSetChanged();
     }
@@ -150,6 +156,13 @@ public class ContactListAdapter extends BaseAdapter
     {
         return mSelectedItemsIds;
     }
+
+    public boolean IsAnyGroupConversationSelected()
+    {
+        return SelectedGroupConversation > 0;
+    }
+
+    private int SelectedGroupConversation = 0;
 
     static class ViewHolder
     {
