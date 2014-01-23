@@ -67,6 +67,7 @@ var duta = function () {
                 public string description { get; set; }
                 */
 			    dutaModel.myId = result.user_id;
+
 			}
 		);
 	}
@@ -81,6 +82,15 @@ var duta = function () {
                 public string description { get; set; }
                 */
 			    dutaModel.myId = result.user_id;
+
+			    var newStatus = statusToString(result.status);
+			    $(userStatus).removeClass(dutaModel.myStatus);
+			    $(userStatus).addClass(newStatus);
+			    dutaModel.myStatus = newStatus;
+
+			    var desc = $('#userDesription');
+			    $(desc).val(result.description);
+			    dutaModel.myDescription = result.description;
 			}
 		);
 	}
@@ -202,13 +212,41 @@ var duta = function () {
 				    for (i; i < value.users.length; i++) {
 				        conversationId += 'a' + value.users[i];
 				    }
+				    var participants2 = "";
+				    var auth = getActualContact(value.author).nickname
+				    var bylo = -1;
+				    var moj = -1;
+				    if (value.users.length > 2) {
+				        var j = 0;
+				        for (j; j < value.users.length; j++) {
+				            if (value.users[j] != dutaModel.myId) {
+				                if (bylo < 0) {
+				                    participants2 = getActualContact(value.users[j]).nickname;
+				                    bylo = j;
+				                }
+				            } else {
+				                moj = j;
+				            }
+				        }
+				        j = 0;
+				        for (j; j < value.users.length; j++) {
+				            if (value.users[j] != dutaModel.myId && j!=bylo) {
+				                var kont = getActualContact(value.users[j]);
+				                participants2 += ", " + kont.nickname
+                            }
+				        }
+				        auth = "Konferencja";
+				    }
+
 				    var date = new Date(value.timestamp);
+                    
 					var model={
 					    users: conversationId,
-						author: getActualContact(value.author).nickname,
+					    author: getActualContact(value.author).nickname,
 						messageText : value.message,
 						dateTime: date.toLocaleTimeString(),
-						participants: getActualContact(value.author).nickname
+						participants: auth,
+						participants2: participants2
 					};
 					renderMessage(model);
 				});					
