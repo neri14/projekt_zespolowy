@@ -50,7 +50,7 @@ public class ContactListAdapter extends BaseAdapter
     @Override
     public long getItemId(int position)
     {
-        return data.get(position).hashCode();
+        return ((Object)data.get(position)).hashCode();
     }
 
     public void setData(List<Contact> data)
@@ -64,7 +64,21 @@ public class ContactListAdapter extends BaseAdapter
         return this.data;
     }
 
-
+    public String [] getContactNamesByIds(int[] ids)
+    {
+        String[] names = new String[ids.length];
+        int iter = 0;
+        for(int id : ids)
+        {
+            for(Contact c : data)
+                if(c.getId() == id)
+                {
+                    names[iter++] = c.getName();
+                    break;
+                }
+        }
+        return names;
+    }
     public boolean removeItem(Contact contact)
     {
         return data.remove(contact);
@@ -114,15 +128,21 @@ public class ContactListAdapter extends BaseAdapter
     public void removeSelection()
     {
         mSelectedItemsIds = new SparseBooleanArray();
+        SelectedGroupConversation = 0;
         notifyDataSetChanged();
     }
 
     public void selectView(int position, boolean value)
     {
-        if (value)
-            mSelectedItemsIds.put(position, value);
-        else
-            mSelectedItemsIds.delete(position);
+        if (value) mSelectedItemsIds.put(position, value);
+        else mSelectedItemsIds.delete(position);
+
+        if (data.get(position).isGroupConversation())
+        {
+            if (value) SelectedGroupConversation++;
+            else if (SelectedGroupConversation > 0) SelectedGroupConversation--;
+            android.util.Log.v("SelGroupConv", "" + SelectedGroupConversation);
+        }
 
         notifyDataSetChanged();
     }
@@ -132,10 +152,17 @@ public class ContactListAdapter extends BaseAdapter
         return mSelectedItemsIds.size();
     }
 
-    public SparseBooleanArray getSelectedIds()
+    public SparseBooleanArray getSelectedPositions()
     {
         return mSelectedItemsIds;
     }
+
+    public boolean IsAnyGroupConversationSelected()
+    {
+        return SelectedGroupConversation > 0;
+    }
+
+    private int SelectedGroupConversation = 0;
 
     static class ViewHolder
     {

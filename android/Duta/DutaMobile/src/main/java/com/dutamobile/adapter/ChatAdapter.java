@@ -59,19 +59,19 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
     @Override
     public int getCount()
     {
-        return data.size();
+        return data == null ? 0 : data.size();
     }
 
     @Override
     public Object getItem(int position)
     {
-        return data.get(position);
+        return data == null ? null : data.get(position);
     }
 
     @Override
     public long getItemId(int position)
     {
-        return data.get(position).hashCode();
+        return data == null ? -1 : ((Object) data.get(position)).hashCode();
     }
 
     @Override
@@ -103,17 +103,15 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
             holder.messageView.setText(msg.getMessageText());
             holder.timestampView.setText(msg.getDate());
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            holder.usernameView.setText(usernames.get(msg.getAuthor()) + ":");
             if (msg.getAuthor() != Helper.MyID)
             {
-                holder.usernameView.setText(usernames.get(msg.getAuthor()) + ":");
                 holder.container.setBackgroundResource(R.drawable.receive_msg_bg);
-
                 params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
                 holder.container.setGravity(Gravity.LEFT);
             }
             else
             {
-                holder.usernameView.setText("Ja:");
                 holder.container.setBackgroundResource(R.drawable.send_msg_bg);
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 holder.container.setGravity(Gravity.RIGHT);

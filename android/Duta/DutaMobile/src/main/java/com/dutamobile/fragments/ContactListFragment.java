@@ -24,6 +24,8 @@ import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
 
 import java.io.Serializable;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Created by Bartosz on 12.10.13.
@@ -31,9 +33,11 @@ import java.io.Serializable;
 public class ContactListFragment extends ListFragment implements Refreshable
 {
     public static final String TAG = "ContactList";
-    public static final String ARG_MESSAGES = "Messages";
-    public static final String ARG_CONTACT_NAME = "ContactName";
-    public static final String ARG_CONTACT_ID = "ContactID";
+    public static final String ARG_MESSAGES = "mgs1";
+    public static final String ARG_CONTACT_NAME = "cName";
+    public static final String ARG_CONTACT_ID = "cId";
+    public static final String ARG_GROUP_CONVERSATION = "gConv";
+    public static final String ARG_CONVERSATION_NAME = "cvName";
     private Handler handler;
     private ActionMode actionMode;
 
@@ -72,13 +76,8 @@ public class ContactListFragment extends ListFragment implements Refreshable
 
         if (actionMode == null)
         {
-            Contact c = (Contact) getListAdapter().getItem(position);
-            c.setNewMessage(false);
-            Bundle args = new Bundle();
-            args.putSerializable(ARG_MESSAGES, (Serializable) c.getMessages());
-            args.putString(ARG_CONTACT_NAME, c.getName());
-            args.putInt(ARG_CONTACT_ID, c.getId());
-            Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + c.getName(), args);
+            Contact contact = (Contact) getListAdapter().getItem(position);
+            StartConversation(contact);
         }
         else
             onListItemSelect(position);
@@ -99,7 +98,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
         if (actionMode != null)
         {
             actionMode.setTitle(String.format("%d %s", count, getResources().getQuantityString(R.plurals.selected, count)));
-            if (count < 3) actionMode.invalidate();
+            actionMode.invalidate();
         }
     }
 
@@ -131,7 +130,35 @@ public class ContactListFragment extends ListFragment implements Refreshable
 
     private void CreateGroupConversation()
     {
-        //TODO implement that
+        SparseBooleanArray tmp = ((ContactListAdapter) getListAdapter()).getSelectedPositions();
+        int size = tmp.size() + 1;
+        SortedMap<Integer, String> map = new TreeMap<Integer, String>();
+        StringBuilder nameBuilder = new StringBuilder();
+        map.put(Helper.MyID, getResources().getString(R.string.me));
+        for(int i = 1 ; i < size; i++)
+        {
+            Contact c = ((Contact) getListAdapter().getItem(tmp.keyAt(i)));
+            map.put(c.getId(), c.getName());
+        }
+        for (int id : map.keySet()) nameBuilder.append(id);
+        Contact group = new Contact(true, "Chat_" + nameBuilder.toString(), map.keySet(), map.values());
+        ((ContactListAdapter) getListAdapter()).getData().add(group);
+        ((ContactListAdapter) getListAdapter()).notifyDataSetChanged();
+        //Helper.startTask(new AddContactTask(getActivity(), group.getLogin(), group.getName(), EditDialog.MODE.ADD.getMode()));
+        StartConversation(group);
+    }
+
+    private void StartConversation(Contact contact)
+    {
+        boolean gc = contact.isGroupConversation();
+        contact.setNewMessage(false);
+        Bundle args = new Bundle();
+        args.putIntArray(ARG_CONTACT_ID, contact.getIdArray());
+        args.putStringArray(ARG_CONTACT_NAME, contact.getNamesArray(getString(R.string.me)));
+        args.putString(ARG_CONVERSATION_NAME, contact.getName());
+        args.putBoolean(ARG_GROUP_CONVERSATION,gc);
+        args.putSerializable(ARG_MESSAGES, (Serializable) contact.getMessages());
+        Helper.fragmentReplacement(getActivity().getSupportFragmentManager(), ChatFragment.class, true, "Chat-" + contact.getName(), args);
     }
 
     private class ActionModeCallback implements ActionMode.Callback
@@ -162,7 +189,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
             }
             else
             {
-                menu.findItem(R.id.action_cl_group_conversation).setVisible(true);
+                menu.findItem(R.id.action_cl_group_conversation).setVisible(!adapter.IsAnyGroupConversationSelected());
                 menu.findItem(R.id.action_cl_edit).setVisible(false);
             }
 
@@ -176,7 +203,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
             {
                 case R.id.action_cl_delete:
                 {
-                    SparseBooleanArray selected = adapter.getSelectedIds();
+                    SparseBooleanArray selected = adapter.getSelectedPositions();
                     for (int i = (selected.size() - 1); i >= 0; i--)
                     {
                         if (selected.valueAt(i))
@@ -190,7 +217,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
                 }
                 case R.id.action_cl_edit:
                 {
-                    Contact contact = (Contact) adapter.getItem(adapter.getSelectedIds().keyAt(0));
+                    Contact contact = (Contact) adapter.getItem(adapter.getSelectedPositions().keyAt(0));
                     EditDialog editDialog = new EditDialog();
                     Bundle args = new Bundle();
                     args.putString(EditDialog.ARG_LOGIN, contact.getLogin());
@@ -203,6 +230,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
                 }
                 case R.id.action_cl_group_conversation:
                 {
+                    CreateGroupConversation();
                     break;
                 }
 

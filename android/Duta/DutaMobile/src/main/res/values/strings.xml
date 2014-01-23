@@ -4,23 +4,27 @@
     <string name="app_name">Duta Mobile</string>
     <string name="title_activity_main">Duta Mobile</string>
     <string name="action_signup">Rejestracja</string>
-    <string name="contentDesc">content</string>
     <string name="drawer_open">Menu</string>
-
     <string name="setting_desc">Ustawianie statusu</string>
     <string name="editting_contact">Edycja kontaktu</string>
+    <string name="registry_address">http://duta.hostingasp.pl/Home/Register</string>
+
+
+    <string name="add">Dodaj</string>
     <string name="edit">Edytuj</string>
-    <string name="group_conversation">Konwersacja grupowa</string>
     <string name="delete">Usuń</string>
+
+    <string name="group_conversation">Konwersacja grupowa</string>
     <string name="nickname">Nazwa wyświetlana</string>
     <string name="login_name">Login kontaktu</string>
     <string name="adding_contact">Dodawanie kontaktu</string>
 
-    <string name="registry_address">http://duta.hostingasp.pl/Home/Register</string>
-    <string name="add">Dodaj</string>
     <string name="input_message_hint">Tu wpisz wiadomość...</string>
-    <string name="new_messages">Noew wiadomości</string>
+    <string name="new_messages">Nowe wiadomości</string>
     <string name="no_internet_connection">Brak połączenia z Internetem.</string>
+    <string name="me">Ja</string>
+
+    <string name="contentDesc">content</string>
 
     <string-array name="drawer_items">
         <item>Zmień opis</item>

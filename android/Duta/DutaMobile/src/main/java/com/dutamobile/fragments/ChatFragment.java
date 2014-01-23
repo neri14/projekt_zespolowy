@@ -21,6 +21,7 @@ import com.dutamobile.model.Message;
 import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -34,13 +35,12 @@ public class ChatFragment extends ListFragment implements Refreshable
     private Handler handler;
     private MenuItem chatItem;
 
-    private int contactId;
+    private int[] contactIds;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View v = inflater.inflate(R.layout.chat_fragment, container, false);
-        contactId = getArguments().getInt(ContactListFragment.ARG_CONTACT_ID);
         message_box = (EditText) v.findViewById(R.id.edittext_1);
         handler = new Handler();
         v.findViewById(R.id.imagebutton_1).setOnClickListener(new View.OnClickListener()
@@ -57,9 +57,7 @@ public class ChatFragment extends ListFragment implements Refreshable
 
         if (getListAdapter() == null)
         {
-            HashMap<Integer, String> usernames = new HashMap<Integer, String>();
-            usernames.put(contactId, getArguments().getString(ContactListFragment.ARG_CONTACT_NAME));
-            setListAdapter(new ChatAdapter(getActivity(), (List<Message>) getArguments().get(ContactListFragment.ARG_MESSAGES), usernames));
+            SetCustomAdapter();
         }
         setHasOptionsMenu(true);
         return v;
@@ -80,7 +78,7 @@ public class ChatFragment extends ListFragment implements Refreshable
                 return true;
             }
         });
-        Helper.getSupportActionBar(getActivity()).setTitle(getArguments().getString(ContactListFragment.ARG_CONTACT_NAME));
+        Helper.getSupportActionBar(getActivity()).setTitle(getArguments().getString(ContactListFragment.ARG_CONVERSATION_NAME));
     }
 
     @Override
@@ -94,9 +92,7 @@ public class ChatFragment extends ListFragment implements Refreshable
     public void onListItemClick(ListView l, View v, int position, long id)
     {
         super.onListItemClick(l, v, position, id);
-
-        if (actionMode != null)
-            onListItemSelect(position);
+        if (actionMode != null) onListItemSelect(position);
     }
 
     private void onListItemSelect(int position)
@@ -149,15 +145,16 @@ public class ChatFragment extends ListFragment implements Refreshable
                         message_box.setText(null);
                     }
                 });
-                final int[] users = new int[]{Helper.MyID, contactId};
-                final long timestamp = NetClient.GetInstance().SendMessage(text, users);
+                final int [] ids = Arrays.copyOf(contactIds, contactIds.length + 1);
+                ids[contactIds.length] = Helper.MyID;
+                final long timestamp = NetClient.GetInstance().SendMessage(text, ids);
 
                 handler.post(new Runnable()
                 {
                     @Override
                     public void run()
                     {
-                        Message msg = new Message(text, users);
+                        Message msg = new Message(text, ids);
                         msg.setTimestamp(timestamp);
                         ((ChatAdapter) getListAdapter()).addMessage(msg);
                         getListView().setSelection(getListAdapter().getCount() - 1);
@@ -166,6 +163,16 @@ public class ChatFragment extends ListFragment implements Refreshable
                 );
             }
         }.start();
+    }
+
+    private void SetCustomAdapter()
+    {
+        HashMap<Integer, String> usernames = new HashMap<Integer, String>();
+        contactIds = getArguments().getIntArray(ContactListFragment.ARG_CONTACT_ID);
+        String [] contactNames = getArguments().getStringArray(ContactListFragment.ARG_CONTACT_NAME);
+        for(int i = 0 ; i < contactIds.length ; i++) usernames.put(contactIds[i], contactNames[i]);
+        setListAdapter(new ChatAdapter(getActivity(), (List<Message>) getArguments().get(ContactListFragment.ARG_MESSAGES),
+                usernames));
     }
 
     private final ActionMode.Callback ActionModeCallback = new ActionMode.Callback()

@@ -1,10 +1,12 @@
 package com.dutamobile.model;
 
 import com.dutamobile.model.response.StatusUpdateResponse;
+import com.dutamobile.util.Helper;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -12,9 +14,27 @@ import java.util.List;
  */
 public class Contact implements Serializable
 {
+    boolean groupConversation = false;
+
     public Contact()
     {
         messages = new ArrayList<Message>();
+    }
+
+    public Contact(Boolean groupConversation, String login, Collection<Integer> ids, Collection<String> names)
+    {
+        this.login = login;
+        this.id = Integer.parseInt(login.substring(5));
+        this.name = "Konwersacja " + id;
+        this.status = Status.AVAILABLE.ordinal();
+        this.messages = new ArrayList<Message>();
+        this.names = new String[names.size()];
+        names.toArray(this.names);
+        this.groupConversation = groupConversation;
+        this.ids = new int[ids.size()];
+        int iter = 0;
+        for (Integer i : ids) this.ids[iter++] = i;
+
     }
 
     public int getId()
@@ -95,6 +115,15 @@ public class Contact implements Serializable
     @SerializedName("description")
     private String description;
 
+    private int[] ids;
+
+    public void setNamesArray(String[] names)
+    {
+        this.names = names;
+    }
+
+    private String[] names;
+
     private List<Message> messages;
 
     public boolean haveNewMessages()
@@ -114,4 +143,20 @@ public class Contact implements Serializable
         status = update.getStatus();
         description = update.getDescription();
     }
+
+    public int[] getIdArray()
+    {
+        return groupConversation ? ids : new int[]{id, Helper.MyID};
+    }
+
+    public String[] getNamesArray(String myName)
+    {
+        return groupConversation ? names : new String[]{name, myName};
+    }
+
+    public boolean isGroupConversation()
+    {
+        return groupConversation;
+    }
+
 }
