@@ -54,7 +54,7 @@ var duta = function () {
 	    getContactList(true);
 //	    getUserData(login);
 	    getMyData();
-//	    document.getElementsByTagName("body")[0].oncontextmenu = function (e) { e.preventDefault(); }
+	    document.getElementsByTagName("body")[0].oncontextmenu = function (e) { e.preventDefault(); }
 	});
 
 	function getUserData(login){
