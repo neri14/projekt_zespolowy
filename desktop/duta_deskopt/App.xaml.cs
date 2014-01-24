@@ -16,7 +16,10 @@ namespace duta_deskopt
         public static DutaServices ds;
         void App_Exit(object sender, ExitEventArgs e)
         {
-            ds.Logout();            
+            if (ds != null)
+            {
+                ds.Logout();
+            }
         }
     }
 }
