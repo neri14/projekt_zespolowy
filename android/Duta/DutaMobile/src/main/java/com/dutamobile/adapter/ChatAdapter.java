@@ -56,6 +56,12 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
         notifyDataSetChanged();
     }
 
+    public void addMessage(Message message, int position)
+    {
+        data.add(position, message);
+        //notifyDataSetChanged();
+    }
+
     @Override
     public int getCount()
     {

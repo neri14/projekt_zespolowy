@@ -24,7 +24,6 @@ import java.util.concurrent.TimeoutException;
  */
 public class DutaApplication extends Application
 {
-    private static final long DAY_IN_MILLIS = 86400000;
     private MainActivity mainActivity;
     private List<Contact> contactList;
     private List<Message> messageList;
@@ -209,7 +208,7 @@ public class DutaApplication extends Application
     private void GetArchive()
     {
         long to = System.currentTimeMillis();
-        long from = to - DAY_IN_MILLIS;
+        long from = to - Helper.DAY_IN_MILLIS;
         messageList = NetClient.GetInstance().GetArchive(from, to);
         MergeMessagesWithContacts(false);
     }

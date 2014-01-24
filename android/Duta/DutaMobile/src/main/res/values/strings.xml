@@ -38,4 +38,8 @@
         <item>Niedostepny</item>
     </string-array>
 
+    <string name="ptr_pull_to_refresh">Pociągnij…</string>
+    <string name="ptr_release_to_refresh">Puść…</string>
+    <string name="ptr_refreshing">Aktualizowanie…</string>
+    <string name="ptr_last_updated">Aktualizacja: %1$s</string>
 </resources>

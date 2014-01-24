@@ -28,6 +28,7 @@ import java.lang.reflect.Type;
 public class Helper
 {
     private static boolean ChatIconStatus = false;
+    public static final long DAY_IN_MILLIS = 86400000;
     public static int MyID;
     public static String PREFS_PRIVATE;
     public static final String PREFS_MAIN = "main-prefs";

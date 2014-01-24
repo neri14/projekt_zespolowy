@@ -20,6 +20,7 @@ import com.dutamobile.adapter.ChatAdapter;
 import com.dutamobile.model.Message;
 import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
+import com.dutamobile.util.PullDownRefreshList;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import java.util.List;
  */
 public class ChatFragment extends ListFragment implements Refreshable
 {
+    private long lastFromDate = System.currentTimeMillis() - Helper.DAY_IN_MILLIS;
     private EditText message_box;
     private ActionMode actionMode;
     private Handler handler;
@@ -52,13 +54,9 @@ public class ChatFragment extends ListFragment implements Refreshable
                 //if text longer than 0 and doesn't contain only whitespace chars
                 if (text.length() > 0 && !text.matches("^\\s*$")) SendMessage(text);
             }
-        }
-        );
+        });
 
-        if (getListAdapter() == null)
-        {
-            SetCustomAdapter();
-        }
+        if (getListAdapter() == null) SetCustomAdapter();
         setHasOptionsMenu(true);
         return v;
     }
@@ -67,9 +65,11 @@ public class ChatFragment extends ListFragment implements Refreshable
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        getListView().setDividerHeight(0);
-        getListView().setSelection(getListAdapter().getCount() - 1);
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
+        PullDownRefreshList list = (PullDownRefreshList) getListView();
+        list.setOnRefreshListener(getMoreMessages);
+        list.setDividerHeight(0);
+        list.setSelection(getListAdapter().getCount() - 1);
+        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
         {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
@@ -204,6 +204,41 @@ public class ChatFragment extends ListFragment implements Refreshable
             ((ChatAdapter) getListAdapter()).removeSelection();
             getListView().setDividerHeight(0);
             actionMode = null;
+        }
+    };
+
+    private PullDownRefreshList.OnRefreshListener getMoreMessages = new PullDownRefreshList.OnRefreshListener()
+    {
+        @Override
+        public void onRefresh()
+        {
+            new Thread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    List<Message> archive = NetClient.GetInstance().GetArchive(lastFromDate - Helper.DAY_IN_MILLIS, lastFromDate);
+                    lastFromDate -= Helper.DAY_IN_MILLIS;
+                    ProcessArchive(archive);
+                }
+            }, "GettingMoreMsgsThread").start();
+
+        }
+
+        private void ProcessArchive(List<Message> archive)
+        {
+            final ChatAdapter adapter = (ChatAdapter) getListAdapter();
+            for (int i = archive.size() - 1; i >= 0; --i) adapter.addMessage(archive.get(i), 0);
+            handler.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    adapter.notifyDataSetChanged();
+                    getListView().setSelection(0);
+                    ((PullDownRefreshList) getListView()).onRefreshComplete();
+                }
+            });
         }
     };
 }

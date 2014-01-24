@@ -22,6 +22,7 @@ import com.dutamobile.adapter.ContactListAdapter;
 import com.dutamobile.model.Contact;
 import com.dutamobile.net.NetClient;
 import com.dutamobile.util.Helper;
+import com.dutamobile.util.PullDownRefreshList;
 
 import java.io.Serializable;
 import java.util.SortedMap;
@@ -44,7 +45,7 @@ public class ContactListFragment extends ListFragment implements Refreshable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
+        View v = inflater.inflate(R.layout.contact_list_layout, null);//super.onCreateView(inflater, container, savedInstanceState);
         setHasOptionsMenu(true);
         handler = new Handler();
 
@@ -65,6 +66,23 @@ public class ContactListFragment extends ListFragment implements Refreshable
             {
                 onListItemSelect(position);
                 return true;
+            }
+        });
+        ((PullDownRefreshList) getListView()).setOnRefreshListener(new PullDownRefreshList.OnRefreshListener()
+        {
+            @Override
+            public void onRefresh()
+            {
+                ((DutaApplication) getActivity().getApplication()).DownloadContactList();
+
+                getListView().postDelayed(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        ((PullDownRefreshList) getListView()).onRefreshComplete();
+                    }
+                }, 5000);
             }
         });
     }
@@ -250,4 +268,5 @@ public class ContactListFragment extends ListFragment implements Refreshable
             actionMode = null;
         }
     }
+
 }
