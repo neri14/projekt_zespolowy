@@ -7,7 +7,7 @@ namespace duta.Debug.Event
 {
     public class LoggerEvent
     {
-        private DateTime time = DateTime.Now;
+        private DateTime time = DateTime.UtcNow;
         private string tag;
         private string msg;
 

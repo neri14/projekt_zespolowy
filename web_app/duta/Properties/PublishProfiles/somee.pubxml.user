@@ -13,10 +13,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:58</publishTime>
     </File>
     <File Include="bin/App_global.asax.compiled">
-      <publishTime>01/11/2014 22:26:15</publishTime>
+      <publishTime>01/17/2014 09:57:28</publishTime>
     </File>
     <File Include="bin/App_global.asax.dll">
-      <publishTime>01/11/2014 22:26:15</publishTime>
+      <publishTime>01/17/2014 09:57:28</publishTime>
     </File>
     <File Include="bin/DotNetOpenAuth.AspNet.dll">
       <publishTime>01/03/2014 13:48:57</publishTime>
@@ -37,7 +37,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="bin/duta.dll">
-      <publishTime>01/11/2014 22:24:10</publishTime>
+      <publishTime>01/17/2014 09:56:59</publishTime>
     </File>
     <File Include="bin/EntityFramework.dll">
       <publishTime>01/03/2014 13:48:57</publishTime>
@@ -310,7 +310,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="PrecompiledApp.config">
-      <publishTime>01/11/2014 22:26:09</publishTime>
+      <publishTime>01/17/2014 09:57:24</publishTime>
     </File>
     <File Include="Scripts/bootstrap/css/bootstrap-theme.css">
       <publishTime>01/03/2014 13:48:56</publishTime>
@@ -343,7 +343,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:56</publishTime>
     </File>
     <File Include="Scripts/comunicator.js">
-      <publishTime>01/03/2014 13:48:56</publishTime>
+      <publishTime>01/17/2014 08:58:41</publishTime>
     </File>
     <File Include="Scripts/handlebars.js">
       <publishTime>01/03/2014 13:48:56</publishTime>
@@ -385,13 +385,13 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="Scripts/login_partial.js">
-      <publishTime>01/03/2014 13:48:57</publishTime>
+      <publishTime>01/17/2014 08:58:41</publishTime>
     </File>
     <File Include="Scripts/modernizr-2.5.3.js">
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="Scripts/register.js">
-      <publishTime>01/03/2014 13:48:57</publishTime>
+      <publishTime>01/17/2014 09:25:15</publishTime>
     </File>
     <File Include="Scripts/_references.js">
       <publishTime>01/03/2014 13:48:56</publishTime>
@@ -409,7 +409,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="Views/Home/komunikator.cshtml">
-      <publishTime>01/03/2014 13:48:57</publishTime>
+      <publishTime>01/17/2014 08:58:41</publishTime>
     </File>
     <File Include="Views/Home/messagesPanelView.cshtml">
       <publishTime>01/03/2014 13:48:57</publishTime>
@@ -439,7 +439,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/03/2014 13:48:57</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>01/11/2014 22:26:05</publishTime>
+      <publishTime>01/17/2014 09:57:24</publishTime>
     </File>
   </ItemGroup>
 </Project>

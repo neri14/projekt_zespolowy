@@ -7,6 +7,10 @@
         <meta name="viewport" content="width=device-width" />
         @Styles.Render("~/Content/css")
         @Styles.Render("~/Scripts/bootstrap/css/bootstrap.css")
+        @Styles.Render("~/Scripts/smoothness/jquery-ui.css")
+        
+        @Styles.Render("~/Scripts/jquery-ui-timepicker-addon.css")
+
         @Scripts.Render("~/bundles/modernizr")
 
     </head>
@@ -40,7 +44,7 @@
         <footer>
             <div class="content-wrapper">
                 <div class="float-left">
-                    <p>&copy; @DateTime.Now.Year - My ASP.NET MVC Application</p>
+                    <p>&copy; @DateTime.UtcNow.Year - My ASP.NET MVC Application</p>
                 </div>
             </div>
         </footer>

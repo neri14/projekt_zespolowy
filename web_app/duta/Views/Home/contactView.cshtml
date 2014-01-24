@@ -1,4 +1,12 @@
-﻿<div id="{{user_id}}" class="contact odd" ondblclick="duta.startConversation('{{user_id}}')">
+﻿<div id="{{user_id}}" class="contact odd" ondblclick="duta.startConversation('{{user_id}}')" oncontextmenu="duta.showContextMenu('{{user_id}}')">
 	<span class="glyphicon glyphicon-certificate status {{status}}"></span><div class="name">{{nickname}}</div></br>
-	<div class="description">{{description}}</div>	
+	<div class="description">{{description}}</div>
+    <div class="contextMenu dropdown clearfix">
+    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block; position: absolute; z-index: 100;">
+      <li><a tabindex="-1" href="#" onclick="duta.selectArchiveDialog('{{user_id}}')">Archiwum</a></li>
+      <li><a tabindex="-1" href="#" onclick="duta.editContactView('{{login}}')">Edytuj</a></li>
+      <li class="divider"></li>
+      <li><a tabindex="-1" href="#" onclick="duta.removeContact('{{login}}')">Usuń</a></li>
+    </ul>
+  </div>	
 </div>

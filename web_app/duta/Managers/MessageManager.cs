@@ -19,6 +19,8 @@ namespace duta.Managers
 
         private static Object locker = new Object();
 
+        private static int HISTORY_LIMIT = 100;
+
         public static async Task<List<Message>> GetMessageUpdate(int user, DateTime lastUpdate)
         {
             lock (locker)
@@ -30,7 +32,12 @@ namespace duta.Managers
             messages = RemoveRecentlySentMessages(messages, user);
             if (messages.Count > 0)
             {
-                sent[user] = messages.Select(m => m.message_id).ToList();
+                if (!sent.ContainsKey(user))
+                    sent.Add(user, new List<long>());
+
+                sent[user].AddRange(messages.Select(m => m.message_id).ToList());
+                if(sent[user].Count > HISTORY_LIMIT)
+                    sent[user].RemoveRange(0, sent[user].Count - HISTORY_LIMIT);
                 return messages;
             }
 
@@ -51,7 +58,11 @@ namespace duta.Managers
 
             messages = data.GetMessagesSince(user, lastUpdate);
             messages = RemoveRecentlySentMessages(messages, user);
-            sent[user] = messages.Select(m => m.message_id).ToList();
+            if (!sent.ContainsKey(user))
+                sent.Add(user, new List<long>());
+            sent[user].AddRange(messages.Select(m => m.message_id).ToList());
+            if (sent[user].Count > HISTORY_LIMIT)
+                sent[user].RemoveRange(0, sent[user].Count - HISTORY_LIMIT);
             return messages;
         }
 
@@ -81,7 +92,7 @@ namespace duta.Managers
 
         public static DateTime SendMessage(int sender, List<int> receivers, string message)
         {
-            DateTime time = DateTime.Now;
+            DateTime time = DateTime.UtcNow;
             data.AddMessage(time, receivers, sender, message);
 
             lock (locker)
@@ -107,9 +118,9 @@ namespace duta.Managers
             data.SetLastMessageUpdate(user_id, time);
         }
 
-        public static List<Message> GetArchive(DateTime from, DateTime to, List<string> usernames)
+        public static List<Message> GetArchive(DateTime from, DateTime to, List<int> ids)
         {
-            return data.GetArchive(from, to, usernames);
+            return data.GetArchive(from, to, ids);
         }
     }
 }

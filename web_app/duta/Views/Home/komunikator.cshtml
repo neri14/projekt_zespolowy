@@ -6,7 +6,11 @@
 @section scripts{
     @Scripts.Render("~/Scripts/comunicator.js")
     @Scripts.Render("~/Scripts/handlebars.js")
+    @Scripts.Render("~/Scripts/jquery-ui-1.8.20.js")
+    @Scripts.Render("~/Scripts/jquery-ui-timepicker-addon.js")
     @Scripts.Render("~/Scripts/bootstrap/js/bootstrap.js")
+    
+
     }
 
 <body>
@@ -26,13 +30,11 @@
 				</ul>
 			</div>
 			<div id="applicationMenu">
-				<button type="button" class="btn btn-xs" onclick="">Menu1</button>
-				<button type="button" class="btn btn-xs" onclick="">Menu2</button>
-				<button type="button" class="btn btn-xs" onclick="">Menu3</button>
-                <button type="button" class="btn btn-xs" >Menu4</button>
+                <button type="button" class="btn btn-xs" onclick="duta.conferenceView()">Konferencja</button>
+				<button type="button" class="btn btn-xs" onclick="duta.addContactView()">Dodaj znajomego</button>
 			</div>
 			<div id="userInfo">
-				<input id="userDesription" type="text"></input>
+				<input id="userDesription" class="statusInActive" onchange="duta.setDescription()" onfocus="duta.descriptionFocus()" type="text"></input>
 			</div>
 			<div id="contacts">
 			</div>

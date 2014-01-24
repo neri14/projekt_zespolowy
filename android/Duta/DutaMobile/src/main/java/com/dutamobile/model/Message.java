@@ -3,41 +3,38 @@ package com.dutamobile.model;
 import com.dutamobile.util.Helper;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Created by Bartosz on 13.10.13.
  */
-public class Message
+public class Message implements Serializable
 {
-    public Message()
-    {
-        this(null, new ArrayList<Contact>());
-    }
-
     public Message(String messageText, List<Contact> contactList)
     {
         this.users = new ArrayList<Integer>();
 
-        if(contactList != null)
+        if (contactList != null)
         {
-            for(Contact c : contactList)
+            for (Contact c : contactList)
                 this.users.add(c.getId());
         }
 
         this.messageText = messageText;
     }
 
-    public Message(String messageText, int [] contactList)
+    public Message(String messageText, int[] contactList)
     {
         this.users = new ArrayList<Integer>();
 
-        if(contactList != null)
+        if (contactList != null)
         {
-            for(int i : contactList)
+            for (int i : contactList)
                 this.users.add(i);
         }
 
@@ -83,6 +80,7 @@ public class Message
     public String getDate()
     {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
+        sdf.setTimeZone(TimeZone.getDefault());
         return sdf.format(new Date(timestamp));
     }
 

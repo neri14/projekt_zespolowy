@@ -1,5 +1,9 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action_forgot_password"
-        android:title="@string/action_test"
-        android:showAsAction="never" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:duta="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_sign_up"
+        android:title="@string/action_signup"
+        android:showAsAction="ifRoom|withText"
+        duta:showAsAction="ifRoom|withText"
+        android:icon="@drawable/sign_up"/>
 </menu>

@@ -1,16 +1,8 @@
 ﻿<div class="tab-pane active conversation" id="{{users}}">
 	<div class="tabMenu">
+        <span id="participants2">{{participants2}}</span>
 		<div class="btn-group">
-			<button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown">
-				Menu <span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu pull-right" role="menu">
-				<li><a href="#">Zapros</a></li>
-				<li><a href="#">Poprzednie rozmowy</a></li>
-				<li><a href="#">Something else here</a></li>
-				<li class="divider"></li>
-				<li><a href="#" onClick="duta.closeConversation('{{users}}')">Zakończ</a></li>
-			</ul>
+            <button type="button" class="btn btn-xs" onClick="duta.closeConversation()" style="float:right">Zakończ</button>
 		</div>
 	</div>
 	<div class="tabMessages">

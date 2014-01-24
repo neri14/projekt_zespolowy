@@ -1,51 +1,21 @@
 package com.dutamobile.adapter;
 
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.IntentSender;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.database.DataSetObserver;
-import android.database.DatabaseErrorHandler;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.UserHandle;
+import android.graphics.Color;
 import android.util.DisplayMetrics;
-import android.view.Display;
+import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.dutamobile.DutaApplication;
 import com.dutamobile.R;
 import com.dutamobile.model.Message;
 import com.dutamobile.util.Helper;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
@@ -63,10 +33,11 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
         RelativeLayout.LayoutParams params1;
     }
 
-    private List<Message> data;
+    private final List<Message> data;
     private final LayoutInflater inflater;
-    private int width;
-    private HashMap<Integer, String> usernames;
+    private final int width;
+    private final HashMap<Integer, String> usernames;
+    private SparseBooleanArray mSelectedItemsIds;
 
     public ChatAdapter(Context context, List<Message> messages, HashMap<Integer, String> usernames)
     {
@@ -76,7 +47,7 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
 
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         width = metrics.widthPixels;
-
+        mSelectedItemsIds = new SparseBooleanArray();
     }
 
     public void addMessage(Message message)
@@ -88,19 +59,19 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
     @Override
     public int getCount()
     {
-        return data.size();
+        return data == null ? 0 : data.size();
     }
 
     @Override
     public Object getItem(int position)
     {
-        return data.get(position);
+        return data == null ? null : data.get(position);
     }
 
     @Override
     public long getItemId(int position)
     {
-        return data.get(position).hashCode();
+        return data == null ? -1 : ((Object) data.get(position)).hashCode();
     }
 
     @Override
@@ -108,7 +79,7 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
     {
         ViewHolder holder;
 
-        if(convertView == null)
+        if (convertView == null)
         {
             holder = new ViewHolder();
             convertView = inflater.inflate(R.layout.chat_item, parent, false);
@@ -127,32 +98,60 @@ public class ChatAdapter extends BaseAdapter //implements ListAdapter
 
         Message msg = data.get(position);
 
-        if(msg != null)
+        if (msg != null)
         {
             holder.messageView.setText(msg.getMessageText());
             holder.timestampView.setText(msg.getDate());
-
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-
-            if(msg.getAuthor() != Helper.MyID)
+            holder.usernameView.setText(usernames.get(msg.getAuthor()) + ":");
+            if (msg.getAuthor() != Helper.MyID)
             {
-                holder.usernameView.setText(usernames.get(msg.getAuthor()) + ":");
                 holder.container.setBackgroundResource(R.drawable.receive_msg_bg);
-
                 params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
                 holder.container.setGravity(Gravity.LEFT);
             }
             else
             {
-                holder.usernameView.setText("Ja:");
                 holder.container.setBackgroundResource(R.drawable.send_msg_bg);
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 holder.container.setGravity(Gravity.RIGHT);
             }
-
+            convertView.setBackgroundColor(mSelectedItemsIds.get(position) ? 0x8834B5E4 : Color.TRANSPARENT);
             holder.container.setLayoutParams(params);
         }
         return convertView;
+    }
+
+    //CAB Methods
+    public void toggleSelection(int position)
+    {
+        selectView(position, !mSelectedItemsIds.get(position));
+    }
+
+    public void removeSelection()
+    {
+        mSelectedItemsIds = new SparseBooleanArray();
+        notifyDataSetChanged();
+    }
+
+    void selectView(int position, boolean value)
+    {
+        if (value)
+            mSelectedItemsIds.put(position, value);
+        else
+            mSelectedItemsIds.delete(position);
+
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedCount()
+    {
+        return mSelectedItemsIds.size();
+    }
+
+    public SparseBooleanArray getSelectedIds()
+    {
+        return mSelectedItemsIds;
     }
 }
 

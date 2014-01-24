@@ -7,8 +7,8 @@
 
     <ImageView
         android:id="@+id/image_1"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:contentDescription="@string/contentDesc"
@@ -17,17 +17,18 @@
     <TextView
         android:id="@+id/text_1"
         android:textColor="#FFF"
-        android:textSize="24dp"
+        android:textSize="24sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_toLeftOf="@id/image_1"
         android:paddingLeft="4dp"
         />
+
     <TextView
         android:id="@+id/text_2"
         android:textColor="#f0f0f0"
-        android:textSize="16dp"
+        android:textSize="16sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -35,10 +36,6 @@
         android:layout_toLeftOf="@id/image_1"
         android:paddingLeft="4dp"
         />
-
-
-
-
 
 
 </RelativeLayout>

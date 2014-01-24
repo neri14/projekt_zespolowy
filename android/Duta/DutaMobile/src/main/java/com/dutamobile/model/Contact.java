@@ -1,19 +1,40 @@
 package com.dutamobile.model;
 
 import com.dutamobile.model.response.StatusUpdateResponse;
+import com.dutamobile.util.Helper;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * Created by Bartosz on 12.10.13.
  */
-public class Contact
+public class Contact implements Serializable
 {
+    boolean groupConversation = false;
+
     public Contact()
     {
         messages = new ArrayList<Message>();
+    }
+
+    public Contact(Boolean groupConversation, String login, Collection<Integer> ids, Collection<String> names)
+    {
+        this.login = login;
+        this.id = Integer.parseInt(login.substring(5));
+        this.name = "Konwersacja " + id;
+        this.status = Status.AVAILABLE.ordinal();
+        this.messages = new ArrayList<Message>();
+        this.names = new String[names.size()];
+        names.toArray(this.names);
+        this.groupConversation = groupConversation;
+        this.ids = new int[ids.size()];
+        int iter = 0;
+        for (Integer i : ids) this.ids[iter++] = i;
+
     }
 
     public int getId()
@@ -94,11 +115,48 @@ public class Contact
     @SerializedName("description")
     private String description;
 
+    private int[] ids;
+
+    public void setNamesArray(String[] names)
+    {
+        this.names = names;
+    }
+
+    private String[] names;
+
     private List<Message> messages;
+
+    public boolean haveNewMessages()
+    {
+        return newMessage;
+    }
+
+    public void setNewMessage(boolean newMessage)
+    {
+        this.newMessage = newMessage;
+    }
+
+    private boolean newMessage = false;
 
     public void Update(StatusUpdateResponse update)
     {
         status = update.getStatus();
         description = update.getDescription();
     }
+
+    public int[] getIdArray()
+    {
+        return groupConversation ? ids : new int[]{id, Helper.MyID};
+    }
+
+    public String[] getNamesArray(String myName)
+    {
+        return groupConversation ? names : new String[]{name, myName};
+    }
+
+    public boolean isGroupConversation()
+    {
+        return groupConversation;
+    }
+
 }

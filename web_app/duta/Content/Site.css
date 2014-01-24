@@ -831,7 +831,6 @@ tr.pager td {
 #userDesription{
 	margin:5px;
 	width: 97%;
-	color: #757575;
 }
 
 .conversation{
@@ -856,7 +855,7 @@ li.active a{
 	text-align:right;
 }
 
-.tabMessages{
+.tabMessages, .archiveMessages{
 	border-top: 1px solid #DDDDDD;
 	border-left: 1px solid #DDDDDD;
 	border-right: 1px solid #DDDDDD;
@@ -919,4 +918,25 @@ li.active a{
 	color: #757575;
 }
 
+.contextMenu {
+    position: absolute;
+    display:none;
+}
+#datepickerFrom, #datepickerTo, #userLogin, #userNickname {
+    width: inherit;
+}
 
+.statusActive {
+    background-color:white;
+    color:black;
+}
+
+.statusInActive {
+    background-color:#7ac0da;
+    color:#3D3D3D;
+}
+
+#participants2 {
+    float: left;
+    margin-top: 4px;
+}

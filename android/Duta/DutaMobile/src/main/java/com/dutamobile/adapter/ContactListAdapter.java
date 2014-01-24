@@ -2,6 +2,7 @@ package com.dutamobile.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +50,7 @@ public class ContactListAdapter extends BaseAdapter
     @Override
     public long getItemId(int position)
     {
-        return data.get(position).hashCode();
+        return ((Object)data.get(position)).hashCode();
     }
 
     public void setData(List<Contact> data)
@@ -58,6 +59,26 @@ public class ContactListAdapter extends BaseAdapter
         notifyDataSetChanged();
     }
 
+    public List<Contact> getData()
+    {
+        return this.data;
+    }
+
+    public String [] getContactNamesByIds(int[] ids)
+    {
+        String[] names = new String[ids.length];
+        int iter = 0;
+        for(int id : ids)
+        {
+            for(Contact c : data)
+                if(c.getId() == id)
+                {
+                    names[iter++] = c.getName();
+                    break;
+                }
+        }
+        return names;
+    }
     public boolean removeItem(Contact contact)
     {
         return data.remove(contact);
@@ -76,7 +97,8 @@ public class ContactListAdapter extends BaseAdapter
             holder.status = (ImageView) convertView.findViewById(R.id.image_1);
             holder.desc = (TextView) convertView.findViewById(R.id.text_2);
             convertView.setTag(holder);
-        } else
+        }
+        else
         {
             holder = (ViewHolder) convertView.getTag();
         }
@@ -85,6 +107,8 @@ public class ContactListAdapter extends BaseAdapter
 
         if (c != null)
         {
+            holder.name.setTypeface(null, c.haveNewMessages() ? Typeface.BOLD : Typeface.NORMAL);
+            holder.name.setTextColor(c.haveNewMessages() ? Color.argb(255, 170, 210, 120) : Color.WHITE);
             holder.name.setText(c.getName());
             holder.status.setImageDrawable(Helper.getStatusIndicator(context, c.getStatus()));
             holder.desc.setText(c.getDescription());
@@ -95,7 +119,7 @@ public class ContactListAdapter extends BaseAdapter
     }
 
 
-    //CAB Method
+    //CAB Methods
     public void toggleSelection(int position)
     {
         selectView(position, !mSelectedItemsIds.get(position));
@@ -104,15 +128,21 @@ public class ContactListAdapter extends BaseAdapter
     public void removeSelection()
     {
         mSelectedItemsIds = new SparseBooleanArray();
+        SelectedGroupConversation = 0;
         notifyDataSetChanged();
     }
 
     public void selectView(int position, boolean value)
     {
-        if (value)
-            mSelectedItemsIds.put(position, value);
-        else
-            mSelectedItemsIds.delete(position);
+        if (value) mSelectedItemsIds.put(position, value);
+        else mSelectedItemsIds.delete(position);
+
+        if (data.get(position).isGroupConversation())
+        {
+            if (value) SelectedGroupConversation++;
+            else if (SelectedGroupConversation > 0) SelectedGroupConversation--;
+            android.util.Log.v("SelGroupConv", "" + SelectedGroupConversation);
+        }
 
         notifyDataSetChanged();
     }
@@ -122,10 +152,17 @@ public class ContactListAdapter extends BaseAdapter
         return mSelectedItemsIds.size();
     }
 
-    public SparseBooleanArray getSelectedIds()
+    public SparseBooleanArray getSelectedPositions()
     {
         return mSelectedItemsIds;
     }
+
+    public boolean IsAnyGroupConversationSelected()
+    {
+        return SelectedGroupConversation > 0;
+    }
+
+    private int SelectedGroupConversation = 0;
 
     static class ViewHolder
     {

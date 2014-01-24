@@ -3,7 +3,11 @@ package com.dutamobile;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,14 +15,16 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dutamobile.model.response.LoginResponse;
-import com.dutamobile.util.Helper;
 import com.dutamobile.net.NetClient;
+import com.dutamobile.util.Helper;
 
 import java.io.IOException;
 
@@ -38,6 +44,9 @@ public class LoginActivity extends ActionBarActivity
     private View mLoginStatusView;
     private TextView mLoginStatusMessageView;
 
+    private ConnectivityManager connectivityManager;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -46,14 +55,9 @@ public class LoginActivity extends ActionBarActivity
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
-        //mUserId = getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("Login", "");
-
-        //FIXME usuń w finalnej wersji
-        mUserId = "b_nowak";
-
+        mUserId = getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).getString("Login", "");
         mUserIdView = (EditText) findViewById(R.id.email);
         mUserIdView.setText(mUserId);
-
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener()
         {
@@ -68,10 +72,6 @@ public class LoginActivity extends ActionBarActivity
                 return false;
             }
         });
-
-        //FIXME usuń w finalnej wersji
-        mPasswordView.setText(mUserId);
-
         mLoginFormView = findViewById(R.id.login_form);
         mLoginStatusView = findViewById(R.id.login_status);
         mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
@@ -84,8 +84,8 @@ public class LoginActivity extends ActionBarActivity
                 attemptLogin();
             }
         });
-
         getSupportActionBar().setTitle(getString(R.string.app_name));
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
@@ -94,6 +94,14 @@ public class LoginActivity extends ActionBarActivity
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.login, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.action_sign_up)
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.registry_address))));
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -120,17 +128,18 @@ public class LoginActivity extends ActionBarActivity
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
-        } else if (mPassword.length() < 4)
-        {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
         }
 
-        // Check for a valid email address.
         if (TextUtils.isEmpty(mUserId))
         {
             mUserIdView.setError(getString(R.string.error_field_required));
+            focusView = mUserIdView;
+            cancel = true;
+        }
+
+        if (!isNetworkAvailable())
+        {
+            Toast.makeText(this, R.string.no_internet_connection, Toast.LENGTH_SHORT).show();
             focusView = mUserIdView;
             cancel = true;
         }
@@ -140,7 +149,8 @@ public class LoginActivity extends ActionBarActivity
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
-        } else
+        }
+        else
         {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
@@ -188,7 +198,8 @@ public class LoginActivity extends ActionBarActivity
                             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
                         }
                     });
-        } else
+        }
+        else
         {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
@@ -204,7 +215,8 @@ public class LoginActivity extends ActionBarActivity
 
     private void PerformLogIn()
     {
-        ((DutaApplication)getApplication()).startTask(new AsyncTask<Void, Void, LoginResponse>(){
+        Helper.startTask(new AsyncTask<Void, Void, LoginResponse>()
+        {
             @Override
             protected LoginResponse doInBackground(Void... params)
             {
@@ -212,7 +224,10 @@ public class LoginActivity extends ActionBarActivity
                 {
                     return NetClient.GetInstance().Login(mUserId, mPassword);
                 }
-                catch (IOException e) { android.util.Log.e("LoginActivity", "Login failed"); }
+                catch(IOException e)
+                {
+                    android.util.Log.e("LoginActivity", "Login failed");
+                }
 
                 return null;
             }
@@ -227,17 +242,27 @@ public class LoginActivity extends ActionBarActivity
                 if (success)
                 {
                     Helper.MyID = loginResponse.getUser_id();
+                    Helper.PREFS_PRIVATE = "priv-prefs-" + Helper.MyID;
+                    getSharedPreferences(Helper.PREFS_MAIN, MODE_PRIVATE).edit()
+                            .putString("Login", mUserId).apply();
 
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
 
-                } else
+                }
+                else
                 {
                     mPasswordView.setError(getString(R.string.error_incorrect_password));
                     mPasswordView.requestFocus();
                 }
             }
         });
+    }
+
+    private boolean isNetworkAvailable()
+    {
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
 }

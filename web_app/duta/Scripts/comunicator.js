@@ -46,15 +46,19 @@ var duta = function () {
 
 	$(document).ready(function () {
 	    var loginName = $('#dutaContainer #application #userName').html();
-	    getUserData(login);
+	    
 	    dutaModel.myLogin = loginName;
 	    dutaModel.myStatus = 'available';
 	    dutaModel.myDescription = '';
-	    getContactList();
+	    dutaModel.lastConvId = 0;
+	    getContactList(true);
+//	    getUserData(login);
+	    getMyData();
+//	    document.getElementsByTagName("body")[0].oncontextmenu = function (e) { e.preventDefault(); }
 	});
 
 	function getUserData(login){
-	    ajaxHelper.post(constants.urls.getUserData, {login: login},
+	    ajaxHelper.post(constants.urls.getUserDataByLogin, {login: login},
 			function (result) {
 			    /*
                 public int user_id { get; set; }
@@ -63,9 +67,35 @@ var duta = function () {
                 public string description { get; set; }
                 */
 			    dutaModel.myId = result.user_id;
+
 			}
 		);
 	}
+
+	function getMyData() {
+	    ajaxHelper.post(constants.urls.getMyData, {},
+			function (result) {
+			    /*
+                public int user_id { get; set; }
+                public string login { get; set; }
+                public int status { get; set; }
+                public string description { get; set; }
+                */
+			    dutaModel.myId = result.user_id;
+
+			    var newStatus = statusToString(result.status);
+			    $(userStatus).removeClass(dutaModel.myStatus);
+			    $(userStatus).addClass(newStatus);
+			    dutaModel.myStatus = newStatus;
+
+			    var desc = $('#userDesription');
+			    $(desc).val(result.description);
+			    dutaModel.myDescription = result.description;
+			}
+		);
+	}
+
+	
 	
 	function getActualContact(id) {
 	    var cont = {};
@@ -77,7 +107,67 @@ var duta = function () {
 		return cont;
 	}
 	
-	
+	function conferenceView() {
+	    var model = {}
+	    model.contacts = dutaModel.contacts;
+	    var conferenceView = constants.templates.conferenceView;
+	    var rendered = Handlebars.compile(conferenceView)(model);
+
+	    $(rendered).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var checkBoxes = $('.conferenceCheckbox');
+                    var users = [];
+                    $.each(checkBoxes, function (index, value) {
+                        if (value.checked == true) {
+                            users.push(value.value);
+                        }
+                    });
+                    $(this).dialog('destroy').remove();
+                    var j=1;
+                    var participants2 = getActualContact(users[0]).nickname;
+                    for (j; j < users.length; j++) {
+                        var kont = getActualContact(users[j]);
+                        participants2 += ", " + kont.nickname
+                    }
+                    users.push(dutaModel.myId);
+                    users.sort(function (a, b) { return a - b });
+
+                    var conversationId = users[0];
+                    var i=1;
+                    for (i; i < users.length; i++) {
+                        conversationId += 'a' + users[i];
+                    }
+                    var cont = 'Konferencja';
+                    var model = {
+                        users: conversationId,
+                        participants: cont,
+                        participants2: participants2
+                    };
+                    prepareConversation(model);
+
+                    
+                }
+            }
+	        ]
+	    });
+
+	    
+	}
+
+	function addConvToModel(users) {
+	    var conversationModel = {};
+
+	    dutaModel.conversations;
+	    dutaModel.lastConvId;
+
+	}
+
 	function renderMessage(model){
 		var template = constants.templates.message;
 		var rendered = Handlebars.compile(template)(model);
@@ -86,13 +176,15 @@ var duta = function () {
 			prepareConversation(model);
 		}
 		$('#messagesPanel .conversation#' + model.users + ' .tabMessages').append(rendered);
+		var elem = $('#messagesPanel .conversation#' + model.users + ' .tabMessages');
+		elem.scrollTop(elem[0].scrollHeight);
 		
 	}
 	function sendMessage(conversationId){
 		messageText = $('#messagesPanel .conversation#'+conversationId+' .messageToSend').val();
 		//jakis post a w jego callback:
 		var data = {
-		    users: [conversationId.split('a')[0], dutaModel.myId],
+		    users: conversationId.split('a'),
 			message : messageText
 		}
 		ajaxHelper.post(constants.urls.sendMessage,data,
@@ -116,13 +208,45 @@ var duta = function () {
 			function(result){
 				$.each(result, function(index, value ) {
 				    var conversationId = value.users[0];
+				    var i=1;
+				    for (i; i < value.users.length; i++) {
+				        conversationId += 'a' + value.users[i];
+				    }
+				    var participants2 = "";
+				    var auth = getActualContact(value.author).nickname
+				    var bylo = -1;
+				    var moj = -1;
+				    if (value.users.length > 2) {
+				        var j = 0;
+				        for (j; j < value.users.length; j++) {
+				            if (value.users[j] != dutaModel.myId) {
+				                if (bylo < 0) {
+				                    participants2 = getActualContact(value.users[j]).nickname;
+				                    bylo = j;
+				                }
+				            } else {
+				                moj = j;
+				            }
+				        }
+				        j = 0;
+				        for (j; j < value.users.length; j++) {
+				            if (value.users[j] != dutaModel.myId && j!=bylo) {
+				                var kont = getActualContact(value.users[j]);
+				                participants2 += ", " + kont.nickname
+                            }
+				        }
+				        auth = "Konferencja";
+				    }
+
 				    var date = new Date(value.timestamp);
+                    
 					var model={
-					    users: value.author+'a',
-						author: getActualContact(value.author).nickname,
+					    users: conversationId,
+					    author: getActualContact(value.author).nickname,
 						messageText : value.message,
 						dateTime: date.toLocaleTimeString(),
-						participants: getActualContact(value.author).nickname
+						participants: auth,
+						participants2: participants2
 					};
 					renderMessage(model);
 				});					
@@ -138,7 +262,7 @@ var duta = function () {
 	}
 	
 	
-	function getContactList(){
+	function getContactList(callAsync){
 		ajaxHelper.post(constants.urls.getContactList,{},
 			function (result) {
 			    /*
@@ -153,44 +277,12 @@ var duta = function () {
 			    });
 				dutaModel.contacts = result;
 				renderContactList(dutaModel.contacts);
-				getMessages();
-				getStatusUpdate();
+				if (callAsync) {
+				    getMessages();
+				    getStatusUpdate();
+				}
 			}
-		);
-		var contacts = [
-			{
-			user_id : '1234',
-			nickname : 'Tomek',
-			status : 'available',
-			user_id : 'w zyciu piekne sa..'
-			},
-			{
-			user_id : '2345',
-			nickname : 'Gosia',
-			status : 'brb',
-			description : 'tylko chwile'
-			},
-			{
-			user_id : '3456',
-			nickname : 'Adam',
-			status : 'available',
-			description : 'zyj'
-			},
-			{
-			user_id : '4567',
-			nickname : 'Przemek',
-			status : 'brb',
-			description : 'i daj rzyc innym'
-			},
-			{
-			user_id : '5678',
-			nickname : 'Kasia',
-			status : 'inaccessible',
-			description : ''
-			}		
-		];
-		//renderContactList(contacts);
-		
+		);		
 	}
 	
 	function renderContactList(contacts){
@@ -215,6 +307,27 @@ var duta = function () {
                 
             }
         );
+	}
+
+	function setDescription() {
+	    var desc = $('#userDesription');
+	    var status = statusToNumber(dutaModel.myStatus);
+	    var description = $(desc).val();
+	    dutaModel.myDescription = description;
+	    ajaxHelper.post(constants.urls.setStatus,
+            {
+                status: status,
+                description: description
+            },
+            function () {
+                desc.removeClass('statusActive');
+                desc.addClass('statusInActive');
+
+            }
+        );
+
+	    
+	    
 	}
 
 	function getStatusUpdate() {
@@ -253,8 +366,12 @@ var duta = function () {
 	function startConversation(identificator){
 	    //jakis post a w jego callback:
 	    var cont = getActualContact(identificator);
+
+	    var users = [identificator, dutaModel.myId];
+	    users.sort(function (a, b) { return a - b });
+
 		var model = {
-			users : identificator+'a',
+		    users: users[0] + 'a' + users[1],
 			participants: cont.nickname
 		};
 		prepareConversation(model);
@@ -275,6 +392,13 @@ var duta = function () {
 		$('#messagesPanel .tab-content').append(rendered);
 		$('#messagesPanel .nav-tabs a:last').tab('show');
 		return rendered;
+	}
+
+	function closeConversation() {
+	    $('#messagesPanel .nav.nav-tabs .active').remove();
+
+	    $('#messagesPanel .tab-content .active').remove();
+	    $('#messagesPanel .nav-tabs a:last').tab('show');
 	}
 
 	function statusToString(nr) {
@@ -301,12 +425,211 @@ var duta = function () {
 	    }
 	}
 
+	function showContextMenu(user_id) {
+	    var $contextMenu = $('#application #contacts #' + user_id + ' .contextMenu');
+
+	    $contextMenu.css({
+	        display: "block"
+	    });
+
+	    $contextMenu.on("click", "a", function () {
+	        $contextMenu.hide();
+	    });
+
+	    $(document).click(function () {
+	        $contextMenu.hide();
+	    });
+	    return false;
+	}
+
+
+	function selectArchiveDialog(user_id) {
+
+	    var archiveView = constants.templates.archiveView;
+//	    var renderedArchive = Handlebars.compile(archiveView)(model);
+	    $(archiveView).dialog({
+	        autoOpen: true,
+	        modal: true,
+            resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var from = new Date($('#datepickerFrom').val()).getTime();
+                    var to = new Date($('#datepickerTo').val()).getTime();
+                    $('#datepickerFrom').remove();
+                    $('#datepickerTo').remove();
+                    $(this).dialog('destroy').remove();
+                    openUserArchiveDialog(user_id, from, to);
+                }
+            }
+	        ]
+	    });
+
+	    $('#datepickerFrom').datetimepicker();
+	    $('#datepickerTo').datetimepicker();
+	}
+
+	function openUserArchiveDialog(user_id, from, to) {
+	    var model = {};
+	    model.user_id = user_id;
+	    model.title = 'Archiwum: ' + getActualContact(user_id).nickname;
+	    var userArchiveView = constants.templates.userArchiveView;
+	    var compiledUserArchiveView = Handlebars.compile(userArchiveView)(model);
+	    ajaxHelper.post(constants.urls.getArchiveFilteredByUserId,
+            {
+                from: from,
+                to: to,
+                userid: user_id
+            },
+			function (result) {
+			    $(compiledUserArchiveView).dialog({
+			        autoOpen: true,
+			        modal: true,
+			        resizable: false
+			    });
+			    /* lista:
+                public List<int> users { get; set; }
+                public int author { get; set; }
+                public long timestamp { get; set; }
+                public string message { get; set; }
+                */
+			    $.each(result, function (index, value) {
+			        var message = {};
+			        var date = new Date(value.timestamp);
+			        message.dateTime = date.toLocaleTimeString();
+			        if (value.author === dutaModel.myId) {
+			            message.author = 'Ja'
+			        } else {
+			            var cont = getActualContact(value.author);
+			            if (cont!=undefined)
+			                message.author = cont.nickname;
+			        }
+			        message.messageText = value.message;
+			        renderArchiveMessage(message);
+			    });
+			}
+		);
+
+
+
+	    
+	}
+
+	function renderArchiveMessage(model) {
+	    var template = constants.templates.message;
+	    var rendered = Handlebars.compile(template)(model);
+	    var div = $('.archiveMessages');
+
+	    $(div).append(rendered);
+
+	}
+
+
+	function addContactView() {
+	    var addContactView = constants.templates.addContactView;
+	    $(addContactView).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var login = $('#userLogin').val();
+                    var nickname = $('#userNickname').val();
+                    addContact(login, nickname);
+
+                    $(this).dialog('destroy').remove();
+
+                }
+            }
+	        ]
+	    });
+	}
+
+	function addContact(login, nickname) {
+
+	    ajaxHelper.post(constants.urls.addContact,
+            {
+                login: login,
+                nickname: nickname
+            },
+			function (result) {
+			    $('#application #contacts').html('');
+			    getContactList(false);
+			}
+		);
+	}
+
+	function editContactView(login) {
+	    var editContactView = constants.templates.editContactView;
+	    $(editContactView).dialog({
+	        autoOpen: true,
+	        modal: true,
+	        resizable: false,
+	        buttons: [
+            {
+                text: "OK",
+                click: function () {
+                    var nickname = $('#userNickname').val();
+                    editContact(login, nickname);
+
+                    $(this).dialog('destroy').remove();
+                }
+            }
+	        ]
+	    });
+	}
+
+	function editContact(login, nickname) {
+
+	    ajaxHelper.post(constants.urls.updateContact,
+            {
+                login: login,
+                nickname: nickname
+            },
+			function (result) {
+			    $('#application #contacts').html('');
+			    getContactList(false);
+			}
+		);
+	}
+
+	function removeContact(login) {
+
+	    ajaxHelper.post(constants.urls.removeContact,
+            {
+                login: login
+            },
+			function (result) {
+			    $('#application #contacts').html('');
+			    getContactList(false);
+			}
+		);
+	}
+
+	function descriptionFocus() {
+	    var desc = $('#userDesription');
+	    desc.removeClass('statusInActive');
+	    desc.addClass('statusActive');
+	}
+
 	return{
 		renderMessage : renderMessage,
 		startConversation : startConversation,
 		getContactList : getContactList,
 		sendMessage: sendMessage,
-		setMyStatus: setMyStatus
+		setMyStatus: setMyStatus,
+		showContextMenu: showContextMenu,
+		selectArchiveDialog: selectArchiveDialog,
+		addContactView: addContactView,
+		editContactView: editContactView,
+		removeContact: removeContact,
+		conferenceView: conferenceView,
+		closeConversation: closeConversation,
+		descriptionFocus: descriptionFocus,
+		setDescription: setDescription
 	
 	};
 
@@ -381,7 +704,12 @@ var constants = function () {
     templates.tabListItem = ajaxHelper.getTemplate(contextRoot+"Home/tabListItemView");
     templates.messagesPanel = ajaxHelper.getTemplate(contextRoot+"Home/messagesPanelView");
     templates.conversation = ajaxHelper.getTemplate(contextRoot+"Home/conversationView");
-    templates.contact = ajaxHelper.getTemplate(contextRoot+"Home/contactView");
+    templates.contact = ajaxHelper.getTemplate(contextRoot + "Home/contactView");
+    templates.archiveView = ajaxHelper.getTemplate(contextRoot + "Home/archiveView");
+    templates.userArchiveView = ajaxHelper.getTemplate(contextRoot + "Home/userArchiveView");
+    templates.addContactView = ajaxHelper.getTemplate(contextRoot + "Home/addContactView");
+    templates.editContactView = ajaxHelper.getTemplate(contextRoot + "Home/editContactView");
+    templates.conferenceView = ajaxHelper.getTemplate(contextRoot + "Home/conferenceView");
 	
 	var urls = {
 	    sendMessage : contextRoot+"Service/SendMessage",
@@ -393,7 +721,12 @@ var constants = function () {
 		getContactList: contextRoot + "Service/GetContactList",
 		getStatusUpdate: contextRoot + "Service/GetStatusUpdate",
 		setStatus: contextRoot + "Service/SetStatus",
-		getUserData: contextRoot + "Service/GetUserData"
+		getUserDataByLogin: contextRoot + "Service/GetUserDataByLogin",
+		getMyData: contextRoot + "Service/GetMyData",
+		getArchiveFilteredByUserId: contextRoot + "Service/GetArchiveFilteredByUserId",
+		addContact: contextRoot + "Service/AddContact",
+		updateContact: contextRoot + "Service/UpdateContact",
+		removeContact: contextRoot + "Service/RemoveContact"
 	}
 
 	return{
